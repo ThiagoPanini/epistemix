@@ -1,0 +1,108 @@
+# ADR 0003 — Infra: VPS Hostinger + Coolify + Cloudflare
+
+- **Status:** Accepted
+- **Data:** 2026-05-23
+- **Decisores:** Thiago Panini (solo)
+- **Relacionado:** [ADR-0002](0002-stack-fastapi-nextjs-postgres.md)
+
+## Contexto
+
+Precisamos decidir onde e como hospedar `apps/web`, `apps/api`, banco e assets. Restrições:
+
+- Solo dev com ambição comercial; ops é responsabilidade única
+- Open source dia 1 — preferência por componentes FOSS
+- Custo previsível importa mais que escalabilidade infinita
+- Usuário declarou que **vai usar VPS Hostinger** (decisão de plataforma já tomada)
+- Setup AI-first não deve ser prejudicado por escolha de infra
+
+## Decisão
+
+**Provisionar VPS Hostinger (alvo: KVM 2 — 2 vCPU, 8 GB RAM, 100 GB NVMe)** com Ubuntu 24.04 LTS.
+
+**Orquestrar via Coolify** (PaaS auto-hospedado open source). Coolify gerencia:
+- Caddy como reverse proxy com SSL automático (Let's Encrypt)
+- Build e deploy dos containers `apps/web` e `apps/api`
+- PostgreSQL 17 como serviço gerenciado pelo Coolify, com volume persistente
+- Preview environments por PR
+- Backups Postgres diários
+
+**Cloudflare** como camada na frente da VPS:
+- DNS autoritativo
+- Proxy + CDN para assets estáticos
+- WAF + DDoS protection
+- Esconde IP da origem
+
+**Cloudflare R2** para assets de usuário e backups (zero egress fees).
+
+**Deploy:** GitHub Actions builda imagens → push para GHCR → Coolify recebe webhook → puxa imagem e faz rolling restart com health checks.
+
+## Justificativa
+
+**VPS Hostinger:** decisão do usuário. Custo fixo (~$5-15/mês), controle total, alinhado com perfil SRE/learning.
+
+**Coolify (vs. docker-compose puro):**
+- Vercel-like DX sem perder controle
+- SSL e routing automáticos eliminam classe inteira de bugs de prod
+- Preview por PR mantém o fluxo AI-first produtivo (Claude pode validar mudança em ambiente real antes do merge)
+- Backups automáticos resolvem item crítico que solo dev sempre adia
+- Open source — alinhado com o espírito do projeto
+
+**Cloudflare na frente:**
+- Praticamente obrigatório para SaaS público em VPS única
+- Reduz egress da VPS (cache de assets)
+- Free tier cobre carga de V1 e V2 confortavelmente
+
+**Cloudflare R2 para assets:**
+- Zero egress fee elimina surpresa de billing quando viralizar
+- S3-compatible API funciona com qualquer SDK
+- Backups Postgres no mesmo lugar, custo desprezível
+
+## Consequências
+
+### Positivas
+- Custo previsível (~$10-25/mês total)
+- Sem vendor lock-in significativo (Coolify pode rodar em qualquer VPS; tudo é container; backups portáveis)
+- DX próxima de Vercel/Render sem perder controle
+- Preview por PR mantém ciclo de feedback curto
+- Aprendizado real de ops útil para o perfil SRE do usuário
+
+### Negativas
+- VPS única é SPOF (single point of failure); aceita-se enquanto V1/V2; HA fica para depois
+- Coolify é responsabilidade adicional: precisa atualizar, ocasionalmente debugar
+- Backup precisa de teste de restore periódico (regra: backup não testado não é backup)
+- Sem escalabilidade horizontal automática; gargalo de CPU/RAM exige scale-up manual
+
+## Operação
+
+- **Hardening inicial:** SSH só por chave, root SSH desabilitado, `ufw` permitindo só 22/80/443, `fail2ban`, `unattended-upgrades` configurado.
+- **Backups:** `pg_dump` diário (configurado no Coolify) → R2. Teste de restore mensal documentado em [ARCHITECTURE.md](../ARCHITECTURE.md).
+- **Monitoramento:** Sentry (errors), Logfire (logs/traces), Uptime Kuma no próprio Coolify (uptime), PostHog (produto).
+- **Snapshots da VPS:** habilitados na Hostinger (custa pouco; é o lifeline para "rm -rf acidental").
+
+## Comparativo de orquestradores
+
+Critérios: time-to-first-deploy (TTFD), manutenção mensal, DX (preview deploys, web UI, logs), aprendizado, lock-in, overhead de RAM, maturidade.
+
+| Opção | TTFD | Manutenção | DX | Aprendizado | Lock-in | Overhead | Maturidade |
+|---|---|---|---|---|---|---|---|
+| **Coolify (escolhido)** | ~2h | Baixa | Alta (Vercel-like) | Média | Baixo | ~500MB RAM | Alta (~30k★, ativo) |
+| Dokploy | ~2h | Baixa | Alta | Média | Baixo | ~400MB RAM | Média (newer) |
+| CapRover | ~1h | Baixa | Média (UX datada) | Baixa | Baixo | ~300MB RAM | Alta (estável) |
+| Dokku | ~1h | Baixíssima | Baixa (CLI-only) | Baixa | Muito baixo | ~100MB RAM | Muito alta |
+| docker-compose + Caddy | ~1 dia | Média-Alta | Baixíssima | Alta na 1ª vez | Zero | ~50MB RAM | N/A |
+| K3s | ~3 dias | Alta | Média (k9s) | Muito Alta | Médio (k8s) | ~1GB+ RAM | Alta |
+| Portainer + manual | ~4h | Média | Média (só containers) | Média | Baixo | ~200MB RAM | Alta |
+
+### Por que cada alternativa foi rejeitada
+
+- **Vercel + Fly.io + Neon (serverless):** descartado pela decisão do usuário de usar VPS.
+- **docker-compose + Caddy direto:** funcional, lock-in zero, RAM mínima — **opção de fallback explícita** se Coolify falhar no critério de revisão (ver seção Operação). Rejeitado para o início porque exige reinventar preview environments, backups, dashboards, rollback automático.
+- **Dokploy:** alternativa válida e mais moderna; reconsiderar em 12-24 meses quando maturidade equiparar.
+- **CapRover:** estável mas UX feels 2018; perde em ergonomia.
+- **Dokku:** Heroku-like CLI puro; sem web UI nem preview deploys automáticos.
+- **K3s:** over-engineering para VPS única e produto solo.
+- **Portainer + manual:** ótima UI de containers mas não é PaaS completo; ainda precisa scriptar CI/CD, SSL, backups.
+
+## Gatilho de revisão (regra de Chesterton invertida)
+
+Se você consumir **mais de 2h/mês mantendo Coolify** (atualizações que quebram, debug de container que não sobe, problemas que exigem bypass), reabrir esta decisão. Provável próxima escolha: `docker-compose + Caddy` puro — o tempo gasto provaria que a abstração custa mais do que entrega.
