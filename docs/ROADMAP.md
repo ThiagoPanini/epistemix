@@ -20,7 +20,7 @@ Sem código de produto. Objetivo: base sólida de documentação, infra, automa�
 - [ ] Docker Compose local com Postgres
 - [ ] AGENTS.md + CLAUDE.md (`@AGENTS.md`) + `.github/copilot-instructions.md`
 - [ ] docs/CONTEXT.md preenchido após sessão `grill-with-docs`
-- [ ] ADRs iniciais (0001 monorepo, 0002 stack, 0003 infra) — concluídos
+- [ ] ADRs iniciais concluídos
 - [ ] CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
 - [ ] Deploy "hello world" em produção respondendo em `talkingpres.com`
 
