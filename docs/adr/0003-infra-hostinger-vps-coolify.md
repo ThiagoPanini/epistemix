@@ -20,7 +20,7 @@ Precisamos decidir onde e como hospedar `apps/web`, `apps/api`, banco e assets. 
 **Provisionar VPS Hostinger (alvo: KVM 2 — 2 vCPU, 8 GB RAM, 100 GB NVMe)** com Ubuntu 24.04 LTS.
 
 **Orquestrar via Coolify** (PaaS auto-hospedado open source). Coolify gerencia:
-- Caddy como reverse proxy com SSL automático (Let's Encrypt)
+- Traefik (default do Coolify) como reverse proxy com SSL automático (Let's Encrypt)
 - Build e deploy dos containers `apps/web` e `apps/api`
 - PostgreSQL 17 como serviço gerenciado pelo Coolify, com volume persistente
 - Preview environments por PR
@@ -106,3 +106,7 @@ Critérios: time-to-first-deploy (TTFD), manutenção mensal, DX (preview deploy
 ## Gatilho de revisão (regra de Chesterton invertida)
 
 Se você consumir **mais de 2h/mês mantendo Coolify** (atualizações que quebram, debug de container que não sobe, problemas que exigem bypass), reabrir esta decisão. Provável próxima escolha: `docker-compose + Caddy` puro — o tempo gasto provaria que a abstração custa mais do que entrega.
+
+## Histórico
+
+- **2026-05-24:** corrigido o reverse proxy embutido de Caddy → Traefik. A doc oficial Coolify ([proxy/caddy/overview](https://coolify.io/docs/knowledge-base/proxy/caddy/overview), [server/proxies](https://coolify.io/docs/knowledge-base/server/proxies)) confirma que Traefik é o default e Caddy é experimental, com recomendação explícita de manter Traefik para a maioria dos setups. A decisão original (delegar TLS + roteamento ao Coolify) permanece válida; só o nome do proxy embutido mudou. Divergência originalmente flagrada em [docs/guides/setup-vps-hostinger-coolify.md](../guides/setup-vps-hostinger-coolify.md) Apêndice C.1.

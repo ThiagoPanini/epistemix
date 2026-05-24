@@ -42,6 +42,15 @@ pnpm-debug.log*
 .env.*.local
 !.env.example
 
+# Crypto / SSH material — never commit private keys or certs
+*.key
+*.pem
+id_rsa*
+id_ed25519*
+id_ecdsa*
+*.p12
+*.pfx
+
 # IDE
 .vscode/
 .idea/
