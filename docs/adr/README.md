@@ -38,3 +38,4 @@ Não edite o ADR original. Crie um novo ADR de revisão que referencia o anterio
 - [0010 — Server Actions apenas para concerns do Next; mutations de domínio na FastAPI](0010-server-actions-apenas-para-concerns-do-next.md)
 - [0011 — URL pública do publicador é `/authors/<username>`](0011-url-publica-do-publicador.md)
 - [0012 — slide-kit: catálogo base + extensões locais + animação como primitiva](0012-slide-kit-base-plus-extensoes-locais.md)
+- [0013 — Substrato de planejamento operado por agentes (GitHub Projects)](0013-substrato-de-planejamento-operado-por-agentes.md)

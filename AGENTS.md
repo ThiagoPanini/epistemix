@@ -101,6 +101,10 @@ Já configuradas em `.agents/skills/`:
 
 Skills nativas do Claude Code para usar regularmente: `init`, `verify`, `simplify`, `review`, `security-review`, `claude-api`, `update-config`.
 
+## Board e fluxo dos agentes
+
+O trabalho é rastreado num GitHub Projects (ver [ADR-0013](docs/adr/0013-substrato-de-planejamento-operado-por-agentes.md)). **Para operar o board — descobrir, reivindicar, executar, submeter ou bloquear tarefas — use a skill `operate-planning-board`** (`.agents/skills/`, lida por Claude Code, Codex e Copilot); não toque na API do board direto. O protocolo e os scripts vivem na skill (fonte única); a decisão e o porquê, no ADR-0013. Princípios evergreen do desenho: [lesson 0002](docs/lessons/0002-harness-basico-em-github-projects.md).
+
 ## Para Claude Code, especificamente
 
 - Memórias auto-salvas locais (fora deste repo) devem conter apenas perfil do usuário e feedback de colaboração — NUNCA decisões de projeto. Decisões de projeto vivem em `docs/`.
