@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=_lib.sh
+source "$SCRIPT_DIR/_lib.sh"
+
+usage() {
+  cat <<'USAGE'
+Usage: set-single-select <issue#> <field-name> <option-name>
+
+Resolves project ID, project item ID, single-select field ID, and option ID,
+then sets that field for the issue's project item.
+USAGE
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+[[ $# -eq 3 ]] || {
+  usage >&2
+  exit 2
+}
+
+require_tools
+assert_project_scope_hint
+
+issue=$1
+field=$2
+option=$3
+
+item=$(set_single_select "$issue" "$field" "$option")
+value=$(get_single_select_value "$issue" "$field")
+
+printf '#%s %s=%s (item %s)\n' "$issue" "$field" "$value" "$item"

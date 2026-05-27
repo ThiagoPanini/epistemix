@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=_lib.sh
+source "$SCRIPT_DIR/_lib.sh"
+
+usage() {
+  cat <<'USAGE'
+Usage: claim <issue#>
+
+Assigns the issue to the current GitHub user, moves board status to
+In progress, comments a claim timestamp, and rereads the claim.
+USAGE
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+[[ $# -eq 1 ]] || {
+  usage >&2
+  exit 2
+}
+
+require_tools
+assert_project_scope_hint
+
+issue=$1
+me=$(current_user)
+status_field_name=$(status_field)
+
+existing_assignees=$(issue_assignees "$issue" || true)
+other_assignees=$(printf '%s\n' "$existing_assignees" | sed '/^$/d' | grep -vx "$me" || true)
+if [[ -n "$other_assignees" && "${TP_ALLOW_MULTI_ASSIGNEE:-0}" != "1" ]]; then
+  die "#$issue is already assigned to: $(printf '%s' "$other_assignees" | paste -sd ', ' -). Set TP_ALLOW_MULTI_ASSIGNEE=1 to allow a shared claim."
+fi
+
+gh issue edit "$issue" --add-assignee "$me" >/dev/null
+set_single_select "$issue" "$status_field_name" "In progress" >/dev/null
+
+ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+gh issue comment "$issue" --body "claimed @ $ts by @$me" >/dev/null
+
+assignees_after=$(issue_assignees "$issue" || true)
+status_after=$(get_single_select_value "$issue" "$status_field_name")
+
+if ! printf '%s\n' "$assignees_after" | grep -qx "$me"; then
+  die "claim reread failed: @$me is not assigned to #$issue"
+fi
+
+if [[ "$status_after" != "In progress" ]]; then
+  die "claim reread failed: $status_field_name=$status_after, expected In progress"
+fi
+
+printf 'claimed #%s as @%s; %s=%s; assignees=%s\n' \
+  "$issue" \
+  "$me" \
+  "$status_field_name" \
+  "$status_after" \
+  "$(printf '%s\n' "$assignees_after" | paste -sd ',' -)"

@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=_lib.sh
+source "$SCRIPT_DIR/_lib.sh"
+
+usage() {
+  cat <<'USAGE'
+Usage: submit <issue#>
+
+Pushes the current branch if needed, opens or reuses a PR with Closes #N in
+the body, and moves board status to In review. Never merges.
+USAGE
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+[[ $# -eq 1 ]] || {
+  usage >&2
+  exit 2
+}
+
+require_tools
+assert_project_scope_hint
+
+issue=$1
+status_field_name=$(status_field)
+branch=$(git branch --show-current)
+[[ -n "$branch" ]] || die "not on a named branch"
+
+base=${TP_PR_BASE:-$(default_branch)}
+if [[ "$branch" == "$base" ]]; then
+  die "refusing to submit from protected/default branch: $branch"
+fi
+
+title=$(issue_title "$issue")
+if ! git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+  git push -u origin "$branch"
+else
+  git push
+fi
+
+if pr_number=$(gh pr view --json number --jq '.number' 2>/dev/null); then
+  pr_url=$(gh pr view --json url --jq '.url')
+else
+  body_file=$(mktemp)
+  trap 'rm -f "$body_file"' EXIT
+  {
+    printf 'Closes #%s\n\n' "$issue"
+    printf 'Submitted by operate-planning-board from branch `%s`.\n' "$branch"
+  } >"$body_file"
+
+  draft_args=()
+  if [[ "${TP_PR_DRAFT:-0}" == "1" ]]; then
+    draft_args=(--draft)
+  fi
+
+  pr_url=$(
+    gh pr create \
+      --base "$base" \
+      --head "$branch" \
+      --title "$title" \
+      --body-file "$body_file" \
+      "${draft_args[@]}"
+  )
+  pr_number=${pr_url##*/}
+fi
+
+set_single_select "$issue" "$status_field_name" "In review" >/dev/null
+status_after=$(get_single_select_value "$issue" "$status_field_name")
+
+[[ "$status_after" == "In review" ]] || die "submit reread failed: $status_field_name=$status_after, expected In review"
+
+printf 'submitted #%s via PR #%s; %s=%s; %s\n' "$issue" "$pr_number" "$status_field_name" "$status_after" "$pr_url"
