@@ -1,62 +1,50 @@
 ---
 name: operate-planning-board
-description: Operates the talkingpres GitHub Projects planning board protocol for agent work. Use when an agent needs to discover, claim, plan, update, submit, or block work on the board, or when the user asks to move planning-board state.
+description: Operates the talkingpres GitHub Projects planning board protocol for agent work. Use when an agent needs to discover, claim, update, submit, or report work on the board, or when the user asks to move planning-board state.
 ---
 
 # Operate Planning Board
 
-## Quick Start
+The board (GitHub Projects v2) holds **live status only** — it is a visibility instrument, not a work cockpit. Strategy stays in `ROADMAP.md`, task spec stays in the issue body, decisions/code stay in PRs/docs. Operate the board through the **GitHub MCP server** (`projects` toolset). Do not call the Projects GraphQL/REST API directly and do not shell out to `gh project` for writes — use the MCP tools so the operation is identical across Claude Code, Codex, and Copilot.
 
-```bash
-gh auth refresh -s project
-export TP_PROJECT_OWNER=ThiagoPanini
-export TP_PROJECT_NUMBER=<project-number>
+The decision and the why are in [ADR-0013](../../../docs/adr/0013-substrato-de-planejamento-operado-por-agentes.md); branch/merge gates come from [ADR-0005](../../../docs/adr/0005-deploy-checks-em-tres-portoes.md); evergreen principles in [lesson 0002](../../../docs/lessons/0002-harness-basico-em-github-projects.md). Day-to-day commands are in [runbook 0002](../../../docs/runbooks/0002-harness-agente-solo.md).
 
-.agents/skills/operate-planning-board/scripts/claim <issue#>
-.agents/skills/operate-planning-board/scripts/submit <issue#>
-.agents/skills/operate-planning-board/scripts/block <issue#> "what needs human input"
-```
+## Prerequisite
 
-Use the scripts for deterministic board writes. Do not call the Projects API directly except to debug these scripts. The protocol and why it exists are recorded in [ADR-0013](../../../docs/adr/0013-substrato-de-planejamento-operado-por-agentes.md); the branch and merge gates come from [ADR-0005](../../../docs/adr/0005-deploy-checks-em-tres-portoes.md).
+GitHub MCP server installed with the `projects` toolset enabled (it is **not** on by default) and a token with `project` scope. Project: `talkingpres — roadmap` (owner `ThiagoPanini`, number `4`).
 
-## When To Invoke
+## Data model
 
-Invoke this skill before an agent discovers work, claims an issue, comments an execution plan, changes board status, opens the PR for a task, or reports a blocker. The board stores live status only; strategy stays in `ROADMAP.md`, task spec stays in issues, and decisions/code stay in PRs/docs.
+Two orthogonal fields, and only two:
+
+- **`Status`** (lifecycle): `Backlog` · `In progress` · `In review` · `Done`.
+- **`Owner`** (routing intent): `Human` · `Agent` · `Pairing`. This says who *should* do it; the native issue **assignee** says who *is* doing it.
+
+Special states are labels, not columns: `someday` (parked/immature, filtered out of the default view) and `blocked` (stalled on something external).
 
 ## Lifecycle
 
-1. Discovery: list board items with `Status=Todo`, current `Phase`, and `Owner` in `Agent` or `Pairing`.
-2. Claim: run `scripts/claim <issue#>`. It assigns the issue to the current GitHub user, moves status to `In progress`, comments `claimed @ <ts>`, and rereads the claim.
-3. Plan: comment the execution plan on the issue before coding. This is the human checkpoint.
-4. Execute: create a branch following ADR-0005, commit normally, and keep work scoped to the issue.
-5. Submit: run `scripts/submit <issue#>`. It pushes the current branch if needed, opens a PR with `Closes #N`, and moves status to `In review`.
-6. Review/Merge: the human reviews and merges. The agent never merges.
-7. Block: run `scripts/block <issue#> "<reason>"` when blocked on a human decision, secret, registrar, or production state.
+1. **Discovery.** Use `projects_get` to read board items; filter for `Status=Backlog`, `Owner∈{Agent,Pairing}`, current `phase-N` label, and not `someday`/`blocked`.
+2. **Claim.** Assign the issue to yourself (the agent's GitHub user) and set `Status=In progress` via `projects_write`. Comment `claimed @ <utc-ts>` on the issue, then reread to confirm assignee + status stuck.
+3. **Plan.** Comment the execution plan on the issue before coding. This is the human checkpoint.
+4. **Execute.** Branch following ADR-0005 (`^(feat|fix|chore|docs)/<scope>-<slug>`). When agents may run in parallel, work in a git worktree partitioned by domain boundary (ADR-0001) to avoid merge conflicts. Keep work scoped to the issue.
+5. **Submit.** Open a PR with `Closes #N`, then set `Status=In review` via `projects_write`.
+6. **Review/Merge.** The human reviews and merges. The agent never merges. `PR merged → Done` is built-in.
+7. **Block.** If you hit an external blocker (human decision, secret, registrar/DNS, production), add the `blocked` label + a comment explaining what is needed, set `Owner=Human`, and move `Status` back to `Backlog` (leaving `In progress` honest). Do not sit in `In progress` while stalled.
 
-## State Machine
+Tasks with no PR (human/infra work) go `Backlog → In progress → Done` directly — the operator closes the issue (`issue closed → Done` is built-in). `In review` only applies to PR-producing work. PR rejected in review goes `In review → In progress`, not blocked.
 
-`Backlog` --human triage--> `Todo` --claim--> `In progress` --PR opened--> `In review` --human merge--> `Done`.
+## Writing a single-select field via MCP (the one gotcha)
 
-`Blocked` is only for external blockers: human input, secrets, registrar, production, or another irreversible action. Review rework goes from `In review` back to `In progress`, not to `Blocked`.
+`projects_write` needs the **field id** and the **option id**, not the text. Resolve them first with `projects_get` (its read of a single-select field returns its `options` with ids), then write. Pattern:
 
-Collisions are a non-goal for current use. Claim uses assignee plus status as a visible record, then rereads. There is no mutex or lock.
+1. `projects_get` the project → find the `Status` (or `Owner`) field id and the id of the target option (e.g. `In progress`).
+2. `projects_write` the item with the resolved `{field id, option id}`.
 
-## Hard Gates
+## Hard gates
 
-- Never merge a PR. Merge is the hard human gate.
-- Never touch secrets, registrar, production credentials, or production state. Block and hand off to `Owner=Human`.
-- Never promote `Backlog`/`proposed` work to `Todo`; backlog curation is human-gated.
-- Never reimplement built-in board automations: item added -> `Todo`, issue/PR closed -> `Done`, and PR merged -> `Done` belong to GitHub Projects configuration.
-
-## Script Configuration
-
-Defaults target the production board:
-
-- `TP_PROJECT_OWNER`: defaults to the repository owner.
-- `TP_PROJECT_NUMBER`: preferred; otherwise scripts try `TP_PROJECT_TITLE`, defaulting to `talkingpres — roadmap`.
-- `TP_STATUS_FIELD`: defaults to `Status`.
-- `TP_OWNER_FIELD`: defaults to `Owner`.
-- `TP_PR_BASE`: defaults to the repository default branch.
-- `TP_PR_DRAFT=1`: makes `submit` open a draft PR.
-
-The helper `scripts/set-single-select <issue#> <field> <option>` resolves project ID, item ID, field ID, and option ID, then sets one Projects v2 single-select field.
+- **Never merge a PR.** Merge is the hard human gate (ADR-0005).
+- **Never touch secrets, registrar/DNS, production credentials, or production state.** Add `blocked`, hand off to `Owner=Human`.
+- **Never promote `someday`/`proposed` work to the ready queue.** Backlog curation is human-gated; you may *propose* a new issue (it lands with the `proposed` label) but not accept it.
+- **Never reimplement built-in board automations:** item added → `Backlog`, issue/PR closed → `Done`, PR merged → `Done` belong to GitHub Projects configuration.
+- **Do not delegate to the cloud (Agent HQ / claude-code-action) on your own** — that is a documented, paid overflow requiring a human decision and an ADR.
