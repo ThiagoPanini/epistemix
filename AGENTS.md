@@ -103,7 +103,7 @@ Skills nativas do Claude Code para usar regularmente: `init`, `verify`, `simplif
 
 ## Board e fluxo dos agentes
 
-O trabalho é rastreado num GitHub Projects (ver [ADR-0013](docs/adr/0013-substrato-de-planejamento-operado-por-agentes.md)). **Para operar o board — descobrir, reivindicar, executar, submeter ou bloquear tarefas — use a skill `operate-planning-board`** (`.agents/skills/`, lida por Claude Code, Codex e Copilot); não toque na API do board direto. O protocolo e os scripts vivem na skill (fonte única); a decisão e o porquê, no ADR-0013. Princípios evergreen do desenho: [lesson 0002](docs/lessons/0002-harness-basico-em-github-projects.md).
+O trabalho é rastreado num GitHub Projects, que é **instrumento de visibilidade, não cockpit** — o trabalho acontece no VS Code com Claude Code, Copilot e Codex (ver [ADR-0013](docs/adr/0013-substrato-de-planejamento-operado-por-agentes.md)). **Para operar o board — descobrir, reivindicar, executar, submeter ou reportar tarefas — use a skill `operate-planning-board`** (`.agents/skills/`, lida por Claude Code, Codex e Copilot); o board é operado pelo **GitHub MCP server** (toolset `projects`), não pela API direta nem por scripts. O protocolo vive na skill (fonte única); a decisão e o porquê, no ADR-0013. Princípios evergreen do desenho: [lesson 0002](docs/lessons/0002-harness-basico-em-github-projects.md).
 
 ## Para Claude Code, especificamente
 
