@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Render the ADR-0014 talkingpres session briefing.
+"""Render a portable solo-dev-assistant session briefing.
 
-The script is intentionally small and read-only. It derives every section from
-ROADMAP.md plus local git/gh state so repeated runs over the same inputs are
-stable.
+The script is read-only. It derives every section from ROADMAP.md plus local
+git/gh state so repeated runs over the same inputs are stable.
 """
 
 from __future__ import annotations
@@ -18,10 +17,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-PHASE_RE = re.compile(r"^##\s+Fase\s+(?P<number>\d+)\s+[—-]\s+(?P<title>.+?)\s*$")
+PHASE_RE = re.compile(
+    r"^##\s+(?:(?:Fase|Phase)\s+)?(?:(?P<number>\d+)\s*(?:[—-]\s*)?)?(?P<title>.+?)\s*$",
+    re.IGNORECASE,
+)
 TASK_RE = re.compile(r"^(?P<indent>\s*)-\s+\[(?P<box>[ xX])\]\s+(?P<body>.+?)\s*$")
-OWNER_RE = re.compile(r"`@(?P<owner>human|agent|pairing)`")
-WAITING_RE = re.compile(r"\(aguardando:\s*(?P<reason>[^)]+)\)")
+OWNER_RE = re.compile(r"`@(?P<owner>[a-zA-Z][\w-]*)`")
+WAITING_RE = re.compile(r"\((?:aguardando|waiting):\s*(?P<reason>[^)]+)\)", re.IGNORECASE)
 STOPWORDS = {
     "a",
     "as",
@@ -32,13 +34,17 @@ STOPWORDS = {
     "dos",
     "e",
     "em",
+    "for",
+    "in",
     "na",
     "no",
     "o",
+    "of",
     "os",
     "para",
     "por",
     "the",
+    "to",
 }
 
 
@@ -89,6 +95,57 @@ def repo_root() -> Path:
     here = Path.cwd()
     discovered = run(["git", "rev-parse", "--show-toplevel"], here)
     return Path(discovered) if discovered else here
+
+
+def roadmap_file(root: Path) -> Path | None:
+    for candidate in [root / "docs/ROADMAP.md", root / "ROADMAP.md"]:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def read_text(path: Path | None) -> str:
+    if path is None or not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8")
+
+
+def project_name(root: Path) -> str:
+    package_json = root / "package.json"
+    if package_json.exists():
+        try:
+            data = json.loads(package_json.read_text(encoding="utf-8"))
+            name = str(data.get("name") or "").strip()
+            if name:
+                return name
+        except json.JSONDecodeError:
+            pass
+
+    pyproject = root / "pyproject.toml"
+    if pyproject.exists():
+        match = re.search(r"(?m)^name\s*=\s*[\"']([^\"']+)[\"']", pyproject.read_text(encoding="utf-8"))
+        if match:
+            return match.group(1).strip()
+
+    readme = root / "README.md"
+    if readme.exists():
+        for line in readme.read_text(encoding="utf-8").splitlines():
+            if line.startswith("# "):
+                return line[2:].strip()
+
+    return root.name
+
+
+def detect_locale(*texts: str) -> str:
+    raw = "\n".join(texts)
+    normalized = normalize_to_ascii(raw)
+    pt_score = len(re.findall(r"\b(fase|aguardando|visao|publico|glossario|invariante|projeto)\b", normalized))
+    en_score = len(re.findall(r"\b(phase|waiting|vision|audience|glossary|invariant|project)\b", normalized))
+    if re.search(r"[áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]", raw):
+        pt_score += 3
+    if en_score > pt_score:
+        return "en"
+    return "pt"
 
 
 def clean_title(body: str) -> tuple[str, str | None, str | None]:
@@ -158,12 +215,16 @@ def parse_phases(roadmap: str) -> list[Phase]:
         if match:
             headings.append((index, match))
 
+    if not headings:
+        return [Phase(number="?", title="Roadmap", tasks=parse_tasks(lines, start_line=1))]
+
     phases: list[Phase] = []
     for heading_index, (line_index, match) in enumerate(headings):
         next_index = headings[heading_index + 1][0] if heading_index + 1 < len(headings) else len(lines)
         section_lines = lines[line_index + 1 : next_index]
         tasks = parse_tasks(section_lines, start_line=line_index + 2)
-        phases.append(Phase(number=match.group("number"), title=match.group("title"), tasks=tasks))
+        number = match.group("number") or "?"
+        phases.append(Phase(number=number, title=match.group("title"), tasks=tasks))
     return phases
 
 
@@ -171,16 +232,30 @@ def active_phase(phases: list[Phase]) -> Phase:
     for phase in phases:
         if any(not task.done for task in phase.tasks):
             return phase
-    return phases[-1] if phases else Phase(number="?", title="sem fase", tasks=[])
+    for phase in phases:
+        if phase.tasks:
+            return phase
+    return Phase(number="?", title="Roadmap", tasks=[])
 
 
-def normalize(text: str) -> list[str]:
-    ascii_text = (
+def phase_label(phase: Phase, locale: str) -> str:
+    if phase.number != "?":
+        label = "Phase" if locale == "en" else "Fase"
+        return f"{label} {phase.number} — {phase.title}"
+    return phase.title
+
+
+def normalize_to_ascii(text: str) -> str:
+    return (
         unicodedata.normalize("NFKD", text)
         .encode("ascii", "ignore")
         .decode("ascii")
         .lower()
     )
+
+
+def normalize(text: str) -> list[str]:
+    ascii_text = normalize_to_ascii(text)
     return [token for token in re.findall(r"[a-z0-9]+", ascii_text) if token not in STOPWORDS and len(token) > 1]
 
 
@@ -217,12 +292,12 @@ def review_waiting(pr: dict[str, str]) -> bool:
     return pr.get("reviewDecision") in {"REVIEW_REQUIRED", "CHANGES_REQUESTED"}
 
 
-def pr_label(pr: dict[str, str]) -> str:
+def pr_label(pr: dict[str, str], locale: str) -> str:
     number = pr.get("number")
-    title = pr.get("title", "sem titulo")
+    title = pr.get("title", "untitled" if locale == "en" else "sem titulo")
     url = pr.get("url", "")
     head = pr.get("headRefName", "")
-    state = "draft" if pr.get("isDraft") else "aberto"
+    state = "draft" if pr.get("isDraft") else ("open" if locale == "en" else "aberto")
     link = f"[PR #{number}]({url})" if url else f"PR #{number}"
     suffix = f" — branch `{head}`, {state}" if head else f" — {state}"
     return f"{link}: {title}{suffix}"
@@ -250,43 +325,52 @@ def best_branch_for_task(task: Task, branches: list[str], current: str) -> str |
     return sorted(scored, key=lambda item: (-item[0], item[1]))[0][1]
 
 
-def reference_for_task(task: Task, prs: list[dict[str, str]], branches: list[str], current: str) -> tuple[str, int | None]:
+def reference_for_task(
+    task: Task,
+    prs: list[dict[str, str]],
+    branches: list[str],
+    current: str,
+    locale: str,
+) -> tuple[str, int | None]:
     pr = best_pr_for_task(task, prs)
     branch = best_branch_for_task(task, branches, current)
     pieces: list[str] = []
     matched_pr_number: int | None = None
     if pr:
         matched_pr_number = int(pr.get("number", 0))
-        pieces.append(pr_label(pr))
+        pieces.append(pr_label(pr, locale))
     if branch and (not pr or branch != pr.get("headRefName")):
         pieces.append(f"branch `{branch}`")
-    return ("; ".join(pieces) if pieces else "sem branch/PR detectado"), matched_pr_number
+    fallback = "no branch/PR detected" if locale == "en" else "sem branch/PR detectado"
+    return ("; ".join(pieces) if pieces else fallback), matched_pr_number
 
 
-def recent_roadmap_commits(root: Path) -> list[str]:
+def recent_roadmap_commits(root: Path, path: Path) -> list[str]:
+    try:
+        relative = str(path.relative_to(root))
+    except ValueError:
+        relative = str(path)
     output = run(
         [
             "git",
             "log",
-            "--grep",
-            "chore(roadmap):",
             "--since=7 days ago",
             "--format=%s",
             "--",
-            "docs/ROADMAP.md",
+            relative,
         ],
         root,
     )
     commits = []
     for line in output.splitlines():
         subject = re.sub(r"^chore\(roadmap\):\s*", "", line).strip()
-        if subject:
+        if subject and subject not in commits:
             commits.append(subject)
     return commits
 
 
-def load_skill_map(root: Path) -> list[tuple[str, list[str]]]:
-    path = root / ".agents/skills/solo-dev-assistant/skills-map.md"
+def load_skill_map() -> list[tuple[str, list[str]]]:
+    path = Path(__file__).resolve().parents[1] / "skills-map.md"
     if not path.exists():
         return []
     entries: list[tuple[str, list[str]]] = []
@@ -299,7 +383,7 @@ def load_skill_map(root: Path) -> list[tuple[str, list[str]]]:
     return entries
 
 
-def suggested_skills(tasks: list[Task], skill_map: list[tuple[str, list[str]]]) -> list[str]:
+def suggested_skills(tasks: list[Task], skill_map: list[tuple[str, list[str]]], locale: str) -> list[str]:
     suggestions: list[str] = []
     seen: set[tuple[str, str]] = set()
     for task in tasks:
@@ -308,28 +392,37 @@ def suggested_skills(tasks: list[Task], skill_map: list[tuple[str, list[str]]]) 
             if any(" ".join(normalize(pattern)) in normalized_title for pattern in patterns):
                 key = (task.title, skill)
                 if key not in seen:
-                    suggestions.append(f'- Para "{task.title}": `{skill}`')
+                    if locale == "en":
+                        suggestions.append(f'- For "{task.title}": `{skill}`')
+                    else:
+                        suggestions.append(f'- Para "{task.title}": `{skill}`')
                     seen.add(key)
                 break
     return suggestions
 
 
-def available_line(index: int, task: Task) -> str:
+def available_line(index: int, task: Task, locale: str) -> str:
     owner = f" `@{task.owner}`" if task.owner else ""
     context = ""
     if task.child_unfinished_count:
-        label = "subtarefa" if task.child_unfinished_count == 1 else "subtarefas"
-        context = f" — destrava {task.child_unfinished_count} {label}"
+        if locale == "en":
+            label = "subtask" if task.child_unfinished_count == 1 else "subtasks"
+            context = f" — unlocks {task.child_unfinished_count} {label}"
+        else:
+            label = "subtarefa" if task.child_unfinished_count == 1 else "subtarefas"
+            context = f" — destrava {task.child_unfinished_count} {label}"
     return f"{index}. {task.title}{owner}{context}"
 
 
 def render() -> str:
     root = repo_root()
-    roadmap_path = root / "docs/ROADMAP.md"
-    if not roadmap_path.exists():
-        raise FileNotFoundError("docs/ROADMAP.md nao encontrado")
+    path = roadmap_file(root)
+    if path is None:
+        raise FileNotFoundError("docs/ROADMAP.md ou ROADMAP.md nao encontrado")
 
-    phases = parse_phases(roadmap_path.read_text(encoding="utf-8"))
+    roadmap = path.read_text(encoding="utf-8")
+    locale = detect_locale(roadmap, read_text(root / "README.md"))
+    phases = parse_phases(roadmap)
     phase = active_phase(phases)
     prs = open_prs(root)
     branches = local_feature_branches(root)
@@ -339,13 +432,40 @@ def render() -> str:
     blocked = [task for task in phase.tasks if task.blocked]
     available = [task for task in phase.tasks if task.available and task.child_unfinished_count == 0]
 
-    lines: list[str] = [f"## Panorama — talkingpres @ Fase {phase.number}", ""]
+    if locale == "en":
+        labels = {
+            "empty": "none",
+            "in_flight": "### In flight",
+            "blocked": "### Blocked / waiting",
+            "available": "### Available next (top 5)",
+            "skills": "### Suggested skills",
+            "recent": "### Recently completed (last 7 days)",
+            "more": "more in ROADMAP",
+            "review_required": "waiting for review",
+            "changes_requested": "changes requested",
+        }
+        title = f"## Briefing — {project_name(root)} @ {phase_label(phase, locale)}"
+    else:
+        labels = {
+            "empty": "nada",
+            "in_flight": "### Em voo",
+            "blocked": "### Bloqueado / aguardando",
+            "available": "### Disponível para pegar (top 5)",
+            "skills": "### Skills sugeridas",
+            "recent": "### Recém-concluído (últimos 7 dias)",
+            "more": "mais no ROADMAP",
+            "review_required": "aguardando revisão",
+            "changes_requested": "mudanças solicitadas",
+        }
+        title = f"## Briefing — {project_name(root)} @ {phase_label(phase, locale)}"
 
-    lines.extend(["### Em voo"])
+    lines: list[str] = [title, ""]
+
+    lines.extend([labels["in_flight"]])
     matched_prs: set[int] = set()
     if in_flight:
         for task in in_flight:
-            reference, matched_pr = reference_for_task(task, prs, branches, current)
+            reference, matched_pr = reference_for_task(task, prs, branches, current, locale)
             if matched_pr:
                 matched_prs.add(matched_pr)
             lines.append(f"- {task.title} 🚧 — {reference}")
@@ -353,43 +473,44 @@ def render() -> str:
         number = int(pr.get("number", 0))
         if number in matched_prs or review_waiting(pr):
             continue
-        lines.append(f"- {pr_label(pr)}")
-    if lines[-1] == "### Em voo":
-        lines.append("nada")
+        lines.append(f"- {pr_label(pr, locale)}")
+    if lines[-1] == labels["in_flight"]:
+        lines.append(labels["empty"])
     lines.append("")
 
-    lines.extend(["### Bloqueado / aguardando você"])
+    lines.extend([labels["blocked"]])
     if blocked:
         for task in blocked:
-            lines.append(f"- {task.title} 🚧 (aguardando: {task.waiting_reason})")
+            waiting_key = "waiting" if locale == "en" else "aguardando"
+            lines.append(f"- {task.title} 🚧 ({waiting_key}: {task.waiting_reason})")
     for pr in prs:
         if not review_waiting(pr):
             continue
-        review_state = "mudanças solicitadas" if pr.get("reviewDecision") == "CHANGES_REQUESTED" else "aguardando revisão"
-        lines.append(f"- {pr_label(pr)} — {review_state}")
-    if lines[-1] == "### Bloqueado / aguardando você":
-        lines.append("nada")
+        review_state = labels["changes_requested"] if pr.get("reviewDecision") == "CHANGES_REQUESTED" else labels["review_required"]
+        lines.append(f"- {pr_label(pr, locale)} — {review_state}")
+    if lines[-1] == labels["blocked"]:
+        lines.append(labels["empty"])
     lines.append("")
 
-    lines.extend(["### Disponível para pegar (top 5)"])
+    lines.extend([labels["available"]])
     if available:
         for index, task in enumerate(available[:5], start=1):
-            lines.append(available_line(index, task))
+            lines.append(available_line(index, task, locale))
         remaining = len(available) - 5
         if remaining > 0:
-            lines.append(f"(+{remaining} mais no ROADMAP)")
+            lines.append(f"(+{remaining} {labels['more']})")
     else:
-        lines.append("nada")
+        lines.append(labels["empty"])
     lines.append("")
 
-    lines.extend(["### Skills sugeridas para esta sessão"])
-    suggestions = suggested_skills(in_flight, load_skill_map(root))
-    lines.extend(suggestions if suggestions else ["nada"])
+    lines.extend([labels["skills"]])
+    suggestions = suggested_skills(in_flight + blocked, load_skill_map(), locale)
+    lines.extend(suggestions if suggestions else [labels["empty"]])
     lines.append("")
 
-    lines.extend(["### Recém-concluído (últimos 7 dias)"])
-    recent = recent_roadmap_commits(root)
-    lines.extend([f"- {item}" for item in recent] if recent else ["nada"])
+    lines.extend([labels["recent"]])
+    recent = recent_roadmap_commits(root, path)
+    lines.extend([f"- {item}" for item in recent] if recent else [labels["empty"]])
 
     return "\n".join(lines)
 
