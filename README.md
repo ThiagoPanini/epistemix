@@ -1,2 +1,2 @@
-# talkingpres
-🦜 Uma galeria de apresentações "falantes"
+# epistemix
+Hub pessoal de aprendizado — blog, cursos, livros, certificações e apresentações técnicas.

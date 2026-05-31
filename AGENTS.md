@@ -1,12 +1,12 @@
 # AGENTS.md — Instruções para agentes de IA neste repositório
 
-Este arquivo é a fonte única de instruções operacionais para qualquer agente de IA (Claude Code, OpenAI Codex, GitHub Copilot, Cursor, Aider) trabalhando no `talkingpres`.
+Este arquivo é a fonte única de instruções operacionais para qualquer agente de IA (Claude Code, OpenAI Codex, GitHub Copilot, Cursor, Aider) trabalhando no `epistemix`.
 
 Outros arquivos esperados por agentes específicos (`CLAUDE.md`, `.github/copilot-instructions.md`) devem apontar para este. Evite duplicar conteúdo entre eles.
 
-## O que é o talkingpres
+## O que é o epistemix
 
-SaaS open source que centraliza apresentações técnicas (software, AI, dados, SRE) num catálogo público com design refinado (referência: codewiki.google, dark first, gradientes leves, animações elegantes mas não extravagantes).
+Hub pessoal open source de aprendizado que centraliza artefatos intelectuais (posts de blog, notas de cursos, reviews de livros, anotações de certificações e apresentações técnicas) num espaço público com design refinado (referência: codewiki.google, dark first, gradientes leves, animações elegantes mas não extravagantes).
 
 **Visão completa:** [docs/VISION.md](docs/VISION.md)
 **Roadmap por fases:** [docs/ROADMAP.md](docs/ROADMAP.md)
@@ -27,7 +27,7 @@ SaaS open source que centraliza apresentações técnicas (software, AI, dados, 
 ## Layout do repositório (alvo)
 
 ```
-talkingpres/
+epistemix/
 ├── AGENTS.md                       # este arquivo
 ├── CLAUDE.md                       # importa AGENTS.md
 ├── README.md
@@ -53,7 +53,7 @@ Estrutura atual ainda em construção — Fase 0 do roadmap está em andamento.
 
 ```bash
 # Backend
-cd apps/api && uv sync && uv run uvicorn talkingpres.main:app --reload
+cd apps/api && uv sync && uv run uvicorn epistemix.main:app --reload
 
 # Frontend
 cd apps/web && pnpm install && pnpm dev

@@ -1,6 +1,6 @@
 # Guides
 
-Guias técnicos para reproduzir etapas que fazem parte da trilha criativa real do talkingpres. Eles não são backlog genérico: entram aqui apenas procedimentos que já foram executados e destilados em receita, ou o próximo passo imediato necessário para continuar a mesma sequência operacional.
+Guias técnicos para reproduzir etapas que fazem parte da trilha criativa real do epistemix. Eles não são backlog genérico: entram aqui apenas procedimentos que já foram executados e destilados em receita, ou o próximo passo imediato necessário para continuar a mesma sequência operacional.
 
 Para entender os conceitos por trás das técnicas usadas, veja [docs/lessons/](../lessons/). Para o registro do que a IA + operador efetivamente fizeram em operações reais, veja [docs/ai-ops/](../ai-ops/). Para comandos cotidianos de operação, veja [docs/runbooks/](../runbooks/).
 
