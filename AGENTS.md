@@ -103,7 +103,15 @@ Skills nativas do Claude Code para usar regularmente: `init`, `verify`, `simplif
 
 ## Board e fluxo dos agentes
 
-O trabalho é rastreado num GitHub Projects, que é **instrumento de visibilidade, não cockpit** — o trabalho acontece no VS Code com Claude Code, Copilot e Codex (ver [ADR-0013](docs/adr/0013-substrato-de-planejamento-operado-por-agentes.md)). **Para operar o board — descobrir, reivindicar, executar, submeter ou reportar tarefas — use a skill `operate-planning-board`** (`.agents/skills/`, lida por Claude Code, Codex e Copilot); o board é operado pelo **GitHub MCP server** (toolset `projects`), não pela API direta nem por scripts. O protocolo vive na skill (fonte única); a decisão e o porquê, no ADR-0013. Princípios evergreen do desenho: [lesson 0002](docs/lessons/0002-harness-basico-em-github-projects.md).
+Plano e estado de execução vivem no **[docs/ROADMAP.md](docs/ROADMAP.md)** como single source — sem board ativo nem espelho a sincronizar (ver [ADR-0014](docs/adr/0014-roadmap-como-source-skill-solo-dev-assistant.md); o desenho anterior via GitHub Projects fica no [ADR-0013 R3](docs/adr/0013-substrato-de-planejamento-operado-por-agentes.md) como histórico). O trabalho acontece no VS Code com Claude Code, Copilot e Codex; o despacho é manual.
+
+**Estado no ROADMAP** (3 markers): `- [ ]` disponível · `🚧` em andamento (anexe `(aguardando: <razão>)` para bloqueio) · `- [x]` concluído. Bullets da fase ativa levam sufixo `` `@human` `` ou `` `@agent` `` indicando quem executa.
+
+**Orientação de sessão:** invoque `/solo-dev-assistant briefing` para o digest do que está em voo, bloqueado, disponível e recém-concluído (lê ROADMAP + git + PRs).
+
+**Intent-loop:** quando o operador expressar intenção de pegar uma tarefa ("vou pegar X"), localize o bullet em `docs/ROADMAP.md`, **proponha** a edição ("marco X como 🚧, confirma?") e edite após confirmação — mesma cerimônia para `[x]` ao concluir e para `(aguardando: ...)` ao bloquear. Em Claude Code o **hook PostToolUse** auto-comita a transição com prefixo `chore(roadmap):`; em Codex/Copilot, comite manualmente com o mesmo prefixo.
+
+**Issues** ficam deferidas: crie à mão só quando a tarefa exigir discussão estendida ou link de PR (`Closes #N`). Princípios evergreen do desenho: [lesson 0002](docs/lessons/0002-harness-basico-em-github-projects.md).
 
 ## Para Claude Code, especificamente
 
