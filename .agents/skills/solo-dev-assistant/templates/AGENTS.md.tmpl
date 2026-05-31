@@ -1,0 +1,52 @@
+# AGENTS.md — Instruções para agentes de IA neste projeto
+
+Este arquivo orienta agentes trabalhando no projeto `{{PROJECT_NAME}}`.
+
+## O que é o projeto
+
+{{ONE_LINE}}
+
+**Visão:** [VISION.md](VISION.md)
+**Roadmap:** [ROADMAP.md](ROADMAP.md)
+**Contexto de domínio:** [CONTEXT.md](CONTEXT.md)
+
+## Estado inicial
+
+Este projeto foi bootstrapado por `/solo-dev-assistant start`. Os documentos são seeds, não especificação final.
+
+Antes de implementar código de produto:
+
+- Refinar `VISION.md` e `ROADMAP.md` com `/grill-me`.
+- Preencher `CONTEXT.md` com `/grill-with-docs`.
+- Registrar ADR-0001 para decisões fundacionais.
+
+## Stack
+
+{{STACK}}
+
+## Convenções iniciais
+
+- Commits seguem Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`.
+- Mudanças estruturais devem ser registradas em ADR antes da implementação.
+- Mudanças em glossário, invariantes ou anti-conceitos atualizam `CONTEXT.md` no mesmo PR.
+- Roadmap é sequencial: não pular fase sem fechar a anterior.
+
+## O que fazer
+
+- Ler `VISION.md`, `ROADMAP.md` e `CONTEXT.md` antes de propor feature.
+- Manter mudanças pequenas e revisáveis.
+- Preferir simplicidade até haver dor real que justifique abstração.
+- Deixar `_TODO_` visível quando uma decisão ainda não foi tomada.
+
+## O que NÃO fazer
+
+- Não inventar stack, público, métricas ou requisitos que não estejam documentados.
+- Não criar features de V2 antes da V1 provar valor.
+- Não commitar segredos.
+- Não desabilitar hooks, testes ou CI para fechar trabalho.
+
+## Skills sugeridas
+
+- `/grill-me` para refinar visão, roadmap e trade-offs.
+- `/grill-with-docs` para glossário, invariantes e documentação versionada.
+- `/solo-dev-assistant briefing` quando o ROADMAP estiver sendo usado como fonte de estado de execução.

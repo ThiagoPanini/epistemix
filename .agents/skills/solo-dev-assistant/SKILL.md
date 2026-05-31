@@ -7,22 +7,26 @@ description: Use this skill whenever the user invokes `/solo-dev-assistant ...`,
 
 This skill is the lightweight planning harness described in `docs/adr/0014-roadmap-como-source-skill-solo-dev-assistant.md`.
 
-It is a multi-command framework. Commands live in `commands/`; each command owns its behavior and any helper scripts it needs. The v1 command is:
+It is a multi-command framework. Commands live in `commands/`; each command owns its behavior and any helper scripts it needs. The v1 commands are:
 
+- `start`: one-shot bootstrap for a new greenfield project. It is not used to bootstrap talkingpres itself.
 - `briefing`: read-only session orientation for talkingpres.
 
-Future commands, such as `start`, should be added only after repeated real friction. Do not create new commands speculatively.
+Future commands beyond `start` and `briefing` should be added only after repeated real friction. Do not create new commands speculatively.
 
 ## Dispatch
 
+When the operator invokes `/solo-dev-assistant start`, read `commands/start.md` and follow it exactly.
+
 When the operator invokes `/solo-dev-assistant briefing`, read `commands/briefing.md` and follow it exactly.
 
-If the operator invokes an unknown command, answer in Portuguese that only `briefing` is implemented in this local v1. Do not invent behavior for missing commands.
+If the operator invokes an unknown command, answer in Portuguese that only `start` and `briefing` are implemented in this local v1. Do not invent behavior for missing commands.
 
 ## Operating Principles
 
 - Keep the ROADMAP as the single source of planning state.
 - Keep `briefing` read-only: it may read `docs/ROADMAP.md`, local git state, recent roadmap commits, and open PRs via `gh pr list`; it must not edit files, create issues, create branches, or stage changes.
+- Keep `start` light: it asks only enough to seed docs, writes five templated markdown files into a new project's `docs/`, and hands off refinement to `grill-me` and `grill-with-docs`.
 - Prefer deterministic output. The same ROADMAP/git/PR state should produce the same markdown.
 - Use Portuguese for operator-facing output. Keep identifiers, command names, branch names, and skill names unchanged.
 - Use the static suggestions in `skills-map.md`; do not infer new skill recommendations from vibes.
@@ -30,5 +34,8 @@ If the operator invokes an unknown command, answer in Portuguese that only `brie
 ## Static Resources
 
 - `commands/briefing.md`: command contract and invocation steps.
+- `commands/start.md`: command contract, adaptive questioning flow, and handoff.
 - `scripts/briefing.py`: deterministic briefing renderer using only Python standard library plus local `git`/`gh` commands.
+- `scripts/start.py`: deterministic template renderer for the five bootstrap docs.
 - `skills-map.md`: static keyword-to-skill map for the "Skills sugeridas" section.
+- `templates/*.tmpl`: pt-BR markdown templates used by `start`.
