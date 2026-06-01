@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/auto-commit-roadmap.sh"
+            "command": "bash .claude/hooks/auto-commit-roadmap.sh"
           }
         ]
       }
