@@ -66,9 +66,12 @@ Specs de feature vivem em `docs/specs/NNNN-<feature>.md` — gênero leve, in-re
 
 Distinção de gêneros: um **ADR** registra uma *decisão* e o *porquê*; um **spec** registra *o que construir* + critério de aceite + plano de slices. São coisas diferentes — Matt separa explicitamente `/to-prd` (destino) de decisões arquiteturais.
 
-### 6. Tooling do loop — deferido (trip-wire)
+### 6. Tooling do loop — `to-prd` adotado cedo; resto deferido (trip-wire)
 
-**Não** construir agora as ferramentas do loop AFK (`/to-prd`, `/to-slices`, loop tipo "Ralph"). Razões: (a) execução está bloqueada até a Fase 0 fechar (§2); (b) o [ADR-0014](0014-roadmap-como-source-skill-solo-dev-assistant.md) prega "comando puxado por dor, não por catálogo a priori". Documentamos o **workflow** agora; construímos a **ferramenta** quando a Fase 1 começar de fato e a fricção manual aparecer. Quando construído, o lar natural é um comando novo da skill `solo-dev-assistant`, não uma skill paralela.
+A skill `to-prd` (a ferramenta de *destino/PRD* do fluxo) foi adotada antecipadamente (commit `f179991`), antes do gatilho de dor previsto. É aceitável, mas com duas ressalvas registradas:
+
+- **A versão importada publica o PRD num issue tracker e aplica label `ready-for-agent`** — o que contradiz este ADR (PRD-lite mora em `docs/specs/`, §5) e o [ADR-0014](0014-roadmap-como-source-skill-solo-dev-assistant.md) (issues deferidas). Antes de usar `to-prd` no fluxo do epistemix, **adaptá-la para escrever em `docs/specs/NNNN-<feature>.md`**, não em issue. Até a adaptação, tratar a skill como **não-wired**.
+- **As skills afins do mesmo conjunto (`to-issues`, que fatia em slices) carregam a mesma ressalva de issue tracker** — adaptar antes de usar. **O loop completo (tipo "Ralph") permanece deferido** pelas razões originais: (a) execução bloqueada até a Fase 0 fechar (§2); (b) o ADR-0014 prega "comando puxado por dor, não por catálogo a priori". Quando construído, o lar natural é um comando da skill `solo-dev-assistant`, não uma skill paralela.
 
 ## Justificativa
 
