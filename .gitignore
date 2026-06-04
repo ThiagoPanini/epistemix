@@ -72,6 +72,10 @@ desktop.ini
 # Claude Code — local overrides (personal, not for the repo)
 .claude/settings.local.json
 
+# MCP — config local de servidores MCP (Hostinger, Cloudflare). Pode referenciar
+# infra pessoal; mantida fora do repo público por convenção (ver guide 0002/0004).
+.mcp.json
+
 # Coverage and test artifacts
 coverage/
 .nyc_output/
