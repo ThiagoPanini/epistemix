@@ -6,6 +6,7 @@
     "node": ">=24"
   },
   "scripts": {
+    "prepare": "lefthook install",
     "dev:web": "pnpm --filter @epistemix/web dev",
     "build:web": "pnpm --filter @epistemix/web build",
     "typecheck:web": "pnpm --filter @epistemix/web typecheck",
@@ -13,6 +14,9 @@
     "format": "biome format --write ."
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1.0"
+    "@biomejs/biome": "^2.1.0",
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "lefthook": "^1.10.0"
   }
 }
