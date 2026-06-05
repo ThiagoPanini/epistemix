@@ -85,6 +85,26 @@ Liste a VPS Hostinger, os projetos/servidores do Coolify e as zonas Cloudflare.
 Retorne apenas identificadores, nomes e status. Não altere nada.
 ```
 
+### Upgrade opcional: direnv (single-source, sem duplicar o token)
+
+A duplicação do token Coolify nos três configs desaparece se o `.env` for carregado automaticamente no shell — aí cada cliente lê `COOLIFY_ACCESS_TOKEN` do ambiente em vez de inline. O [direnv](https://direnv.net) faz isso por diretório, sem `source` manual por sessão.
+
+Setup único (por máquina):
+
+1. Instale o direnv e adicione o hook ao shell (ex.: `eval "$(direnv hook zsh)"` no `~/.zshrc`).
+2. Crie um `.envrc` na raiz (sem segredo — só a diretiva) e autorize:
+
+   ```bash
+   echo 'dotenv' > .envrc && direnv allow
+   ```
+
+3. Mova o token Coolify do config para o `.env` e troque o inline por referência ao ambiente:
+   - `.mcp.json`: `"COOLIFY_ACCESS_TOKEN": "${COOLIFY_ACCESS_TOKEN}"`
+   - `.codex/config.toml`: troque o bloco `env` por `env_vars = ["COOLIFY_ACCESS_TOKEN"]`
+   - `.vscode/mcp.json`: `"COOLIFY_ACCESS_TOKEN": "${env:COOLIFY_ACCESS_TOKEN}"`
+
+Resultado: token só no `.env` (gitignored), zero duplicação. Custo: depender do direnv instalado em cada máquina — por isso é upgrade, não o padrão.
+
 ## Critério de sucesso
 
 - Os três templates versionados não contêm tokens.
