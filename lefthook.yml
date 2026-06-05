@@ -1,0 +1,44 @@
+# Portão 1 — checks locais (ADR-0005). Feedback rápido na máquina do dev;
+# o gate REAL é o pr-checks.yml (Portão 2). Pulável com --no-verify, que é
+# proibido sem justificativa (ver AGENTS.md).
+#
+# Instalado automaticamente por `pnpm install` (script prepare → lefthook install).
+
+pre-commit:
+  parallel: true
+  commands:
+    # Segredos: varre o que está staged antes de virar commit.
+    # gitleaks 8.18+ substituiu `protect --staged` por `git --staged`.
+    secrets:
+      run: gitleaks git --staged --redact --no-banner
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
+
+pre-push:
+  parallel: true
+  commands:
+    api-format:
+      root: "apps/api/"
+      glob: "*.py"
+      run: uv run ruff format --check .
+    api-lint:
+      root: "apps/api/"
+      glob: "*.py"
+      run: uv run ruff check .
+    api-types:
+      root: "apps/api/"
+      glob: "*.py"
+      run: uv run pyright --warnings
+    api-tests:
+      root: "apps/api/"
+      glob: "*.py"
+      run: uv run pytest -m "not integration" -q
+    web-check:
+      glob: "apps/web/**/*.{ts,tsx,js,jsx,mjs,json,css}"
+      run: pnpm exec biome check apps/web
+    web-types:
+      glob: "apps/web/**/*.{ts,tsx}"
+      run: pnpm --filter @epistemix/web typecheck

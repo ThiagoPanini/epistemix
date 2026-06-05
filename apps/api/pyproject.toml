@@ -36,3 +36,8 @@ pythonVersion = "3.13"
 typeCheckingMode = "standard"
 venvPath = "."
 venv = ".venv"
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: testes que exigem serviços externos (ex.: Postgres) — fora do gate pre-push",
+]

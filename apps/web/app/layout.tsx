@@ -6,9 +6,7 @@ export const metadata: Metadata = {
   description: "Hub pessoal de aprendizado.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
       <body className="min-h-screen bg-neutral-950 text-neutral-100 antialiased">{children}</body>
