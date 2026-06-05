@@ -27,6 +27,7 @@ Sem código de produto. Objetivo: base sólida de documentação, infra, automa�
 - [ ] Backup do Postgres em R2 (bucket criado no [guide 0002](guides/0002-configurar-cloudflare-r2-mcp.md); credencial S3 + schedule no Coolify em guide futuro)
 - [ ] Runbook de restore mensal do Postgres (backup não testado não é backup)
 - [x] Deploy "hello world" em produção respondendo em `epistemix.dev` — `nginxdemos/hello`, TLS Full (strict) — ver [ai-ops 0004](ai-ops/0004-publicar-epistemix-dev.md) e [guide 0003](guides/0003-publicar-epistemix-dev-em-producao.md)
+- [x] Cutover para os apps reais: `epistemix.dev` → `apps/web`, `apps/api` em `api.epistemix.dev` (Cloudflare), card "API: online" — ver [ai-ops 0005](ai-ops/0005-deploy-cutover-coolify-e-api-publica.md) e [runbook 0003](runbooks/0003-deploy-cutover-coolify.md)
 
 ### CI/CD e qualidade
 
