@@ -10,7 +10,7 @@ Para a visão de longo prazo, ver [VISION.md](VISION.md). Para decisões registr
 
 Sem código de produto. Objetivo: base sólida de documentação, infra, automação e setup AI-first.
 
-> **Progresso (atualizado 2026-06-05):** infra base da VPS, fundação documental, **borda Cloudflare** e **esqueleto de aplicação no ar concluídos** — `epistemix.dev` serve o `apps/web` real (landing Fase 0, card "API: online") consumindo `apps/api` via `api.epistemix.dev` atrás do Cloudflare; CI (3 portões), Lefthook e branch protection ativos. Cutover do placeholder + fiação web↔api em [ai-ops 0005](ai-ops/0005-deploy-cutover-coolify-e-api-publica.md). Restam só itens deferidos (backup Postgres → Fase 1; CONTRIBUTING/etc). Trilha auditável em [docs/ai-ops/](ai-ops/), receitas reproduzíveis em [docs/guides/](guides/).
+> **Progresso (atualizado 2026-06-05):** infra base da VPS, fundação documental, **borda Cloudflare** e **esqueleto de aplicação no ar concluídos** — `epistemix.dev` serve o `apps/web` real (landing Fase 0, card "API: online") consumindo `apps/api` via `api.epistemix.dev` atrás do Cloudflare; CI (3 portões), Lefthook e branch protection ativos. Cutover do placeholder + fiação web↔api em [ai-ops 0005](ai-ops/0005-deploy-cutover-coolify-e-api-publica.md). Restam só itens deferidos (backup Postgres → Fase 2, junto com a 1ª migration; CONTRIBUTING/etc). Trilha auditável em [docs/ai-ops/](ai-ops/), receitas reproduzíveis em [docs/guides/](guides/).
 > **Estado de execução:** rastreado neste próprio ROADMAP como single source (markers `🚧`/`[x]`, sufixo `` `@human` ``/`` `@agent` `` na fase ativa) — board GitHub Projects deferido, ver [ADR-0014](adr/0014-roadmap-como-source-skill-solo-dev-assistant.md).
 
 ### Infra e borda
