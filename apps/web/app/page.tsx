@@ -4,7 +4,13 @@ type Health = { status: string };
 
 async function getApiHealth(): Promise<Health | null> {
   try {
-    const res = await fetch(`${API_URL}/health`, { cache: "no-store" });
+    // Timeout curto: esta página é renderizada no servidor a cada request e
+    // não pode pendurar se a API estiver inalcançável — sem isso o healthcheck
+    // do container (GET / em 5s) estoura e o deploy faz rollback. Ver runbook 0003.
+    const res = await fetch(`${API_URL}/health`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(2000),
+    });
     if (!res.ok) return null;
     return (await res.json()) as Health;
   } catch {
