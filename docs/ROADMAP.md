@@ -30,9 +30,9 @@ Sem código de produto. Objetivo: base sólida de documentação, infra, automa�
 
 ### CI/CD e qualidade
 
-- [ ] CI: GitHub Actions com lint + typecheck + testes em PR
-- [ ] Branch protection na `main`: PR obrigatório, CI verde obrigatório, sem force-push
-- [ ] Secret scanning no CI (`gitleaks`)
+- [x] CI: GitHub Actions com lint + typecheck + testes em PR (`pr-checks.yml`, jobs web/api/security)
+- [x] Branch protection na `main`: PR obrigatório, checks verdes, sem force-push, história linear, approvals=0 (ruleset; emenda solo no ADR-0005)
+- [x] Secret scanning (`gitleaks`): pre-commit (Lefthook) + job `security` do `pr-checks.yml`
 
 ### Código e ambiente local
 
