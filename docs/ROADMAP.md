@@ -36,8 +36,8 @@ Sem código de produto. Objetivo: base sólida de documentação, infra, automa�
 
 ### Código e ambiente local
 
-- [ ] Skeleton monorepo: `apps/web` (Next.js) + `apps/api` (FastAPI), ambos com "hello world" rodando
-- [ ] Docker Compose local com Postgres
+- 🚧 Skeleton monorepo: `apps/web` (Next.js) + `apps/api` (FastAPI), ambos com "hello world" rodando `@agent`
+- 🚧 Docker Compose local com Postgres `@agent`
 
 ### Documentação e setup AI-first
 

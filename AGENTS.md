@@ -50,16 +50,22 @@ epistemix/
 
 Estrutura atual ainda em construção — Fase 0 do roadmap está em andamento.
 
-## Como rodar (placeholder — preencher na Fase 0)
+## Como rodar
 
 ```bash
-# Backend
+# Stack completa (web + api + postgres) via Docker
+docker compose up --build
+# → http://localhost:3000 mostra o status do /health do apps/api
+
+# — ou desenvolvimento local sem Docker —
+
+# Backend (FastAPI em :8000; uv gerencia o Python 3.13)
 cd apps/api && uv sync && uv run uvicorn epistemix.main:app --reload
 
-# Frontend
+# Frontend (Next.js em :3000; lê EPISTEMIX_API_URL, default http://localhost:8000)
 cd apps/web && pnpm install && pnpm dev
 
-# Banco local
+# Apenas o banco local
 docker compose up -d postgres
 ```
 
