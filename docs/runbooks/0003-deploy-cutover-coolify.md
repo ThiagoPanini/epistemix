@@ -4,6 +4,8 @@ Referência operacional do **Portão 3** ([ADR-0005](../adr/0005-deploy-checks-e
 
 > O workflow [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml) já faz **build + push para GHCR** em todo merge na `main`. O job `deploy` fica **pulado** até os secrets do Coolify existirem (não falha). Este runbook é o setup único que liga essa última peça.
 
+> **Healthcheck:** o Coolify roda o healthcheck *dentro* do container via `curl`/`wget`. As imagens `web` e `api` já trazem `curl` instalado nos seus Dockerfiles exatamente por isso — sem ele o container sobe mas é marcado `unhealthy` e sofre rollback. Se criar um app novo com healthcheck, garanta o `curl` na imagem.
+
 ## Estado de referência (2026-06)
 
 - Server Coolify: `localhost` (uuid `xzika6refja7xc2j8sia6cp7`).

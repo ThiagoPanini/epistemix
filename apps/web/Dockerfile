@@ -24,6 +24,9 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0
+# curl é exigido pelo healthcheck do Coolify (Portão 3) — roda o check DENTRO
+# do container; a imagem alpine não traz curl/wget. Ver runbook 0003.
+RUN apk add --no-cache curl
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 COPY --from=build /app/public ./public
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
