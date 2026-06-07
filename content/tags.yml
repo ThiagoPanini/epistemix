@@ -12,3 +12,7 @@
   label: "Linux"
 - slug: devops
   label: "DevOps"
+- slug: agents
+  label: "Agents"
+- slug: sdd
+  label: "SDD"

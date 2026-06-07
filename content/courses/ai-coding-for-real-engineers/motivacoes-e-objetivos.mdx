@@ -1,0 +1,101 @@
+---
+title: "Motivações e Objetivos"
+date: 2026-06-07
+status: published
+tags: [ai, agents, sdd]
+summary: "Por que comecei o AI Hero e o que espero tirar dele."
+---
+
+Já faz um tempo que escrevo software com um agente do lado. No epistemix (este projeto),
+por exemplo, boa parte do que entra no repositório passa por Claude Code, Codex ou Copilot
+antes de virar commit. Funciona. Mas, sendo honesto, muito disso ainda é improviso: eu
+peço, o agente responde, eu corrijo, e tudo vai acontecendo. É produtivo e, ao
+mesmo tempo, artesanal demais para algo que já virou o centro do meu fluxo de
+trabalho.
+
+Foi por aí que cheguei no **AI Coding for Real Engineers**, do Matt Pocock. A
+proposta é trocar o improviso por método: parar de *vibe coding* e tratar o
+trabalho com agentes como uma disciplina de engenharia, com as competências de
+sempre, só que recolocadas num fluxo assistido por IA.
+
+## Por que esse curso
+
+O que me convenceu não foi a promessa de acelerar meu trabalho com AI da noite para o dia.
+Foi o ângulo. Em vez de vender truques de *prompt*, o curso parte de fundamentos de
+engenharia que não envelhecem e mostra como dobrá-los para o trabalho com
+agentes. O Matt resume isso em sete verbos, e foram eles que me ganharam:
+
+| Verbo | O que significa |
+| --- | --- |
+| *Communicating* | Compartilhar com clareza intenção, contexto e requisitos |
+| *Anticipating* | Enxergar o problema antes de ele acontecer |
+| *Planning* | Transformar trabalho grande em PRDs bem formatados |
+| *Decomposing* | Quebrar o plano em tarefas pequenas e iterativas |
+| *Delegating* | Escolher o que entregar ao agente e o que segurar |
+| *Systematizing* | Transformar o que deu certo em padrão repetível |
+| *Parallelizing* | Colocar mais de um agente trabalhando em paralelo |
+
+Repare que nenhum desses verbos é sobre IA. São sobre engenharia. A IA entra
+como o novo executor de um ofício que já existia, e é essa inversão que me
+interessa.
+
+## O que eu não espero, e o que espero
+
+Não espero sair do curso com uma fórmula mágica, e também não é um curso sobre
+construir aplicações de IA: o foco é o contrário, usar IA para construir
+software de verdade. O que espero é mais concreto: ganhar autonomia e segurança
+para delegar a parte certa do trabalho a um agente sem perder o controle do
+código nem a compreensão do que ele faz.
+
+## A ementa, em duas semanas
+
+É um *cohort* assíncrono de duas semanas, com aulas liberadas toda segunda e
+*office hours* ao vivo (gravadas e com transcrição). Antes de começar há um
+módulo de aquecimento, *Getting to Know Claude Code*, e a versão atual do curso é
+agnóstica de agente: vale o *coding agent* que você preferir. As duas semanas se
+dividem assim:
+
+| Semana | Foco | Alguns tópicos |
+| --- | --- | --- |
+| 1 | Fundamentos, *steering* e planejamento | Gestão da *context window*, o loop *Plan / Execute / Clear*, `AGENTS.md` e *skills* customizadas, *progressive disclosure*, decomposição de features, escrita de PRD, *tracer bullets* e validação de arquitetura, planejamento multi-fase |
+| 2 | *Feedback loops*, agentes AFK e *human-in-the-loop* | Integração com CI e estratégias de teste, *skills* para padrões de qualidade, *pre-commit hooks*, o padrão *Ralph Wiggum loop*, modo *human-in-the-loop*, execução autônoma (AFK), fases de pesquisa, *kanban* e preparação do *codebase* para agentes |
+
+## O que espero aprender
+
+Boa parte dessa ementa eu já pratico por instinto em alguns dos meus projetos.
+Costumo colocar um modelo de autonomia AFK com *human-in-the-loop* nas bordas (registrado em
+ADRs), specs no estilo PRD-lite antes de implementar, *vertical slices* que
+funcionam como *tracer bullets*, um `AGENTS.md` como fonte única de instrução e
+*skills* customizadas, incluindo a que escreveu este post.
+
+O problema é que construí quase tudo isso no tato. Quero submeter essas escolhas
+a apuração de quem já sistematizou o assunto e descobrir onde estou fazendo
+gambiarra. Há pontos que sei que faço mal: gerencio a *context window* na base da
+intuição, paralelizo agentes de forma desajeitada e nunca estruturei direito um
+*feedback loop* autônomo em que eu confie de olhos fechados. É exatamente onde a
+Semana 2 mira.
+
+## Como vou registrar aqui
+
+O plano é simples: cada aula que render aprendizado relevante vira um Post neste
+*Source*. Não é resumo de aula, é o que sobra depois de passar pelo meu contexto,
+o que confirmou ou derrubou alguma prática que eu já usava no epistemix.
+
+Sobre frequência, sou honesto: isto é um projeto solo, tocado no tempo livre.
+Pode haver semanas de vários posts e pode haver silêncio. O compromisso é com a
+qualidade da nota, não com o calendário.
+
+Minha expectativa mais prática é usar o curso como laboratório para o próprio
+epistemix. Conforme as aulas avançarem, quero converter os aprendizados em
+mudanças concretas no repositório: instruções melhores para agentes, specs menos
+ambíguas, *feedback loops* que falhem cedo, critérios mais claros para delegar e
+uma forma mais disciplinada de paralelizar Claude Code, Codex e Copilot. No
+limite, a graça é esta: estudar um curso sobre engenharia com agentes enquanto o
+hub onde registro esse estudo fica mais preparado para ser desenvolvido com
+agentes.
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [AI Hero, de Matt Pocock](https://www.aihero.dev/)
+- [Matt Pocock anunciando a versão 2 do curso](https://x.com/mattpocockuk/status/2056447804537741327)
