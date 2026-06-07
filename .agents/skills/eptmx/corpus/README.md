@@ -4,11 +4,12 @@ Esta pasta é o home documentado das amostras reais usadas para calibrar `refere
 
 ## Estado atual
 
-`references/STYLE.md` **v1 já foi destilado** do backup completo do Hashnode — os 40 artigos das
-séries Linux Básico, Visão Geral sobre o Ecossistema Hadoop e Apache Spark (2022) — que vive em
-**`tmp/blog/hashnode_backup/`** no repo, mais o post atual `content/courses/aihero/
-primeiras-impressoes.mdx` (2026). Por isso esta pasta pode estar vazia: o corpus-base mora no
-`tmp/`, não duplicado aqui.
+`references/STYLE.md` **v2 já foi destilado** do backup completo do Hashnode — os 40 artigos
+publicados das séries Linux Básico, Visão Geral sobre o Ecossistema Hadoop e Apache Spark (2022)
+**+ 6 drafts** (FAQ de certificação, log semanal, boas-vindas de série, tutoriais AWS) — que vivem
+no **repo irmão `../hashnode-backup`** (clone git separado, fora do epistemix; ~46 `.md`), mais o
+post atual `content/courses/aihero/primeiras-impressoes.mdx` (2026). Por isso esta pasta fica
+vazia de propósito: o corpus-base mora no repo irmão, não duplicado aqui.
 
 Para re-destilar a voz a qualquer momento, use o comando **`eptmx calibrate`** (playbook em
 `commands/calibrate.md`) — ele sabe onde procurar (backup, posts do repo, exports novos).
@@ -19,7 +20,8 @@ O scraping direto não funciona (`panini.hashnode.dev` está atrás do Cloudflar
 gratuita foi aposentada em 2026-05). O caminho confiável para conteúdo novo:
 
 1. **Exportar / fazer backup no Hashnode** (Dashboard → backup de dados). O backup atual já foi
-   obtido e está em `tmp/blog/hashnode_backup/` como markdown por artigo.
+   obtido e está no repo irmão `../hashnode-backup` como markdown por artigo (`<cuid>.md` e
+   `draft-<id>.md`).
 
 2. **Se vier como JSON**, converta com:
 

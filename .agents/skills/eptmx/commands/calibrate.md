@@ -8,7 +8,7 @@ export do Hashnode, posts novos no repo) ou quando o autor reverter mudanças de
 
 Fontes, em ordem de preferência:
 
-- **Backup do Hashnode**: `tmp/blog/hashnode_backup/` (os 40 artigos de 2022, base da v1).
+- **Backup do Hashnode**: repo irmão `../hashnode-backup` (40 publicados + 6 drafts de 2022, base da v2).
 - **Posts atuais do repo**: `content/**/*.mdx` (a voz moderna; ex.: aihero/primeiras-impressoes).
 - **`corpus/`** da skill, se algum dia for populado.
 - **Export novo do Hashnode**: rode o conversor primeiro — `node scripts/hashnode-to-corpus.mjs

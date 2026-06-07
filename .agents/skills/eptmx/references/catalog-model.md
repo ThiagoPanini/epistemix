@@ -51,14 +51,21 @@ Array. Cada entrada (Zod: `sectionSchema`):
 Zod: `sourceFileSchema`. **snake_case** no arquivo:
 
 ```yaml
-name: "AI Hero"
-external_url: "https://aihero.dev"
+name: "AI Coding for Real Engineers"
+external_url: "https://www.aihero.dev/cohorts/..."
 author: "Matt Pocock"
-description: "Curso sobre construir aplicações de IA em produção."
+description: "Cohort sobre usar agentes de IA para programar software de verdade."
+cover: "_assets/course-background.webp"        # opcional
+author_avatar: "_assets/profile-instrutor.webp" # opcional
 ```
 
-Todos os quatro campos são obrigatórios. O `slug` do Source é o nome do diretório
-(kebab-case), não um campo do arquivo.
+Os quatro primeiros campos são obrigatórios; `cover` e `author_avatar` são opcionais.
+São **caminhos relativos ao diretório do Source** de imagens — a convenção é colocá-las
+numa subpasta **`_assets/`** (ex.: `content/<section>/<source>/_assets/capa.webp`).
+São servidas ao browser pela rota `app/content-assets/[...segments]` (o Next só serve
+`public/` estático). Imagens de **identidade do hub** (ex.: avatar do autor dos posts) NÃO
+vivem aqui — ficam em `public/`. O `slug` do Source é o nome do diretório (kebab-case),
+não um campo do arquivo.
 
 ## Frontmatter do `Post` (`.mdx`) — schema EXATO
 
