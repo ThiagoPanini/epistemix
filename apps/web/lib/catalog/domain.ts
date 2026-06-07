@@ -19,6 +19,8 @@ export interface Source {
   externalUrl: string;
   author: string;
   description: string;
+  cover?: string; // caminho relativo da capa em content/<section>/<source>/
+  authorAvatar?: string; // caminho relativo do avatar do autor, idem
 }
 
 export interface Tag {

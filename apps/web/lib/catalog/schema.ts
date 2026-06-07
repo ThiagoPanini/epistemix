@@ -18,6 +18,10 @@ export const sourceFileSchema = z.object({
   external_url: z.string(),
   author: z.string(),
   description: z.string(),
+  // Imagens opcionais colocadas no diretório do Source e servidas via
+  // app/content-assets/[...segments]. Use caminhos relativos, como _assets/capa.webp.
+  cover: z.string().optional(),
+  author_avatar: z.string().optional(),
 });
 
 export const tagSchema = z.object({

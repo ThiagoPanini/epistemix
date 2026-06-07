@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { sourceAuthorAvatarUrl } from "@/lib/content-assets";
 import { formatDate } from "@/lib/format";
 import type { SitePost, SiteSection, SiteSource, Tag } from "@/lib/site/model";
 import { OpenPlayerButton } from "./open-player-button";
@@ -62,7 +63,11 @@ export function SourceCard({ source }: { source: SiteSource }) {
       <div className="src-body">
         <span className="src-name">{source.name}</span>
         <span className="src-author">
-          <Avatar hue={hueFromText(source.author)} name={source.author} />
+          <Avatar
+            hue={hueFromText(source.author)}
+            name={source.author}
+            src={sourceAuthorAvatarUrl(source)}
+          />
           {source.author}
         </span>
         <span className="src-desc">{source.description}</span>
@@ -104,12 +109,17 @@ export function SourcePageView({
           </span>
           <h1>{source.name}</h1>
           <div className="source-byline">
-            <Avatar hue={hueFromText(source.author)} name={source.author} size={22} />
+            <Avatar
+              hue={hueFromText(source.author)}
+              name={source.author}
+              size={22}
+              src={sourceAuthorAvatarUrl(source)}
+            />
             {source.author}
           </div>
           <p className="src-long">{source.description}</p>
           <a className="ext-link" href={source.externalUrl} rel="noreferrer" target="_blank">
-            <Icon name="external" size={14} /> {source.externalUrl.replace(/^https?:\/\//, "")}
+            <Icon name="external" size={14} /> Link para o Curso
           </a>
         </div>
       </div>

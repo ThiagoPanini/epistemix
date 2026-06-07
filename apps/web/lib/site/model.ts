@@ -40,6 +40,14 @@ export interface SiteModel {
 
 const REPO_URL = "https://github.com/ThiagoPanini/epistemix";
 
+// Autor do hub (single-author). Distinto do criador externo de um Source (ex.: o
+// instrutor de um curso). É quem assina os Posts. O avatar é um asset de identidade
+// servido direto de public/, não colocado junto a um Source específico.
+export const SITE_AUTHOR = {
+  name: "Thiago Panini",
+  avatar: "/images/authors/thiago-panini.jpg",
+};
+
 const PLANNED_SECTIONS: SiteSection[] = [
   {
     slug: "books",

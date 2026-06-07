@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import { getCatalog } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
 import { mdxComponents } from "@/lib/mdx-components";
-import { getReadTime, getSiteModel } from "@/lib/site/model";
+import { getReadTime, getSiteModel, SITE_AUTHOR } from "@/lib/site/model";
 import { slugify } from "@/lib/slug";
 import { AppShell } from "../../../_components/app-shell";
 import { PostToc, type TocHeading } from "../../../_components/post-toc";
@@ -80,16 +81,25 @@ export default async function PostPage({
               ))}
             </div>
             <div className="byline">
-              <Avatar hue={hueFromText(source.author)} name={source.author} size={26} />
+              <Avatar
+                hue={hueFromText(SITE_AUTHOR.name)}
+                name={SITE_AUTHOR.name}
+                size={26}
+                src={SITE_AUTHOR.avatar}
+              />
               <div>
-                <div className="nm">{source.author}</div>
-                <div className="rt">via {source.name}</div>
+                <div className="nm">{SITE_AUTHOR.name}</div>
+                <div className="rt">sobre o curso {source.name}</div>
               </div>
             </div>
           </header>
 
           <div className="prose">
-            <MDXRemote source={post.body} components={mdxComponents} />
+            <MDXRemote
+              components={mdxComponents}
+              options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+              source={post.body}
+            />
           </div>
 
           <Engagement />

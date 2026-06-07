@@ -1,4 +1,6 @@
+import Image from "next/image";
 import type { CSSProperties, SVGProps } from "react";
+import { contentAssetUrl } from "@/lib/content-assets";
 import type { SectionIcon, SiteSource } from "@/lib/site/model";
 
 export type IconName =
@@ -222,7 +224,17 @@ export function Wordmark() {
   return <span className="wordmark">epistemix</span>;
 }
 
-export function Avatar({ name, hue = 256, size }: { name: string; hue?: number; size?: number }) {
+export function Avatar({
+  name,
+  hue = 256,
+  size,
+  src,
+}: {
+  name: string;
+  hue?: number;
+  size?: number;
+  src?: string;
+}) {
   const initials = initialsOf(name);
   const style = {
     background: `linear-gradient(150deg, oklch(0.6 0.16 ${hue}), oklch(0.45 0.14 ${hue + 30}))`,
@@ -231,7 +243,11 @@ export function Avatar({ name, hue = 256, size }: { name: string; hue?: number; 
 
   return (
     <span className="av" style={style}>
-      {initials}
+      {src ? (
+        <Image alt={name} className="av-img" height={size ?? 16} src={src} width={size ?? 16} />
+      ) : (
+        initials
+      )}
     </span>
   );
 }
@@ -241,10 +257,24 @@ export function SourceCover({
   className = "",
   style,
 }: {
-  source: Pick<SiteSource, "name" | "slug">;
+  source: Pick<SiteSource, "name" | "slug" | "sectionSlug" | "cover">;
   className?: string;
   style?: CSSProperties;
 }) {
+  if (source.cover) {
+    return (
+      <div className={`src-cover ${className}`.trim()} style={style}>
+        <Image
+          alt={source.name}
+          className="cover-img"
+          fill
+          sizes="(max-width: 720px) 100vw, 400px"
+          src={contentAssetUrl(source.sectionSlug, source.slug, source.cover)}
+        />
+      </div>
+    );
+  }
+
   const [h1, h2] = coverHues(source.slug);
   const background = `radial-gradient(120% 130% at 18% 12%, oklch(0.55 0.2 ${h1}) 0%, oklch(0.42 0.17 ${h2}) 46%, oklch(0.2 0.08 ${h2}) 100%)`;
 

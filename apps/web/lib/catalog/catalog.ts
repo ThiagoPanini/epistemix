@@ -49,6 +49,8 @@ function loadSources(rootDir: string, section: Section): Source[] {
       externalUrl: raw.external_url,
       author: raw.author,
       description: raw.description,
+      cover: raw.cover,
+      authorAvatar: raw.author_avatar,
     };
   });
 }

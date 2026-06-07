@@ -34,6 +34,8 @@ describe("loadCatalog — sources", () => {
       externalUrl: "https://aihero.dev",
       author: "Matt Pocock",
       description: "Curso sobre construir aplicações de IA em produção.",
+      cover: "cover.webp",
+      authorAvatar: "matt.webp",
     });
   });
 });
