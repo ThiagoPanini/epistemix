@@ -1,13 +1,31 @@
 name: pr-checks
 
 # Portão 2 (ADR-0005) — o GATE REAL antes do merge na main.
+#
+# Dispara no PUSH das branches de trabalho (ADR-0005 nomeia o portão "On PR /
+# push to feature branch"; emenda 2026-06-07). Com o ruleset strict/up-to-date,
+# os contextos web/api/security reportados no SHA satisfazem o PR — inclusive um
+# PR aberto automaticamente, que NÃO dispararia `pull_request` por causa da
+# proteção anti-recursão do GITHUB_TOKEN. Por isso a validação vive no push.
+# PR vindo de fork fica deferido como trip-wire (adicionar `pull_request`
+# guardado quando surgir contribuidor externo).
+#
+# Ao final dos checks (verdes), o job `open-pr` abre um PR para a main se ainda
+# não existir um (ADR-0017: abrir PR é AFK; o merge continua humano).
+#
 # Enxuto por enquanto: lint + typecheck + test + secret scan. Preview-deploy,
 # e2e, coverage gate e bandit/npm-audit entram quando houver código que os
 # justifique.
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches:
+      - "feat/**"
+      - "fix/**"
+      - "chore/**"
+      - "docs/**"
+      - "refactor/**"
+      - "test/**"
 
 permissions:
   contents: read
@@ -64,3 +82,53 @@ jobs:
       - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Ao final dos checks verdes: abre PR para a main se ainda não existir um.
+  # Idempotente — push subsequente reusa o PR existente (no-op). Merge é humano.
+  open-pr:
+    name: open-pr
+    needs: [web, api, security]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Abrir PR para a main se ainda não existir
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          # Já existe PR aberto desta branch para a main?
+          if [ "$(gh pr list --head "$BRANCH" --base main --state open --json number --jq 'length')" -ne 0 ]; then
+            echo "::notice::Já existe PR aberto de $BRANCH para a main — nada a fazer."
+            exit 0
+          fi
+
+          # Há commits novos sobre a main? (evita 'No commits between ...')
+          # Compara com FETCH_HEAD: 'git fetch origin main' sempre o grava,
+          # mesmo quando o checkout não mantém o ref origin/main.
+          git fetch --quiet origin main
+          if [ "$(git rev-list --count FETCH_HEAD..HEAD)" -eq 0 ]; then
+            echo "::notice::$BRANCH não tem commits novos sobre a main — PR não aberto."
+            exit 0
+          fi
+
+          # Título = subject do commit mais recente da branch que NÃO seja um
+          # 'chore(roadmap):' (auto-commit do hook do ADR-0014, que costuma ser
+          # o tip e faria um título ruim). Já em Conventional Commits; vira a
+          # mensagem do squash-merge na main. Fallback: último commit.
+          title="$(git log "FETCH_HEAD..HEAD" --pretty=%s | grep -v '^chore(roadmap):' | head -n1 || true)"
+          [ -z "$title" ] && title="$(git log -1 --pretty=%s)"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "$title" \
+            --body "🤖 PR aberto automaticamente quando os checks do push ficaram verdes (pr-checks → open-pr). A validação do Portão 2 (ADR-0005) já rodou neste push. **Merge continua humano** (ADR-0005 Portão 3 / ADR-0017): revise o diff e mergeie quando quiser. Preencha resumo, riscos e screenshots (se houver UI) antes do merge."
+
+          echo "::notice::PR aberto: $BRANCH → main — $title"

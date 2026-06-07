@@ -143,3 +143,16 @@ Obrigatório no commit-msg hook (Lefthook + `commitlint`). PRs com squash-merge 
 A decisão original listava **"code owner review obrigatória"** na branch protection da `main`. Para um repositório de **dev solo**, isso é auto-bloqueante: o GitHub não permite que o autor aprove o próprio PR, então uma gate de aprovação requerida (`required approvals ≥ 1`) impede qualquer merge sem uma segunda identidade ou bypass de admin a cada merge.
 
 **Reconciliação:** a branch protection passa a exigir `required approvals = 0`. A revisão humana **não é eliminada** — ela é o próprio ato de o operador ler o PR (verde, preparado pelo loop AFK) e clicar merge, exatamente o portão "Revisar e mergear — sempre humano" do [ADR-0017](0017-desenvolvimento-autonomo-afk.md). Uma gate de aprovação separada seria redundante e impossível no fluxo solo. As demais proteções (PR obrigatório, checks verdes, sem force-push, história linear via squash) permanecem como a defesa real. Quando o projeto ganhar uma segunda pessoa revisando, reavaliar para `required approvals ≥ 1` + CODEOWNERS.
+
+### Emenda 2026-06-07 — checks no push + PR automático para a main
+
+A decisão original do Portão 2 já se chamava **"On PR / push to feature branch"**, mas a implementação (`pr-checks.yml`) disparava **só em `pull_request`**, e cada PR era aberto à mão. Duas mudanças fecham essa lacuna e tiram o passo manual:
+
+1. **Checks rodam no `push`** das branches de trabalho (globs `feat|fix|chore|docs|refactor|test/**`), não mais em `pull_request`. Os contextos requeridos (`web`/`api`/`security`) são reportados no SHA; com o ruleset `strict`/up-to-date, isso satisfaz o PR — atualizar a branch re-roda os checks contra o estado efetivamente mergeado.
+2. **PR automático para a main.** Um job `open-pr` (`needs: [web, api, security]`) abre um PR para a `main` **quando os checks ficam verdes**, se ainda não existir um para a branch. É **idempotente**: push seguinte reusa o PR (no-op). PR nasce *ready-for-review*; título = subject do último commit (Conventional Commits), que vira a mensagem do squash-merge.
+
+**Por que a validação precisa viver no `push` (e não no PR):** um PR criado pela Action com o `GITHUB_TOKEN` padrão **não dispara** o evento `pull_request` (proteção anti-recursão do GitHub). Se os checks só rodassem em `pull_request`, o PR automático ficaria sem os checks requeridos e nunca mergeável. Rodando no `push`, os contextos já estão satisfeitos no SHA quando o PR nasce.
+
+**O que esta emenda NÃO muda:** o merge continua **humano** (Portão 3 intacto) — abrir PR é ação AFK ([ADR-0017](0017-desenvolvimento-autonomo-afk.md) passo 3, "até PR verde"), mergear é a borda HITL de saída. Todas as proteções da `main` (PR obrigatório, checks verdes, linear/squash, sem force-push) permanecem.
+
+**Trip-wire:** cobertura de **PR vindo de fork** (contribuidor externo, cujo push não dispara workflow nesta repo) fica deferida — quando surgir o primeiro contribuidor externo, adicionar um trigger `pull_request` guardado para PRs de fork.

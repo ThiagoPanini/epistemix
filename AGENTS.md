@@ -85,7 +85,7 @@ docker compose up -d postgres
 - **TypeScript:** `biome` para format/lint. App Router + RSC sempre que possível. Server Actions para mutations simples; rotas API só quando precisar de webhook ou client externo.
 - **Banco:** toda mudança via migration Alembic. Nunca alterar schema direto. Migrations reversíveis sempre.
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`). PRs pequenos (~300 LOC alvo).
-- **Branches:** `main` protegida. Feature branches casam regex `^(feat|fix|chore|docs|refactor|test)/.+$`. Scope recomendado: nome do boundary (`feat/catalog-...`, `fix/engagement-...`). Ver [ADR-0005](docs/adr/0005-deploy-checks-em-tres-portoes.md).
+- **Branches:** `main` protegida. Feature branches casam regex `^(feat|fix|chore|docs|refactor|test)/.+$`. Scope recomendado: nome do boundary (`feat/catalog-...`, `fix/engagement-...`). Push numa branch do padrão roda os checks (Portão 2) e, **quando ficam verdes, abre um PR para a main automaticamente** se ainda não houver um — push seguinte reusa o PR (no-op). Merge continua humano. Ver [ADR-0005](docs/adr/0005-deploy-checks-em-tres-portoes.md) (emenda 2026-06-07).
 - **Pre-push hooks:** Lefthook roda lint + typecheck + tests dos arquivos afetados. `--no-verify` é proibido sem justificativa.
 
 ## O que fazer

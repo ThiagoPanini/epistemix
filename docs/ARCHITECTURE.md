@@ -123,14 +123,16 @@ PORTÃO 1 — Pre-push local (segundos)
     ├── gitleaks protect --staged
     └── commitlint (commit-msg)
 
-PORTÃO 2 — On PR (minutos) ← GATE REAL
+PORTÃO 2 — On push da branch (minutos) ← GATE REAL
 └── GitHub Actions: pr-checks.yml
     ├── lint + typecheck (paralelo)
     ├── test-unit + test-integration + test-e2e
     ├── security-scan (gitleaks + bandit + npm audit)
     ├── coverage-check
-    └── preview-deploy → Coolify
-        └── comenta no PR: pr-<n>.preview.epistemix.dev
+    ├── preview-deploy → Coolify
+    │   └── comenta no PR: pr-<n>.preview.epistemix.dev
+    └── open-pr → abre PR para a main quando os checks ficam verdes
+        (se ainda não existir; idempotente. Merge continua humano)
 
 PORTÃO 3 — On merge to main (deploy)
 └── GitHub Actions: deploy.yml
