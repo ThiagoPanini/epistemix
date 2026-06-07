@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { SiteModel } from "@/lib/site/model";
 import { CommandPalette } from "./command-palette";
 import { PresentationPlayer } from "./presentation-player";
@@ -11,14 +12,6 @@ import { Aurora } from "./surfaces";
 export function HomeLanding({ model }: { model: SiteModel }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const fireToast = useCallback((message: string) => {
-    setToast(message);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2800);
-  }, []);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -28,58 +21,66 @@ export function HomeLanding({ model }: { model: SiteModel }) {
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      if (toastTimer.current) clearTimeout(toastTimer.current);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [playerOpen]);
-
-  function onEntrar() {
-    fireToast("Entrar chega na Fase 2 — por ora, tudo é público e read-only.");
-  }
 
   return (
     <>
       <main className="home">
         <Aurora />
         <nav className="home-nav">
-          <BrandMark />
-          <Wordmark />
+          <div className="home-brand">
+            <BrandMark />
+            <span className="home-brand-copy">
+              <Wordmark />
+              <span className="home-byline">by Thiago Panini</span>
+            </span>
+          </div>
           <div className="home-nav-spacer" />
-          <button className="btn btn-ghost" onClick={() => setPaletteOpen(true)} type="button">
-            <Icon name="search" size={14} /> Buscar <span className="kbd">⌘K</span>
-          </button>
-          <button
-            className="btn btn-ghost"
-            onClick={onEntrar}
-            title="Em breve — Fase 2"
-            type="button"
+          <a
+            className="btn btn-ghost repo-btn"
+            href={model.repoUrl}
+            rel="noreferrer"
+            target="_blank"
           >
-            <Icon name="lock" size={14} /> Entrar
-          </button>
+            <Icon name="github" size={14} />
+            <span className="repo-label">ThiagoPanini/epistemix</span>
+          </a>
         </nav>
 
+        <div aria-hidden="true" className="home-figure">
+          <Image
+            alt=""
+            className="home-figure-img"
+            fill
+            priority
+            sizes="100vw"
+            src="/images/greek-thinking-v2.png"
+          />
+          <div className="fig-tint" />
+          <div className="fig-fade" />
+        </div>
+
         <section className="home-stage">
-          <div className="home-badge">
-            <span className="pulse" />
-            Hub pessoal de aprendizado · open source
-          </div>
-          <h1>
-            Aprender em
-            <br />
-            <span className="grad">público.</span>
-          </h1>
-          <p className="tagline">
-            Cursos, livros, certificações e ideias — com minhas notas, código e o raciocínio por
-            trás.
-          </p>
-          <div className="home-cta">
-            <Link className="btn btn-primary" href="/courses">
-              Explorar Courses <Icon name="arrowRight" size={15} />
-            </Link>
-            <button className="btn btn-ghost" onClick={onEntrar} type="button">
-              Entrar
-            </button>
+          <div className="home-copy">
+            <div className="home-badge">
+              <span className="pulse" />
+              Hub pessoal de aprendizado · open source
+            </div>
+            <h1>
+              Conhecimento
+              <br />
+              <span className="grad">compartilhado.</span>
+            </h1>
+            <p className="tagline">
+              Uma jornada pessoal de aprendizado, percepções e tutoriais criados para uso da
+              comunidade.
+            </p>
+            <div className="home-cta">
+              <Link className="btn btn-primary" href="/courses">
+                Explorar Conteúdos <Icon name="arrowRight" size={15} />
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -100,12 +101,6 @@ export function HomeLanding({ model }: { model: SiteModel }) {
         />
       )}
       {playerOpen && <PresentationPlayer onExit={() => setPlayerOpen(false)} />}
-      {toast && (
-        <div className="toast">
-          <Icon name="lock" size={14} />
-          {toast}
-        </div>
-      )}
     </>
   );
 }

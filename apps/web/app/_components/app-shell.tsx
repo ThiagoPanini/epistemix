@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { SiteModel } from "@/lib/site/model";
 import { CommandPalette } from "./command-palette";
 import { PresentationPlayer } from "./presentation-player";
@@ -28,18 +28,6 @@ export function AppShell({
   const [drawer, setDrawer] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const fireToast = useCallback((message: string) => {
-    setToast(message);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2800);
-  }, []);
-
-  const onEntrar = useCallback(() => {
-    fireToast("Entrar chega na Fase 2 — por ora, tudo é público e read-only.");
-  }, [fireToast]);
 
   const openPlayer = useCallback(() => setPlayerOpen(true), []);
 
@@ -60,7 +48,6 @@ export function AppShell({
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("epx:open-player", onOpenPlayer);
-      if (toastTimer.current) clearTimeout(toastTimer.current);
     };
   }, [playerOpen]);
 
@@ -80,12 +67,7 @@ export function AppShell({
           onNavigate={() => setDrawer(false)}
         />
         <div className="main">
-          <Header
-            crumbs={crumbs}
-            onEntrar={onEntrar}
-            onMenu={() => setDrawer(true)}
-            onSearch={() => setPaletteOpen(true)}
-          />
+          <Header crumbs={crumbs} onMenu={() => setDrawer(true)} repoUrl={model.repoUrl} />
           <main className="content">
             {children}
             {showFooter && <FooterMin model={model} />}
@@ -101,7 +83,6 @@ export function AppShell({
         />
       )}
       {playerOpen && <PresentationPlayer onExit={() => setPlayerOpen(false)} />}
-      <Toast message={toast} />
     </>
   );
 }
@@ -176,14 +157,12 @@ function Sidebar({
 
 function Header({
   crumbs,
-  onEntrar,
   onMenu,
-  onSearch,
+  repoUrl,
 }: {
   crumbs: Breadcrumb[];
-  onEntrar: () => void;
   onMenu: () => void;
-  onSearch: () => void;
+  repoUrl: string;
 }) {
   return (
     <header className="header">
@@ -207,20 +186,10 @@ function Header({
         ))}
       </div>
       <div className="header-spacer" />
-      <button aria-label="Buscar" className="search-trigger" onClick={onSearch} type="button">
-        <Icon name="search" size={15} />
-        <span className="st-label">Buscar...</span>
-        <span className="kbd">⌘K</span>
-      </button>
-      <button
-        className="btn btn-ghost"
-        onClick={onEntrar}
-        title="Em breve — autenticação chega na Fase 2"
-        type="button"
-      >
-        <Icon name="lock" size={14} />
-        Entrar
-      </button>
+      <a className="btn btn-ghost repo-btn" href={repoUrl} rel="noreferrer" target="_blank">
+        <Icon name="github" size={14} />
+        <span className="repo-label">ThiagoPanini/epistemix</span>
+      </a>
     </header>
   );
 }
@@ -237,16 +206,5 @@ function FooterMin({ model }: { model: SiteModel }) {
       <span>© 2026 epistemix</span>
       <span className="footer-phase">Fase 1 · read-only</span>
     </footer>
-  );
-}
-
-function Toast({ message }: { message: string | null }) {
-  if (!message) return null;
-
-  return (
-    <div className="toast">
-      <Icon name="lock" size={14} />
-      {message}
-    </div>
   );
 }
