@@ -32,7 +32,8 @@ WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
-    HOSTNAME=0.0.0.0
+    HOSTNAME=0.0.0.0 \
+    EPISTEMIX_CONTENT_DIR=/app/content
 # curl é exigido pelo healthcheck do Coolify (Portão 3) — roda o check DENTRO
 # do container; a imagem alpine não traz curl/wget. Ver runbook 0003.
 RUN apk add --no-cache curl
@@ -40,6 +41,10 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 COPY --from=build /app/public ./public
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+# content/ contém imagens de Source (capa, avatar) servidas em runtime pelo
+# route handler app/content-assets/[...segments]/route.ts. Sem esta cópia,
+# o handler retorna 404 em produção (a build stage descarta o FS do container).
+COPY --from=build --chown=nextjs:nodejs /app/content ./content
 USER nextjs
 EXPOSE 3000
 CMD ["node", "server.js"]
