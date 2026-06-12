@@ -11,9 +11,9 @@ Os MCP servers de Hostinger (VPS), Coolify e Cloudflare foram configurados (guid
 
 Isso cria uma capacidade nova e perigosa ao mesmo tempo: o agente agora consegue **tocar produção e infra** — fazer deploy, mudar DNS, mexer no firewall que fecha a origem, destruir ou recriar a VM. Sem uma política explícita, "mais autonomia" vira "mais blast radius". Os documentos embutidos nas sessões de agente (AGENTS.md, CONTEXT.md, ADRs) não diziam, até este ADR, **o que um agente pode tocar sozinho e o que precisa parar e chamar o humano**.
 
-Em paralelo, o operador quer adotar o fluxo **AFK (Away From Keyboard)** descrito por Matt Pocock para o desenvolvimento de features: o trabalho se divide em tarefas **HITL** (*human in the loop* — exigem julgamento humano) e **AFK** (o agente implementa sozinho). O bom desenho é **HITL nas bordas, AFK no meio**: o humano alinha o que construir (borda de entrada), o agente implementa sem supervisão (meio), o humano revisa e mergeia (borda de saída).
+Em paralelo, o operador quer adotar o fluxo **AFK (Away From Keyboard)** descrito por Matt Pocock para o desenvolvimento de features: o trabalho se divide em tarefas **HITL** (*human in the loop* — exigem julgamento humano) e **AFK** (o agente implementa sozinho). O bom desenho é **HITL nas bordas, AFK no meio**: o humano alinha o que construir (borda de entrada), o agente implementa sem supervisão (meio) e a branch protection decide se o PR verde pode entrar.
 
-O [ADR-0014](0014-roadmap-como-source-skill-solo-dev-assistant.md) **já encoda o eixo certo** — "agente livre no reversível, humano gated no irreversível (merge, segredos, produção)". O que falta é tornar esse eixo **operacional** para as duas superfícies novas (ops via MCP e feature-dev) e escrever isso onde o agente lê (AGENTS.md).
+O [ADR-0014](0014-roadmap-como-source-skill-solo-dev-assistant.md) **já encoda o eixo certo** — "agente livre no reversível, humano gated no irreversível". Este ADR torna o eixo **operacional** para as duas superfícies novas (ops via MCP e feature-dev) e escreve isso onde o agente lê (AGENTS.md). A partir da emenda de 2026-06-12, merge protegido de PR verde deixa de ser classificado como irreversível manual: o risco é delegado aos portões técnicos da `main`.
 
 ## Decisão
 
@@ -34,7 +34,7 @@ Classifique **pelo efeito da operação, não decorando a lista de tools** (os c
 Regras de borda:
 
 - **Segredos (🔴) seguem o protocolo de operação sensível:** o agente faz toda a parte sem segredo, **documenta o comando** que toca o segredo, e entrega para o operador aplicar — não trava a sessão nem tenta forçar (consistente com a prática registrada do operador).
-- **O caminho normal para produção continua sendo `merge → deploy` ([ADR-0005](0005-deploy-checks-em-tres-portoes.md) portão 3), gated por merge humano.** Um `redeploy`/`restart` manual via Coolify MCP é ação de **ops** (recuperação, aplicar env var), reversível e com rollback por health-check — por isso 🟡, não 🔴.
+- **O caminho normal para produção continua sendo `merge → deploy` ([ADR-0005](0005-deploy-checks-em-tres-portoes.md) portão 3), gated pela branch protection.** Um `redeploy`/`restart` manual via Coolify MCP é ação de **ops** (recuperação, aplicar env var), reversível e com rollback por health-check — por isso 🟡, não 🔴.
 - **Na dúvida, 🔴.** É sempre seguro o agente perguntar; não é seguro o agente adivinhar para baixo.
 
 ### 2. Autonomia em feature-dev — o fluxo AFK
@@ -47,8 +47,8 @@ Pipeline — **HITL nas bordas, AFK no meio**:
 
 1. **🔴 HITL — alinhar (borda de entrada).** O operador alinha o *que* construir com o agente via `grill-me`/`grill-with-docs`, resolvendo ambiguidade. Julgamento mora aqui.
 2. **🟡 Handoff — PRD-lite.** O agente destila o alinhamento num spec curto em `docs/specs/NNNN-<feature>.md`: objetivo, critério de aceite, e a **lista de vertical slices**. Reversível → o agente cria sozinho. Ver §5.
-3. **🟢/🟡 AFK — implementar (meio).** Para cada slice, o agente trabalha **sem supervisão** num **git worktree** (§3): implementa a fatia ponta-a-ponta com TDD, roda os feedback loops (testes, typecheck, lint) até **PR verde** (CI passando). Pode encadear slices consecutivas como PRs separados. **Não mergeia.**
-4. **🔴 HITL — revisar e mergear (borda de saída).** O operador revisa o diff, confere o resultado e mergeia. Merge permanece humano ([ADR-0005](0005-deploy-checks-em-tres-portoes.md) intacto). Merge na `main` dispara deploy.
+3. **🟢/🟡 AFK — implementar (meio).** Para cada slice, o agente trabalha **sem supervisão** num **git worktree** (§3): implementa a fatia ponta-a-ponta com TDD, roda os feedback loops (testes, typecheck, lint) até **PR verde** (CI passando). Pode encadear slices consecutivas como PRs separados.
+4. **🟡 AFK — merge protegido.** Com PR verde, branch atualizada, sem conflito, sem draft e branch protection satisfeita, o agente aplica `gh pr merge <N> --squash`. Se houver conflito ou check pendente/falhando, o agente atualiza a branch, resolve conflito, reroda CI e só mergeia depois de verde. Merge na `main` dispara deploy.
 
 **Pré-condição de execução (trip-wire):** o AFK de feature só roda de verdade quando a **Fase 0 estiver fechada** — sem skeleton (`apps/web`, `apps/api`), CI (`pr-checks.yml`), Lefthook e branch protection, o loop **não tem portão real para se auto-verificar**. Até lá, este fluxo está **documentado mas não executável**.
 
@@ -107,14 +107,14 @@ A skill `to-prd` (a ferramenta de *destino/PRD* do fluxo) foi adotada antecipada
 ## Opções rejeitadas
 
 - **Corte binário puro (reversível/irreversível), como no ADR-0014 cru.** Trata `redeploy` de produção como AFK pleno; subestima blast radius em ops. O semáforo adiciona a faixa 🟡 (faz + registra) exatamente para esse meio.
-- **Merge autônomo pelo agente** (como no AFK "puro" do Matt, onde tarefas AFK mergeiam sozinhas). Rejeitado: contradiz o portão de merge humano do ADR-0005, e em projeto open-source solo o review humano na ponta é barato e vale o seguro. AFK aqui é "implementar até PR verde", não "mergear".
+- **Merge autônomo sem branch protection.** Rejeitado: entraria na `main` sem portão real. O modelo aceito é outro: squash-merge autônomo apenas quando a branch protection já validou CI, linearidade e PR obrigatório.
 - **Construir o Ralph loop / `/to-issues` agora.** Sem Fase 0 fechada não há portão para o loop se verificar; ADR-0014 manda esperar a dor. Deferido com trip-wire.
 - **PRD-lite como issue do GitHub.** Não é versionado nem cross-harness; o operador raramente cria issue manual. `docs/specs/` vence.
 - **Não escrever política de MCP e confiar no bom senso do agente.** É exatamente o que cria blast radius silencioso. A política explícita é o ponto.
 
 ## O que este ADR NÃO muda
 
-- Portões de deploy ([ADR-0005](0005-deploy-checks-em-tres-portoes.md)): merge humano, três portões, CI como gate real — intactos.
+- Portões de deploy ([ADR-0005](0005-deploy-checks-em-tres-portoes.md)): três portões, CI como gate real e branch protection como autoridade de merge — intactos.
 - Substrato de planejamento ([ADR-0014](0014-roadmap-como-source-skill-solo-dev-assistant.md)): ROADMAP single source, intent-loop, hook de auto-commit — intactos. Este ADR adiciona uma superfície (feature-dev/specs) ao mesmo eixo de autonomia.
 - Boundaries de domínio ([ADR-0001](0001-monorepo-and-boundaries.md)) e arquitetura hexagonal ([ADR-0004](0004-hexagonal-pragmatica.md)) — intactos.
 - A escolha de infra ([ADR-0003](0003-infra-hostinger-vps-coolify.md)/[ADR-0006](0006-cloudflare-na-frente-da-vps.md)/[ADR-0016](0016-vps-agnostica-multi-projeto.md)) — intacta; este ADR governa *como* os agentes a operam, não *o que* ela é.

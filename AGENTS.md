@@ -85,7 +85,7 @@ docker compose up -d postgres
 - **TypeScript:** `biome` para format/lint. App Router + RSC sempre que possível. Server Actions para mutations simples; rotas API só quando precisar de webhook ou client externo.
 - **Banco:** toda mudança via migration Alembic. Nunca alterar schema direto. Migrations reversíveis sempre.
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`). PRs pequenos (~300 LOC alvo).
-- **Branches:** `main` protegida. Feature branches casam regex `^(feat|fix|chore|docs|refactor|test)/.+$`. Scope recomendado: nome do boundary (`feat/catalog-...`, `fix/engagement-...`). Push numa branch do padrão roda os checks (Portão 2) e, **quando ficam verdes, abre um PR para a main automaticamente** se ainda não houver um — push seguinte reusa o PR (no-op). Merge continua humano. Ver [ADR-0005](docs/adr/0005-deploy-checks-em-tres-portoes.md) (emenda 2026-06-07).
+- **Branches:** `main` protegida. Feature branches casam regex `^(feat|fix|chore|docs|refactor|test)/.+$`. Scope recomendado: nome do boundary (`feat/catalog-...`, `fix/engagement-...`). Push numa branch do padrão roda os checks (Portão 2) e, **quando ficam verdes, abre um PR para a main automaticamente** se ainda não houver um — push seguinte reusa o PR (no-op). Agente pode aplicar `gh pr merge <N> --squash` em PR próprio quando todos os checks requeridos estiverem verdes e não houver conflito; conflito exige atualizar a branch, rerodar CI e só então mergear. Ver [ADR-0005](docs/adr/0005-deploy-checks-em-tres-portoes.md) (emenda 2026-06-12).
 - **Pre-push hooks:** Lefthook roda lint + typecheck + tests dos arquivos afetados. `--no-verify` é proibido sem justificativa.
 
 ## O que fazer
@@ -104,7 +104,7 @@ docker compose up -d postgres
 - Não acoplar lógica entre boundaries (`catalog`, `identity`, `engagement`, `narration`, `shared`, `platform`). Comunicação via interfaces explícitas, não imports diretos cross-domain.
 - Não usar `--no-verify`, `--force` ou desabilitar CI para fechar PR. Falha no hook = consertar a causa.
 - Não commitar segredos. Use `.env.example` / `.mcp.json.example`. CI roda `gitleaks` em todo PR. O `.mcp.json` real é gitignored.
-- Não executar operação 🔴 de MCP (DNS, firewall, destruir/recriar VM, restore, senhas, deletar recursos, `stop_all_apps`, drop de database) nem mergear na `main` sem o operador — proponha e pare. Ver [ADR-0017](docs/adr/0017-desenvolvimento-autonomo-afk.md).
+- Não executar operação 🔴 de MCP (DNS, firewall, destruir/recriar VM, restore, senhas, deletar recursos, `stop_all_apps`, drop de database) sem o operador — proponha e pare. Merge na `main` é exceção operacional: permitido para PR com CI verde, squash-merge, sem conflito, e com branch protegida aprovando o merge. Ver [ADR-0017](docs/adr/0017-desenvolvimento-autonomo-afk.md).
 - Não criar dependência paga adicional sem registrar ADR justificando.
 
 ## Skills disponíveis para uso (Claude Code)
@@ -145,14 +145,14 @@ Classifique **pelo efeito**, não decorando a lista de tools:
 
 - 🟢 **Verde — faz sempre, sozinho.** Leitura e diagnóstico: `get*`/`list*`/`*logs*`/`*metrics*`/`diagnose_*`/`search`. Sem efeito colateral.
 - 🟡 **Amarelo — faz sozinho e registra em [docs/ai-ops/](docs/ai-ops/).** Efeito reversível: criar recurso, snapshot, env var não-secreta, `deploy`/`redeploy`/`restart` de app existente, purge de cache.
-- 🔴 **Vermelho — propõe e espera o operador.** Irreversível/destrutivo/produção: DNS/nameservers, firewall, recriar/destruir/comprar VM, restaurar backup por cima, senhas, `delete*` de recurso, `stop_all_apps`, drop de database, **segredos** e **merge na `main`**. Para segredos, faça a parte sem segredo e **documente o comando** para o operador aplicar — não trave a sessão.
+- 🔴 **Vermelho — propõe e espera o operador.** Irreversível/destrutivo/produção: DNS/nameservers, firewall, recriar/destruir/comprar VM, restaurar backup por cima, senhas, `delete*` de recurso, `stop_all_apps`, drop de database e **segredos**. Para segredos, faça a parte sem segredo e **documente o comando** para o operador aplicar — não trave a sessão. Merge na `main` saiu desta faixa: é permitido só via PR protegido, CI verde e squash-merge.
 
 ### Feature-dev — fluxo AFK
 
 1. 🔴 **Alinhar** (`grill-me`/`grill-with-docs`) — o operador define o *o quê*.
 2. 🟡 **PRD-lite** em `docs/specs/NNNN-<feature>.md` — objetivo + critério de aceite + **vertical slices** (fatias que atravessam schema→API→UI→testes→e2e). Ver [docs/specs/](docs/specs/).
-3. 🟢 **Implementar** — cada slice num **git worktree** dedicado, com TDD, até **PR verde**. Pode encadear slices como PRs separados. **Não mergeia.**
-4. 🔴 **Revisar e mergear** — sempre humano (ver [ADR-0005](docs/adr/0005-deploy-checks-em-tres-portoes.md)).
+3. 🟢 **Implementar** — cada slice num **git worktree** dedicado, com TDD, até **PR verde**. Pode encadear slices como PRs separados.
+4. 🟡 **Mergear** — se CI estiver verde, branch atualizada, sem conflito e o GitHub permitir, o agente aplica squash-merge. Se houver conflito, atualiza a branch, reroda CI e só mergeia verde.
 
 > ⚠️ O AFK de feature só é executável quando a **Fase 0 fechar** (skeleton + CI + Lefthook + branch protection) — antes disso não há portão real para o loop se auto-verificar.
 
