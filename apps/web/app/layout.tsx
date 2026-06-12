@@ -1,10 +1,32 @@
 import type { Metadata } from "next";
 import { Archivo, Source_Serif_4, Spline_Sans_Mono } from "next/font/google";
+import { SITE_NAME, SITE_TWITTER, SITE_URL } from "@/lib/site/meta";
 import "./globals.css";
 
+const DESCRIPTION =
+  "Hub pessoal de aprendizado — posts, cursos, livros, certificações e palestras.";
+
 export const metadata: Metadata = {
-  title: "epistemix",
-  description: "Hub pessoal de aprendizado — posts, cursos, livros, certificações e palestras.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: DESCRIPTION,
+  openGraph: {
+    siteName: SITE_NAME,
+    locale: "pt_BR",
+    type: "website",
+    title: SITE_NAME,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: SITE_TWITTER,
+    title: SITE_NAME,
+    description: DESCRIPTION,
+  },
+  robots: { index: true, follow: true },
 };
 
 const archivo = Archivo({

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -6,12 +7,37 @@ import remarkGfm from "remark-gfm";
 import { getCatalog } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
 import { mdxComponents } from "@/lib/mdx-components";
+import { articleJsonLd, buildPostUrl } from "@/lib/site/meta";
 import { getReadTime, getSiteModel } from "@/lib/site/model";
 import { slugify } from "@/lib/slug";
 import { AppShell } from "../../../_components/app-shell";
 import { TocSpy } from "../../../_components/toc-spy";
 
 export const dynamicParams = false;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ post: string; section: string; source: string }>;
+}): Promise<Metadata> {
+  const { section: sectionSlug, source: sourceSlug, post: postSlug } = await params;
+  const post = getCatalog().getPost(sectionSlug, sourceSlug, postSlug);
+  if (!post) return {};
+  const url = buildPostUrl(sectionSlug, sourceSlug, postSlug);
+  return {
+    title: post.title,
+    description: post.summary || undefined,
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.summary || undefined,
+      url,
+      publishedTime: post.date,
+      authors: ["Thiago Panini"],
+    },
+    twitter: { title: post.title, description: post.summary || undefined },
+  };
+}
 
 export function generateStaticParams() {
   const catalog = getCatalog();
@@ -46,8 +72,17 @@ export default async function PostPage({
   const tagLabels = new Map(model.tags.map((t) => [t.slug, t.label]));
   const headings = extractHeadings(post.body);
 
+  const jsonLd = articleJsonLd({
+    title: post.title,
+    summary: post.summary,
+    date: post.date,
+    url: buildPostUrl(sectionSlug, sourceSlug, postSlug),
+  });
+
   return (
     <AppShell>
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is safe structured data generated server-side */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <div className="wrap">
         <div className="read-grid">
           <article>

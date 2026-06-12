@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -5,12 +6,48 @@ import remarkGfm from "remark-gfm";
 import { getCatalog } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
 import { mdxComponents } from "@/lib/mdx-components";
+import { articleJsonLd, buildPostUrl } from "@/lib/site/meta";
 import { getReadTime, getSiteModel } from "@/lib/site/model";
 import { slugify } from "@/lib/slug";
 import { AppShell } from "../../_components/app-shell";
 import { SourceView } from "../../_components/source-view";
 
 export const dynamicParams = false;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ section: string; source: string }>;
+}): Promise<Metadata> {
+  const { section: sectionSlug, source: sourceSlug } = await params;
+  const catalog = getCatalog();
+  const model = getSiteModel();
+  const section = model.sections.find((s) => s.slug === sectionSlug);
+  if (!section) return {};
+
+  if (section.kind === "with_sources") {
+    const source = catalog.getSource(sectionSlug, sourceSlug);
+    if (!source) return {};
+    return {
+      title: source.name,
+      description: source.description,
+      openGraph: { title: source.name, description: source.description },
+    };
+  }
+
+  const post = catalog.getDirectPost(sectionSlug, sourceSlug);
+  if (!post) return {};
+  return {
+    title: post.title,
+    description: post.summary || undefined,
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.summary || undefined,
+      publishedTime: post.date,
+    },
+  };
+}
 
 export function generateStaticParams() {
   const catalog = getCatalog();
@@ -67,9 +104,17 @@ export default async function SourceOrDirectPostPage({
   const next = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
   const tagLabels = new Map(model.tags.map((t) => [t.slug, t.label]));
   const headings = extractHeadings(post.body);
+  const jsonLd = articleJsonLd({
+    title: post.title,
+    summary: post.summary,
+    date: post.date,
+    url: buildPostUrl(sectionSlug, "", sourceSlug),
+  });
 
   return (
     <AppShell>
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is safe structured data generated server-side */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <div className="wrap">
         <div className="read-grid">
           <article>
