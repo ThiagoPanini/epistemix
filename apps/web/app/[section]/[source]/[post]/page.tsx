@@ -12,6 +12,7 @@ import { getReadTime, getSiteModel } from "@/lib/site/model";
 import { slugify } from "@/lib/slug";
 import { AppShell } from "../../../_components/app-shell";
 import { TocSpy } from "../../../_components/toc-spy";
+import { ViewTracker } from "../../../_components/view-tracker";
 
 export const dynamicParams = false;
 
@@ -114,7 +115,7 @@ export default async function PostPage({
               <button type="button" className="up-btn">
                 ▲ Upvote
               </button>
-              <span className="eng-stat">0 leituras</span>
+              <ViewTracker artifactId={`${sectionSlug}/${sourceSlug}/${postSlug}`} />
               <span className="eng-stat">0 comentários</span>
             </div>
 
