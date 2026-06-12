@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Archivo, Source_Serif_4, Spline_Sans_Mono } from "next/font/google";
+import { getCatalog } from "@/lib/catalog";
 import { SITE_NAME, SITE_TWITTER, SITE_URL } from "@/lib/site/meta";
+import { getSiteModel } from "@/lib/site/model";
+import { buildPaletteItems } from "@/lib/site/palette";
+import { PaletteItemsProvider } from "./providers";
 import "./globals.css";
 
 const DESCRIPTION =
@@ -52,12 +56,18 @@ const splineSansMono = Spline_Sans_Mono({
 });
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const model = getSiteModel();
+  const catalog = getCatalog();
+  const paletteItems = buildPaletteItems(model, catalog);
+
   return (
     <html
       lang="pt-BR"
       className={`${archivo.variable} ${sourceSerif4.variable} ${splineSansMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <PaletteItemsProvider items={paletteItems}>{children}</PaletteItemsProvider>
+      </body>
     </html>
   );
 }
