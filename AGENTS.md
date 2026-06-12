@@ -149,8 +149,15 @@ Princípio raiz: **reversível e de baixo impacto → o agente faz sozinho; irre
 Classifique **pelo efeito**, não decorando a lista de tools:
 
 - 🟢 **Verde — faz sempre, sozinho.** Leitura e diagnóstico: `get*`/`list*`/`*logs*`/`*metrics*`/`diagnose_*`/`search`. Sem efeito colateral.
-- 🟡 **Amarelo — faz sozinho e registra em [docs/ai-ops/](docs/ai-ops/).** Efeito reversível: criar recurso, snapshot, env var não-secreta, `deploy`/`redeploy`/`restart` de app existente, purge de cache, **segredo gerável por máquina** (senha de DB, secret de sessão, token R2/API criado via API) — gera e seta via MCP, nunca commita (emenda 2026-06-12 ao [ADR-0017](docs/adr/0017-desenvolvimento-autonomo-afk.md)).
-- 🔴 **Vermelho — propõe e espera o operador.** Irreversível/destrutivo/produção: DNS/nameservers, firewall, recriar/destruir/comprar VM, restaurar backup por cima, senhas (root/panel), `delete*` de recurso, `stop_all_apps`, drop de database, **segredo emitido por terceiro fora de MCP** (`client_secret` de OAuth, API key paga). Para esses segredos, faça a parte sem o segredo e **documente o comando** para o operador aplicar — não trave a sessão.
+- 🟡 **Amarelo — faz sozinho e registra em [docs/ai-ops/](docs/ai-ops/).** Efeito reversível ou rotina de deploy:
+  - Criar recurso no Coolify (banco Postgres/Redis, app, serviço) e provisionar com `instant_deploy`
+  - Snapshot / backup pontual
+  - Env vars de runtime (incluindo **segredos geráveis por máquina**: senha de DB, session secret, token de API gerado via MCP) — gera, seta via MCP e registra no ai-ops; nunca commita
+  - `deploy`/`redeploy`/`restart` de app ou serviço existente
+  - Rodar `alembic upgrade head` (migration para frente) após deploy; emitir `alembic downgrade` apenas uma revisão atrás se reverter PR ainda fresco
+  - Purge de cache Cloudflare
+  - Atualizar `post_deployment_command` de uma app para automação de migrations
+- 🔴 **Vermelho — propõe e espera o operador.** Irreversível/destrutivo: DNS/nameservers, regras de firewall, recriar/destruir/comprar VM, restaurar backup por cima de produção, senhas root/panel, `delete*` de recurso persistente, `stop_all_apps`, `alembic downgrade` para revisão anterior ao deploy atual (possível perda de dados), **segredo emitido por terceiro** (`client_secret` OAuth, API key paga externa). Para segredos de terceiro: faça a parte sem o segredo e **documente o comando exato** para o operador aplicar — não trave a sessão.
 
 ### Feature-dev — fluxo AFK
 

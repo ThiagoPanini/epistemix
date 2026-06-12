@@ -20,9 +20,13 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 COPY src ./src
+COPY alembic.ini ./
+COPY alembic ./alembic
 RUN uv sync --frozen --no-dev
 
 ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 8000
-CMD ["uvicorn", "epistemix.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Runs pending migrations before starting the server; container fails fast if
+# DATABASE_URL is missing or DB is unreachable, preventing serving with stale schema.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn epistemix.main:app --host 0.0.0.0 --port 8000"]
