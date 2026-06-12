@@ -1,0 +1,42 @@
+import { betterAuth } from "better-auth";
+import { Pool } from "pg";
+
+export const auth = betterAuth({
+  database: new Pool({
+    connectionString: process.env.DATABASE_URL,
+  }),
+  secret: process.env.BETTER_AUTH_SECRET,
+  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  emailAndPassword: {
+    enabled: true,
+  },
+  user: {
+    // Matches Alembic migration 20260612160243 (auth_ prefix avoids SQL reserved-word collision)
+    modelName: "auth_user",
+    additionalFields: {
+      username: {
+        type: "string",
+        required: true,
+        unique: true,
+        input: true,
+      },
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "user",
+      },
+    },
+  },
+  session: {
+    modelName: "auth_session",
+  },
+  account: {
+    modelName: "auth_account",
+  },
+  verification: {
+    modelName: "auth_verification",
+  },
+});
+
+export type Session = typeof auth.$Infer.Session;
+export type User = typeof auth.$Infer.Session.user;
