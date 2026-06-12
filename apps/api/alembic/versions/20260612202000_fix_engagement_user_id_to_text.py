@@ -21,17 +21,29 @@ depends_on = None
 
 def upgrade() -> None:
     with op.batch_alter_table("artifact_view") as batch_op:
-        batch_op.alter_column("user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=True)
+        batch_op.alter_column(
+            "user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=True
+        )
     with op.batch_alter_table("artifact_vote") as batch_op:
-        batch_op.alter_column("user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=False)
+        batch_op.alter_column(
+            "user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=False
+        )
     with op.batch_alter_table("artifact_comment") as batch_op:
-        batch_op.alter_column("user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=False)
+        batch_op.alter_column(
+            "user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=False
+        )
 
 
 def downgrade() -> None:
     with op.batch_alter_table("artifact_comment") as batch_op:
-        batch_op.alter_column("user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=False)
+        batch_op.alter_column(
+            "user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=False
+        )
     with op.batch_alter_table("artifact_vote") as batch_op:
-        batch_op.alter_column("user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=False)
+        batch_op.alter_column(
+            "user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=False
+        )
     with op.batch_alter_table("artifact_view") as batch_op:
-        batch_op.alter_column("user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=True)
+        batch_op.alter_column(
+            "user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=True
+        )
