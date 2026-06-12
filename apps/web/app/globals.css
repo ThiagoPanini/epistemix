@@ -1802,6 +1802,56 @@ svg.graph {
   cursor: default;
 }
 
+.auth-social {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.auth-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--sf);
+  border: 1px solid var(--ln);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  padding: 10px;
+  cursor: pointer;
+  transition: border-color 140ms;
+}
+
+.auth-social-btn:hover:not(:disabled) {
+  border-color: var(--lns);
+}
+
+.auth-social-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--fnt);
+  letter-spacing: 0.08em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--ln);
+}
+
 /* ============================================================
    AUTHOR PROFILE PAGE
    ============================================================ */

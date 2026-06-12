@@ -10,6 +10,30 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  socialProviders: {
+    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+      ? {
+          github: {
+            clientId: process.env.GITHUB_CLIENT_ID,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+            mapProfileToUser: (profile: { login: string }) => ({
+              username: profile.login,
+            }),
+          },
+        }
+      : {}),
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? {
+          google: {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            mapProfileToUser: (profile: { email: string }) => ({
+              username: profile.email.split("@")[0],
+            }),
+          },
+        }
+      : {}),
+  },
   user: {
     // Matches Alembic migration 20260612160243 (auth_ prefix avoids SQL reserved-word collision)
     modelName: "auth_user",
