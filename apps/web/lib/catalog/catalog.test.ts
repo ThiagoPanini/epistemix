@@ -8,7 +8,12 @@ describe("loadCatalog — sections", () => {
   it("reads the declared sections ordered by `order`", () => {
     const catalog = loadCatalog(fixture("valid"));
 
-    expect(catalog.getSections().map((s) => s.slug)).toEqual(["courses", "blog"]);
+    expect(catalog.getSections().map((s) => s.slug)).toEqual([
+      "courses",
+      "blog",
+      "books",
+      "certifications",
+    ]);
 
     const courses = catalog.getSection("courses");
     expect(courses).toMatchObject({
@@ -109,6 +114,26 @@ describe("loadCatalog — direct posts", () => {
     const catalog = loadCatalog(fixture("valid"));
 
     expect(catalog.getDirectPost("blog", "nao-existe")).toBeUndefined();
+  });
+});
+
+describe("loadCatalog — books and certifications (with_sources, invariante 16)", () => {
+  it("loads a book Source with no posts (Source sem Post é válido)", () => {
+    const catalog = loadCatalog(fixture("valid"));
+
+    const sources = catalog.getSources("books");
+    expect(sources.map((s) => s.slug)).toEqual(["ddia"]);
+    expect(sources[0]).toMatchObject({ slug: "ddia", sectionSlug: "books" });
+    expect(catalog.getPosts("books", "ddia")).toEqual([]);
+  });
+
+  it("loads a certification Source with no posts", () => {
+    const catalog = loadCatalog(fixture("valid"));
+
+    const sources = catalog.getSources("certifications");
+    expect(sources.map((s) => s.slug)).toEqual(["aws-saa-c03"]);
+    expect(sources[0]).toMatchObject({ slug: "aws-saa-c03", sectionSlug: "certifications" });
+    expect(catalog.getPosts("certifications", "aws-saa-c03")).toEqual([]);
   });
 });
 

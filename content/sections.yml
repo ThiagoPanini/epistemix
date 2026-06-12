@@ -8,3 +8,13 @@
   kind: direct
   order: 2
   description: "Posts soltos sobre o que estou construindo e aprendendo na prática."
+- slug: books
+  title: Books
+  kind: with_sources
+  order: 3
+  description: "Livros técnicos lidos, com resumos por capítulo e trechos que marquei."
+- slug: certifications
+  title: Certifications
+  kind: with_sources
+  order: 4
+  description: "Certificações em andamento e concluídas, com o caminho de estudo."
