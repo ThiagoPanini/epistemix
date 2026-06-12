@@ -18,6 +18,8 @@ export interface Catalog {
   getSource(sectionSlug: string, sourceSlug: string): Source | undefined;
   getPosts(sectionSlug: string, sourceSlug: string): Post[];
   getPost(sectionSlug: string, sourceSlug: string, postSlug: string): Post | undefined;
+  getDirectPosts(sectionSlug: string): Post[];
+  getDirectPost(sectionSlug: string, postSlug: string): Post | undefined;
   getTags(): Tag[];
 }
 
@@ -35,6 +37,39 @@ function listMdx(path: string): string[] {
   return readdirSync(path, { withFileTypes: true })
     .filter((e) => e.isFile() && e.name.endsWith(".mdx"))
     .map((e) => e.name);
+}
+
+function loadDirectPosts(rootDir: string, section: Section, knownTags: Set<string>): Post[] {
+  if (section.kind !== "direct") return [];
+
+  const dir = join(rootDir, section.slug);
+  let files: string[];
+  try {
+    files = listMdx(dir);
+  } catch {
+    return [];
+  }
+
+  return files.map((file) => {
+    const { data, content } = matter(readFileSync(join(dir, file), "utf8"));
+    const frontmatter = postFrontmatterSchema.parse(data);
+
+    const unknown = frontmatter.tags.filter((t) => !knownTags.has(t));
+    if (unknown.length > 0) {
+      const where = join(section.slug, file);
+      throw new Error(
+        `Tag(s) fora de tags.yml em ${where}: ${unknown.join(", ")} (ver invariante 9 / ADR-0008)`,
+      );
+    }
+
+    return {
+      slug: file.replace(/\.mdx$/, ""),
+      sectionSlug: section.slug,
+      sourceSlug: "",
+      ...frontmatter,
+      body: content,
+    };
+  });
 }
 
 function loadSources(rootDir: string, section: Section): Source[] {
@@ -98,6 +133,7 @@ export function loadCatalog(rootDir: string): Catalog {
 
   const sources = sections.flatMap((section) => loadSources(rootDir, section));
   const posts = sources.flatMap((source) => loadPosts(rootDir, source, knownTags));
+  const directPosts = sections.flatMap((section) => loadDirectPosts(rootDir, section, knownTags));
 
   const publishedIn = (sectionSlug: string, sourceSlug: string) =>
     posts
@@ -105,6 +141,11 @@ export function loadCatalog(rootDir: string): Catalog {
         (p) =>
           p.status === "published" && p.sectionSlug === sectionSlug && p.sourceSlug === sourceSlug,
       )
+      .sort((a, b) => b.date.localeCompare(a.date));
+
+  const publishedDirect = (sectionSlug: string) =>
+    directPosts
+      .filter((p) => p.status === "published" && p.sectionSlug === sectionSlug)
       .sort((a, b) => b.date.localeCompare(a.date));
 
   return {
@@ -116,6 +157,9 @@ export function loadCatalog(rootDir: string): Catalog {
     getPosts: publishedIn,
     getPost: (sectionSlug, sourceSlug, postSlug) =>
       publishedIn(sectionSlug, sourceSlug).find((p) => p.slug === postSlug),
+    getDirectPosts: publishedDirect,
+    getDirectPost: (sectionSlug, postSlug) =>
+      publishedDirect(sectionSlug).find((p) => p.slug === postSlug),
     getTags: () => tags,
   };
 }
