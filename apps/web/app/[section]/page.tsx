@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getCatalog } from "@/lib/catalog";
 import { getAllStaticSectionSlugs, getSiteModel } from "@/lib/site/model";
 import { AppShell } from "../_components/app-shell";
+import { SectionDirectView } from "../_components/section-direct-view";
 import { SectionWithSourcesView } from "../_components/section-view";
 import { WipPage } from "../_components/wip-page";
 
@@ -48,10 +49,15 @@ export default async function SectionPage({ params }: { params: Promise<{ sectio
     );
   }
 
-  // direct sections (blog, talks) — implementado em C2
-  return (
-    <AppShell>
-      <WipPage title={section.title} description={section.description} />
-    </AppShell>
-  );
+  // direct sections (blog, talks)
+  if (section.kind === "direct") {
+    const posts = catalog.getDirectPosts(sectionSlug);
+    return (
+      <AppShell>
+        <SectionDirectView section={section} posts={posts} />
+      </AppShell>
+    );
+  }
+
+  notFound();
 }

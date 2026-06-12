@@ -77,6 +77,41 @@ describe("loadCatalog — posts", () => {
   });
 });
 
+describe("loadCatalog — direct posts", () => {
+  it("lists published direct posts ordered by date desc", () => {
+    const catalog = loadCatalog(fixture("valid"));
+
+    const posts = catalog.getDirectPosts("blog");
+    expect(posts.map((p) => p.slug)).toEqual(["primeiro-post", "segundo-post"]);
+  });
+
+  it("excludes draft direct posts (invariante 6)", () => {
+    const catalog = loadCatalog(fixture("valid"));
+
+    const posts = catalog.getDirectPosts("blog");
+    expect(posts.map((p) => p.slug)).not.toContain("rascunho-blog");
+  });
+
+  it("returns a direct post by slug", () => {
+    const catalog = loadCatalog(fixture("valid"));
+
+    const post = catalog.getDirectPost("blog", "primeiro-post");
+    expect(post).toMatchObject({
+      slug: "primeiro-post",
+      sectionSlug: "blog",
+      sourceSlug: "",
+      title: "Primeiro Post do Blog",
+      status: "published",
+    });
+  });
+
+  it("returns undefined for unknown direct post slug", () => {
+    const catalog = loadCatalog(fixture("valid"));
+
+    expect(catalog.getDirectPost("blog", "nao-existe")).toBeUndefined();
+  });
+});
+
 describe("loadCatalog — build-time validation", () => {
   it("throws when a post uses a tag outside tags.yml (invariante 9)", () => {
     expect(() => loadCatalog(fixture("invalid-tag"))).toThrow(/naoexiste/);
