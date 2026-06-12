@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { CodeBlock } from "@/app/_components/code-block";
 import { slugify } from "./slug";
 
 export const mdxComponents = {
@@ -8,7 +9,7 @@ export const mdxComponents = {
   h3: (props: ComponentPropsWithoutRef<"h3">) => (
     <h3 id={props.id ?? slugify(toText(props.children))} {...props} />
   ),
-  code: (props: ComponentPropsWithoutRef<"code">) => <code {...props} />,
+  pre: (props: ComponentPropsWithoutRef<"pre">) => <CodeBlock {...props} />,
 };
 
 function toText(node: ReactNode): string {

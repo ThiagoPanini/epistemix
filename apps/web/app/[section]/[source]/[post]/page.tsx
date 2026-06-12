@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import rehypePrettyCode from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
 import { getCatalog } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
@@ -8,6 +9,7 @@ import { mdxComponents } from "@/lib/mdx-components";
 import { getReadTime, getSiteModel } from "@/lib/site/model";
 import { slugify } from "@/lib/slug";
 import { AppShell } from "../../../_components/app-shell";
+import { TocSpy } from "../../../_components/toc-spy";
 
 export const dynamicParams = false;
 
@@ -84,7 +86,20 @@ export default async function PostPage({
             <div className="prose">
               <MDXRemote
                 components={mdxComponents}
-                options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+                options={{
+                  mdxOptions: {
+                    remarkPlugins: [remarkGfm],
+                    rehypePlugins: [
+                      [
+                        rehypePrettyCode,
+                        {
+                          theme: { dark: "github-dark-dimmed", light: "github-light" },
+                          keepBackground: false,
+                        },
+                      ],
+                    ],
+                  },
+                }}
                 source={post.body}
               />
             </div>
@@ -156,20 +171,7 @@ export default async function PostPage({
             </div>
           </article>
 
-          {headings.length > 0 && (
-            <aside className="toc">
-              <div className="toc-label">CONTEÚDO</div>
-              {headings.map((h) => (
-                <a
-                  key={h.id}
-                  href={`#${h.id}`}
-                  style={{ paddingLeft: h.level === 3 ? "24px" : "12px" }}
-                >
-                  {h.text}
-                </a>
-              ))}
-            </aside>
-          )}
+          {headings.length > 0 && <TocSpy headings={headings} />}
         </div>
       </div>
     </AppShell>

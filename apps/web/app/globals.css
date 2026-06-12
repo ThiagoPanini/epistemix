@@ -859,6 +859,57 @@ button {
   color: #e3dccd;
 }
 
+.code-wrap {
+  position: relative;
+  margin: 0 0 22px;
+}
+
+.code-wrap pre {
+  margin: 0;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fnt);
+  background: transparent;
+  border: 1px solid var(--ln);
+  padding: 3px 7px;
+  cursor: pointer;
+  transition:
+    color 120ms,
+    border-color 120ms;
+  z-index: 1;
+}
+
+.copy-btn:hover {
+  color: var(--ink);
+  border-color: var(--ln-heavy);
+}
+
+/* rehype-pretty-code filename caption */
+[data-rehype-pretty-code-title] {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--fnt);
+  background: #080705;
+  border: 1px solid var(--ln);
+  border-bottom: none;
+  padding: 6px 14px;
+  margin-top: 22px;
+}
+
+[data-rehype-pretty-code-title] + .code-wrap pre,
+[data-rehype-pretty-code-title] + pre {
+  margin-top: 0;
+  border-top: none;
+}
+
 .prose blockquote {
   border-top: 2px solid var(--ac);
   border-bottom: 1px solid var(--ln);
