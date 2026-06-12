@@ -15,6 +15,7 @@ if config.config_file_name is not None:
 
 # Wire up all models so autogenerate can detect tables.
 import epistemix.engagement.models  # noqa: E402, F401
+import epistemix.identity.models  # noqa: E402, F401
 from epistemix.db import Base  # noqa: E402
 
 target_metadata = Base.metadata
