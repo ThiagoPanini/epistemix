@@ -6,6 +6,7 @@ from fastapi import Cookie, Depends, FastAPI, Request
 
 from epistemix.db import ping_db
 from epistemix.engagement import views as views_module
+from epistemix.engagement import votes as votes_module
 from epistemix.identity.dependencies import get_current_user, require_auth
 from epistemix.identity.models import AuthUser
 
@@ -77,3 +78,30 @@ async def get_view_count(artifact_id: str) -> dict[str, int]:
     async with views_module.SessionLocal() as db:
         count = await views_module.get_view_count(db, artifact_id)
     return {"count": count}
+
+
+@app.post("/api/votes/{artifact_id:path}")
+async def toggle_vote(
+    artifact_id: str,
+    user: Annotated[AuthUser, Depends(require_auth)],
+) -> dict[str, bool | int]:
+    """Toggles the current user's vote on an artifact. Returns new state."""
+    if votes_module.SessionLocal is None:
+        return {"voted": False, "count": 0}
+    async with votes_module.SessionLocal() as db:
+        await votes_module.toggle_vote(db, artifact_id, user.id)
+        state = await votes_module.get_vote_state(db, artifact_id, user.id)
+    return state
+
+
+@app.get("/api/votes/{artifact_id:path}")
+async def get_vote_state(
+    artifact_id: str,
+    user: Annotated[AuthUser | None, Depends(get_current_user)] = None,
+) -> dict[str, bool | int]:
+    """Returns { count, voted } for the artifact; voted is false for anon users."""
+    if votes_module.SessionLocal is None:
+        return {"count": 0, "voted": False}
+    async with votes_module.SessionLocal() as db:
+        state = await votes_module.get_vote_state(db, artifact_id, user.id if user else None)
+    return state

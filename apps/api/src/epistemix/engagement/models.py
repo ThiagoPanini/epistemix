@@ -24,7 +24,7 @@ class ArtifactView(Base):
     artifact_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     session_id: Mapped[str] = mapped_column(String(255), nullable=False)
     day_bucket_utc: Mapped[date] = mapped_column(Date, nullable=False)
-    user_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True)
+    user_id: Mapped[str | None] = mapped_column(Text, nullable=True)
     referrer_kind: Mapped[str | None] = mapped_column(String(64), nullable=True)
     country_code: Mapped[str | None] = mapped_column(String(2), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -36,7 +36,7 @@ class ArtifactVote(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     artifact_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(Text, nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
@@ -45,7 +45,7 @@ class ArtifactComment(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     artifact_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(Text, nullable=False, index=True)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

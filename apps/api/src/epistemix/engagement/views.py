@@ -1,7 +1,7 @@
 """Engagement boundary — view recording use cases."""
 
 from datetime import UTC, date, datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
@@ -55,13 +55,6 @@ async def record_view(
     if is_bot(user_agent):
         return False
 
-    uid: UUID | None = None
-    if user_id:
-        try:
-            uid = UUID(user_id)
-        except ValueError:
-            uid = None
-
     stmt = (
         insert(ArtifactView)
         .values(
@@ -69,7 +62,7 @@ async def record_view(
             artifact_id=artifact_id,
             session_id=session_id,
             day_bucket_utc=date.today(),
-            user_id=uid,
+            user_id=user_id or None,
             created_at=datetime.now(tz=UTC),
         )
         .on_conflict_do_nothing(constraint="uq_view_dedup")

@@ -13,6 +13,7 @@ import { slugify } from "@/lib/slug";
 import { AppShell } from "../../../_components/app-shell";
 import { TocSpy } from "../../../_components/toc-spy";
 import { ViewTracker } from "../../../_components/view-tracker";
+import { VoteButton } from "../../../_components/vote-button";
 
 export const dynamicParams = false;
 
@@ -112,9 +113,7 @@ export default async function PostPage({
             </header>
 
             <div className="engage">
-              <button type="button" className="up-btn">
-                ▲ Upvote
-              </button>
+              <VoteButton artifactId={`${sectionSlug}/${sourceSlug}/${postSlug}`} />
               <ViewTracker artifactId={`${sectionSlug}/${sourceSlug}/${postSlug}`} />
               <span className="eng-stat">0 comentários</span>
             </div>
