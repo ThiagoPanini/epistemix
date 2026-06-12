@@ -53,6 +53,44 @@ export interface TimelineEvent {
   hot: boolean;
 }
 
+export interface KnowledgeGraph {
+  nodes: KnowledgeGraphNode[];
+  edges: KnowledgeGraphEdge[];
+  tagCount: number;
+  artifactCount: number;
+}
+
+export type KnowledgeGraphNode = KnowledgeGraphTagNode | KnowledgeGraphArtifactNode;
+
+export interface KnowledgeGraphTagNode {
+  kind: "tag";
+  id: string;
+  slug: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface KnowledgeGraphArtifactNode {
+  kind: "artifact";
+  id: string;
+  slug: string;
+  sectionSlug: string;
+  sourceSlug: string;
+  label: string;
+  href: string;
+  x: number;
+  y: number;
+  radius: number;
+  reads: number;
+}
+
+export interface KnowledgeGraphEdge {
+  id: string;
+  source: string;
+  target: string;
+}
+
 export interface Tag {
   slug: string;
   label: string;

@@ -2,7 +2,16 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import matter from "gray-matter";
 import yaml from "js-yaml";
-import type { NowLearningItem, Post, Section, Source, Tag, TimelineEvent } from "./domain";
+import type {
+  KnowledgeGraph,
+  KnowledgeGraphArtifactNode,
+  NowLearningItem,
+  Post,
+  Section,
+  Source,
+  Tag,
+  TimelineEvent,
+} from "./domain";
 import { isReservedSectionSlug } from "./reserved";
 import {
   postFrontmatterSchema,
@@ -23,6 +32,7 @@ export interface Catalog {
   getTags(): Tag[];
   getNowLearning(): NowLearningItem[];
   getTimelineEvents(): TimelineEvent[];
+  getKnowledgeGraph(): KnowledgeGraph;
 }
 
 function readYaml(path: string): unknown {
@@ -226,6 +236,54 @@ export function loadCatalog(rootDir: string): Catalog {
       }),
     ].sort((a, b) => b.date.localeCompare(a.date));
 
+  const allPublishedPosts = () =>
+    [...directPosts, ...posts]
+      .filter((post) => post.status === "published")
+      .sort((a, b) => {
+        const date = b.date.localeCompare(a.date);
+        if (date !== 0) return date;
+        return artifactKey(a).localeCompare(artifactKey(b));
+      });
+
+  const knowledgeGraph = (): KnowledgeGraph => {
+    const artifacts = allPublishedPosts();
+    const tagNodes = tags.map((tag, index) => ({
+      kind: "tag" as const,
+      id: `tag:${tag.slug}`,
+      slug: tag.slug,
+      label: tag.label,
+      x: 170,
+      y: spread(index, tags.length),
+    }));
+    const artifactNodes: KnowledgeGraphArtifactNode[] = artifacts.map((post, index) => ({
+      kind: "artifact",
+      id: `artifact:${artifactKey(post)}`,
+      slug: post.slug,
+      sectionSlug: post.sectionSlug,
+      sourceSlug: post.sourceSlug,
+      label: post.title,
+      href: artifactHref(post),
+      x: 760,
+      y: spread(index, artifacts.length),
+      reads: 0,
+      radius: 10,
+    }));
+    const edges = artifacts.flatMap((post) =>
+      post.tags.map((tag) => ({
+        id: `edge:${tag}:${artifactKey(post)}`,
+        source: `tag:${tag}`,
+        target: `artifact:${artifactKey(post)}`,
+      })),
+    );
+
+    return {
+      nodes: [...tagNodes, ...artifactNodes],
+      edges,
+      tagCount: tagNodes.length,
+      artifactCount: artifactNodes.length,
+    };
+  };
+
   return {
     getSections: () => sections,
     getSection: (slug) => sections.find((s) => s.slug === slug),
@@ -256,5 +314,21 @@ export function loadCatalog(rootDir: string): Catalog {
           progress: s.progress,
         })),
     getTimelineEvents: timelineEvents,
+    getKnowledgeGraph: knowledgeGraph,
   };
+}
+
+function artifactKey(post: Post): string {
+  return post.sourceSlug
+    ? `${post.sectionSlug}/${post.sourceSlug}/${post.slug}`
+    : `${post.sectionSlug}/${post.slug}`;
+}
+
+function artifactHref(post: Post): string {
+  return `/${artifactKey(post)}`;
+}
+
+function spread(index: number, total: number): number {
+  if (total <= 1) return 320;
+  return Math.round(80 + (index * 480) / (total - 1));
 }

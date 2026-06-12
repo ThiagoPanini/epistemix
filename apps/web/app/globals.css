@@ -1157,8 +1157,69 @@ svg.graph {
   height: auto;
 }
 
+.gedge {
+  stroke: var(--lns);
+  stroke-width: 1;
+  transition:
+    opacity 160ms,
+    stroke 160ms;
+}
+
+.gedge.active {
+  stroke: var(--ac-line);
+  stroke-width: 1.5;
+}
+
+.gedge.dimmed {
+  opacity: 0.18;
+}
+
 .gnode {
   cursor: pointer;
+}
+
+.gnode rect {
+  fill: var(--ac);
+}
+
+.gnode circle {
+  fill: var(--bg);
+  stroke: var(--mut);
+  stroke-width: 1.5;
+  transition:
+    fill 160ms,
+    stroke 160ms,
+    opacity 160ms;
+}
+
+.gnode text {
+  fill: var(--mut);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  transition:
+    fill 160ms,
+    opacity 160ms;
+}
+
+.tag-node text {
+  text-anchor: end;
+  fill: var(--ac-text);
+  text-transform: uppercase;
+}
+
+.gnode.active circle {
+  fill: var(--ac-soft);
+  stroke: var(--ac-text);
+}
+
+.gnode.active text {
+  fill: var(--ink);
+}
+
+.gnode.dimmed {
+  opacity: 0.3;
 }
 
 /* ============================================================

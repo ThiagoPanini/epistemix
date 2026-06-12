@@ -191,6 +191,40 @@ describe("loadCatalog — Timeline (D2)", () => {
   });
 });
 
+describe("loadCatalog — Knowledge Graph (D3)", () => {
+  it("derives tag and published artifact nodes with membership edges", () => {
+    const catalog = loadCatalog(fixture("valid"));
+    const graph = catalog.getKnowledgeGraph();
+
+    expect(graph.nodes.filter((node) => node.kind === "tag").map((node) => node.id)).toEqual([
+      "tag:ai",
+      "tag:typescript",
+    ]);
+    expect(graph.nodes.filter((node) => node.kind === "artifact").map((node) => node.id)).toEqual([
+      "artifact:blog/primeiro-post",
+      "artifact:blog/segundo-post",
+      "artifact:courses/aihero/primeiras-impressoes",
+      "artifact:courses/aihero/setup-inicial",
+    ]);
+    expect(graph.edges.map((edge) => `${edge.source}->${edge.target}`)).toEqual([
+      "tag:ai->artifact:blog/primeiro-post",
+      "tag:ai->artifact:blog/segundo-post",
+      "tag:ai->artifact:courses/aihero/primeiras-impressoes",
+      "tag:typescript->artifact:courses/aihero/primeiras-impressoes",
+      "tag:ai->artifact:courses/aihero/setup-inicial",
+    ]);
+  });
+
+  it("uses deterministic coordinates for the same catalog input", () => {
+    const graphA = loadCatalog(fixture("valid")).getKnowledgeGraph();
+    const graphB = loadCatalog(fixture("valid")).getKnowledgeGraph();
+
+    expect(graphA.nodes.map(({ id, x, y }) => ({ id, x, y }))).toEqual(
+      graphB.nodes.map(({ id, x, y }) => ({ id, x, y })),
+    );
+  });
+});
+
 describe("loadCatalog — build-time validation", () => {
   it("throws when a post uses a tag outside tags.yml (invariante 9)", () => {
     expect(() => loadCatalog(fixture("invalid-tag"))).toThrow(/naoexiste/);

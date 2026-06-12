@@ -1,15 +1,15 @@
 import { AppShell } from "@/app/_components/app-shell";
-import { WipPage } from "@/app/_components/wip-page";
+import { GraphView } from "@/app/_components/graph-view";
+import { getCatalog } from "@/lib/catalog";
 
 export const metadata = { title: "Grafo · epistemix" };
 
 export default function GraphPage() {
+  const graph = getCatalog().getKnowledgeGraph();
+
   return (
     <AppShell>
-      <WipPage
-        title="Grafo"
-        description="Visualização de relações entre tags e artefatos do catálogo."
-      />
+      <GraphView graph={graph} />
     </AppShell>
   );
 }

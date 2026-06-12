@@ -4,6 +4,11 @@ import { type Catalog, loadCatalog } from "./catalog";
 
 export type { Catalog } from "./catalog";
 export type {
+  KnowledgeGraph,
+  KnowledgeGraphArtifactNode,
+  KnowledgeGraphEdge,
+  KnowledgeGraphNode,
+  KnowledgeGraphTagNode,
   NowLearningItem,
   Post,
   Section,
