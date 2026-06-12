@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getCatalog } from "@/lib/catalog";
 import { getSiteModel } from "@/lib/site/model";
 import { AppShell } from "../../_components/app-shell";
-import { WipPage } from "../../_components/wip-page";
+import { SourceView } from "../../_components/source-view";
 
 export const dynamicParams = false;
 
@@ -28,9 +28,11 @@ export default async function SourcePage({
   const source = catalog.getSource(sectionSlug, sourceSlug);
   if (!section || !source) notFound();
 
+  const posts = catalog.getPosts(sectionSlug, sourceSlug);
+
   return (
     <AppShell>
-      <WipPage title={source.name} description={source.description} />
+      <SourceView source={source} posts={posts} sectionSlug={sectionSlug} />
     </AppShell>
   );
 }

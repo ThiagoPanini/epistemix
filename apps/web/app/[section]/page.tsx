@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getCatalog } from "@/lib/catalog";
 import { getAllStaticSectionSlugs, getSiteModel } from "@/lib/site/model";
 import { AppShell } from "../_components/app-shell";
+import { SectionWithSourcesView } from "../_components/section-view";
 import { WipPage } from "../_components/wip-page";
 
 export const dynamicParams = false;
@@ -34,22 +35,23 @@ export default async function SectionPage({ params }: { params: Promise<{ sectio
   }
 
   const catalog = getCatalog();
-  const sources = catalog.getSources(sectionSlug);
 
+  if (section.kind === "with_sources") {
+    const sources = catalog.getSources(sectionSlug).map((source) => ({
+      ...source,
+      postCount: catalog.getPosts(sectionSlug, source.slug).length,
+    }));
+    return (
+      <AppShell>
+        <SectionWithSourcesView section={section} sources={sources} />
+      </AppShell>
+    );
+  }
+
+  // direct sections (blog, talks) — implementado em C2
   return (
     <AppShell>
-      <div className="page wrap">
-        <div className="page-head">
-          <h1>{section.title}</h1>
-          <p className="desc">{section.description}</p>
-          <p
-            className="meta mono"
-            style={{ fontSize: "11px", color: "var(--fnt)", marginTop: "12px" }}
-          >
-            {sources.length} {sources.length === 1 ? "fonte" : "fontes"}
-          </p>
-        </div>
-      </div>
+      <WipPage title={section.title} description={section.description} />
     </AppShell>
   );
 }

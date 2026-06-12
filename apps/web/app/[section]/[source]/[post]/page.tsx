@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
@@ -36,6 +37,11 @@ export default async function PostPage({
   const post = catalog.getPost(sectionSlug, sourceSlug, postSlug);
   if (!section || !source || !post) notFound();
 
+  const allPosts = catalog.getPosts(sectionSlug, sourceSlug);
+  const idx = allPosts.findIndex((p) => p.slug === postSlug);
+  const prev = idx > 0 ? allPosts[idx - 1] : null;
+  const next = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
+  const tagLabels = new Map(model.tags.map((t) => [t.slug, t.label]));
   const headings = extractHeadings(post.body);
 
   return (
@@ -45,7 +51,9 @@ export default async function PostPage({
           <article>
             <header className="read-head">
               <span className="kicker mono">
-                {section.title} · {source.name}
+                <Link href={`/${sectionSlug}`}>{section.title}</Link>
+                {" · "}
+                <Link href={`/${sectionSlug}/${sourceSlug}`}>{source.name}</Link>
               </span>
               <h1>{post.title}</h1>
               {post.summary && <p className="standfirst">{post.summary}</p>}
@@ -58,7 +66,7 @@ export default async function PostPage({
                 <div className="tagrow" style={{ marginTop: "14px" }}>
                   {post.tags.map((tag) => (
                     <span className="tag" key={tag}>
-                      {tag}
+                      {tagLabels.get(tag) ?? tag}
                     </span>
                   ))}
                 </div>
@@ -80,13 +88,83 @@ export default async function PostPage({
                 source={post.body}
               />
             </div>
+
+            {(prev || next) && (
+              <nav
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "16px",
+                  marginTop: "48px",
+                  borderTop: "1px solid var(--ln)",
+                  paddingTop: "24px",
+                }}
+              >
+                {prev ? (
+                  <Link
+                    href={`/${sectionSlug}/${sourceSlug}/${prev.slug}`}
+                    style={{ fontSize: "13px" }}
+                  >
+                    <div
+                      className="mono"
+                      style={{
+                        fontSize: "10px",
+                        color: "var(--fnt)",
+                        letterSpacing: "0.1em",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      ← ANTERIOR
+                    </div>
+                    <div style={{ fontWeight: 600 }}>{prev.title}</div>
+                  </Link>
+                ) : (
+                  <span />
+                )}
+                {next ? (
+                  <Link
+                    href={`/${sectionSlug}/${sourceSlug}/${next.slug}`}
+                    style={{ fontSize: "13px", textAlign: "right" }}
+                  >
+                    <div
+                      className="mono"
+                      style={{
+                        fontSize: "10px",
+                        color: "var(--fnt)",
+                        letterSpacing: "0.1em",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      PRÓXIMO →
+                    </div>
+                    <div style={{ fontWeight: 600 }}>{next.title}</div>
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </nav>
+            )}
+
+            <div className="disc">
+              <h3 className="mono">DISCUSSÃO</h3>
+              <p
+                className="mono"
+                style={{ fontSize: "12px", color: "var(--fnt)", marginTop: "14px" }}
+              >
+                Comentários em breve — autenticação implementada em E0a.
+              </p>
+            </div>
           </article>
 
           {headings.length > 0 && (
             <aside className="toc">
               <div className="toc-label">CONTEÚDO</div>
               {headings.map((h) => (
-                <a key={h.id} href={`#${h.id}`}>
+                <a
+                  key={h.id}
+                  href={`#${h.id}`}
+                  style={{ paddingLeft: h.level === 3 ? "24px" : "12px" }}
+                >
                   {h.text}
                 </a>
               ))}
