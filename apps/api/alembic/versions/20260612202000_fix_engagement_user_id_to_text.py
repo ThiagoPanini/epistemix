@@ -6,6 +6,7 @@ Create Date: 2026-06-12 20:20:00
 
 better-auth generates nanoid strings as user IDs, not UUIDs.
 Aligns artifact_view/artifact_vote/artifact_comment user_id columns.
+Uses batch_alter_table for SQLite compatibility in migration tests.
 """
 
 import sqlalchemy as sa
@@ -19,30 +20,18 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.alter_column("artifact_view", "user_id", type_=sa.Text(), existing_nullable=True)
-    op.alter_column("artifact_vote", "user_id", type_=sa.Text(), existing_nullable=False)
-    op.alter_column("artifact_comment", "user_id", type_=sa.Text(), existing_nullable=False)
+    with op.batch_alter_table("artifact_view") as batch_op:
+        batch_op.alter_column("user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=True)
+    with op.batch_alter_table("artifact_vote") as batch_op:
+        batch_op.alter_column("user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=False)
+    with op.batch_alter_table("artifact_comment") as batch_op:
+        batch_op.alter_column("user_id", existing_type=sa.Uuid(), type_=sa.Text(), existing_nullable=False)
 
 
 def downgrade() -> None:
-    op.alter_column(
-        "artifact_comment",
-        "user_id",
-        type_=sa.Uuid(),
-        existing_nullable=False,
-        postgresql_using="user_id::uuid",
-    )
-    op.alter_column(
-        "artifact_vote",
-        "user_id",
-        type_=sa.Uuid(),
-        existing_nullable=False,
-        postgresql_using="user_id::uuid",
-    )
-    op.alter_column(
-        "artifact_view",
-        "user_id",
-        type_=sa.Uuid(),
-        existing_nullable=True,
-        postgresql_using="user_id::uuid",
-    )
+    with op.batch_alter_table("artifact_comment") as batch_op:
+        batch_op.alter_column("user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=False)
+    with op.batch_alter_table("artifact_vote") as batch_op:
+        batch_op.alter_column("user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=False)
+    with op.batch_alter_table("artifact_view") as batch_op:
+        batch_op.alter_column("user_id", existing_type=sa.Text(), type_=sa.Uuid(), existing_nullable=True)
