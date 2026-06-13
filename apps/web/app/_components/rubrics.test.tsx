@@ -20,12 +20,12 @@ const RUBRIC_HREFS = [
   "/graph",
 ];
 const RUBRIC_LABELS = [
-  "Últimas",
+  "Home",
   "Blog",
   "Cursos",
   "Livros",
   "Certificações",
-  "Palestras",
+  "Apresentações",
   "Cronologia",
   "Grafo",
 ];
@@ -59,10 +59,10 @@ describe("Rubrics", () => {
     expect(screen.getByRole("link", { name: "Cursos" })).not.toHaveClass("on");
   });
 
-  it("marks Últimas active for root path", () => {
+  it("marks Home active for root path", () => {
     vi.mocked(usePathname).mockReturnValue("/");
     render(<Rubrics />);
-    expect(screen.getByRole("link", { name: "Últimas" })).toHaveClass("on");
+    expect(screen.getByRole("link", { name: "Home" })).toHaveClass("on");
     expect(screen.getByRole("link", { name: "Blog" })).not.toHaveClass("on");
   });
 

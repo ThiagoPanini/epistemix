@@ -9,6 +9,12 @@ describe("Topbar", () => {
     expect(screen.getByText("epistemix")).toBeInTheDocument();
   });
 
+  it("wordmark is a link to /", () => {
+    render(<Topbar />);
+    const brand = screen.getByRole("link", { name: "epistemix" });
+    expect(brand).toHaveAttribute("href", "/");
+  });
+
   it("renders a GITHUB external link", () => {
     render(<Topbar />);
     const githubLink = screen.getByRole("link", { name: /github/i });
@@ -28,9 +34,11 @@ describe("Topbar", () => {
     expect(container.querySelector(".topbar")).toBeInTheDocument();
   });
 
-  it("renders current date in mono font region", () => {
+  it("does not render a date in the topbar", () => {
     render(<Topbar />);
     const topbarIn = document.querySelector(".topbar-in");
     expect(topbarIn).toBeInTheDocument();
+    // date-hide element should not exist
+    expect(document.querySelector(".date-hide")).not.toBeInTheDocument();
   });
 });

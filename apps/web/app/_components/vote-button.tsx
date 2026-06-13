@@ -49,7 +49,7 @@ export function VoteButton({ artifactId }: { artifactId: string }) {
   if (!isLoggedIn) {
     return (
       <button type="button" className="up-btn up-btn--anon" disabled title="Entre para votar">
-        ▲ {state.count}
+        ↑ {state.count}
       </button>
     );
   }
@@ -63,7 +63,7 @@ export function VoteButton({ artifactId }: { artifactId: string }) {
       aria-pressed={state.voted}
       aria-label={state.voted ? "Remover upvote" : "Upvote"}
     >
-      ▲ {state.count}
+      ↑ {state.count}
     </button>
   );
 }

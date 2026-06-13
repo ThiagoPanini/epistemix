@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { label: "Últimas", href: "/" },
+  { label: "Home", href: "/" },
   { label: "Blog", href: "/blog" },
   { label: "Cursos", href: "/courses" },
   { label: "Livros", href: "/books" },
   { label: "Certificações", href: "/certifications" },
-  { label: "Palestras", href: "/talks" },
+  { label: "Apresentações", href: "/talks" },
   { label: "Cronologia", href: "/timeline" },
   { label: "Grafo", href: "/graph" },
 ];

@@ -32,15 +32,7 @@ export function HomeView({ featured, latest, sections, nowLearning = [] }: Props
       <div className="mast">
         <h1>epistemix</h1>
         <div className="mast-rule">
-          <span>CADERNO PÚBLICO DE ENGENHARIA</span>
-          <span className="ed">
-            {new Date().toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-              timeZone: "UTC",
-            })}
-          </span>
+          <span>ESPAÇO PESSOAL DE APRENDIZADO E ESTUDO · THIAGO PANINI</span>
         </div>
       </div>
 
