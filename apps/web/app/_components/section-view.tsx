@@ -15,14 +15,14 @@ export function SectionWithSourcesView({
   return (
     <div className="page wrap">
       <div className="page-head">
+        <span className="kicker">Rubrica</span>
         <h1>{section.title}</h1>
         <p className="desc">{section.description}</p>
-        <p
-          className="meta mono"
-          style={{ fontSize: "11px", color: "var(--fnt)", marginTop: "12px" }}
-        >
-          {sources.length} {sources.length === 1 ? "fonte" : "fontes"}
-        </p>
+        <div className="metaline meta">
+          <span>
+            {sources.length} {sources.length === 1 ? "fonte" : "fontes"}
+          </span>
+        </div>
       </div>
 
       {sources.map((source) => (

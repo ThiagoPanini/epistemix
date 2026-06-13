@@ -16,14 +16,14 @@ export function SectionDirectView({
   return (
     <div className="page wrap">
       <div className="page-head">
+        <span className="kicker">Rubrica</span>
         <h1>{section.title}</h1>
         <p className="desc">{section.description}</p>
-        <p
-          className="meta mono"
-          style={{ fontSize: "11px", color: "var(--fnt)", marginTop: "12px" }}
-        >
-          {posts.length} {posts.length === 1 ? "post" : "posts"}
-        </p>
+        <div className="metaline meta">
+          <span>
+            {posts.length} {posts.length === 1 ? "post" : "posts"}
+          </span>
+        </div>
       </div>
 
       <div style={{ marginTop: "26px" }}>
