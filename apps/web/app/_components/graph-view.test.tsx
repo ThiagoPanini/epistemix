@@ -31,8 +31,9 @@ describe("GraphView", () => {
     const { container } = render(<GraphView graph={GRAPH} />);
 
     expect(container.querySelector("svg.graph")).toHaveAttribute("viewBox", "0 0 1000 640");
-    expect(screen.getByText("1 tag")).toBeInTheDocument();
-    expect(screen.getByText("1 artefato")).toBeInTheDocument();
+    expect(screen.getByText("TAG CURADA")).toBeInTheDocument();
+    expect(screen.getByText(/ARTEFATO.*raio/)).toBeInTheDocument();
+    expect(screen.getByText(/ARTEFATOS.*TAGS.*CONEXÕES/)).toBeInTheDocument();
   });
 
   it("links artifact nodes to their reading route", () => {

@@ -9,24 +9,26 @@ export function GraphView({ graph }: { graph: KnowledgeGraph }) {
   const activeIds = useMemo(() => neighborhood(graph, hoveredId), [graph, hoveredId]);
 
   return (
-    <div className="content-inner">
+    <div className="wrap page">
       <div className="page-head">
-        <span className="page-eyebrow">Grafo · catálogo derivado</span>
-        <h1 className="page-title">Grafo</h1>
-        <p className="page-desc">
-          Tags curadas e artefatos publicados, conectados por pertencimento e calculados a partir do
-          catálogo MDX.
+        <span className="kicker">Mapa do conhecimento</span>
+        <h1>Grafo</h1>
+        <p className="desc">
+          Como os artefatos se conectam pelas tags curadas. Passe o mouse para destacar vizinhanças;
+          clique num artefato para ler.
         </p>
       </div>
 
       <div className="graph-box">
         <div className="graph-legend">
           <span>
-            <span className="sq" /> {graph.tagCount} {graph.tagCount === 1 ? "tag" : "tags"}
+            <span className="sq" /> TAG CURADA
           </span>
           <span>
-            <span className="ci" /> {graph.artifactCount}{" "}
-            {graph.artifactCount === 1 ? "artefato" : "artefatos"}
+            <span className="ci" /> ARTEFATO (raio = leituras)
+          </span>
+          <span>
+            {graph.artifactCount} ARTEFATOS · {graph.tagCount} TAGS · {graph.edges.length} CONEXÕES
           </span>
         </div>
         <svg aria-label="Grafo Tag para Artifact" className="graph" viewBox="0 0 1000 640">

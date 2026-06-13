@@ -25,25 +25,25 @@ export function TimelineView({ events }: { events: TimelineEvent[] }) {
 
       {years.length > 0 ? (
         years.map(([year, yearEvents]) => (
-            <section className="tl-year-group" key={year}>
-              <h2 className="tl-year">{year}</h2>
-              <div className="tl-lines">
-                {yearEvents.map((event) => (
-                  <Link className="tl-row" href={event.href} key={event.id}>
-                    <time className="tl-date" dateTime={event.date}>
-                      {formatDate(event.date)}
-                    </time>
-                    <span className={`tl-type${event.hot ? " hot" : ""}`}>
-                      {TYPE_LABEL[event.type]}
-                    </span>
-                    <span className="tl-main">
-                      <span className="tl-t">{event.label}</span>
-                      <span className="tl-detail">{event.detail}</span>
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </section>
+          <section className="tl-year-group" key={year}>
+            <h2 className="tl-year">{year}</h2>
+            <div className="tl-lines">
+              {yearEvents.map((event) => (
+                <Link className="tl-row" href={event.href} key={event.id}>
+                  <time className="tl-date" dateTime={event.date}>
+                    {formatDate(event.date)}
+                  </time>
+                  <span className={`tl-type${event.hot ? " hot" : ""}`}>
+                    {TYPE_LABEL[event.type]}
+                  </span>
+                  <span className="tl-main">
+                    <span className="tl-t">{event.label}</span>
+                    <span className="tl-detail">{event.detail}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
         ))
       ) : (
         <div className="empty-state">
