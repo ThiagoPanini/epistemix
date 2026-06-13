@@ -67,8 +67,10 @@ Prosa em `#d9d2c4`; código em `#e3dccd` sobre `#080705`. Botão primário
 
 ## 4. Componentes-chave (todos no protótipo A)
 
-- **Masthead (home):** wordmark gigante + régua sólida 3px + linha mono (caderno /
-  edição). A "edição" usa `--ac-text`.
+- **Masthead (home):** wordmark gigante + régua sólida 3px + **uma** linha mono de
+  tagline: `ESPAÇO PESSOAL DE APRENDIZADO E ESTUDO · THIAGO PANINI`. A segunda linha
+  de "edição" do protótipo (`ED. Nº N — MÊS ANO`) foi **removida** (decisão 2026-06-12);
+  a metáfora editorial "Prensa" vive no visual, não mais na cópia da tagline.
 - **Now Learning:** faixa com label mono à esquerda (`● AGORA ESTUDANDO`, dot que
   pulsa) + cards roláveis horizontalmente; "há 2 dias" em `--ac-text`.
 - **Lead grid:** destaque (kicker + h2 grande + standfirst serif + meta mono +
@@ -116,6 +118,12 @@ O próprio `index.html` do bundle aponta como "próximos passos": **estados vazi
   no protótipo A** e foi adicionada deliberadamente para suportar engajamento
   autenticado. Desenhar no idioma editorial de A.
 - **CTA de login contextual** no bloco de engajamento ("entre para votar/comentar").
+- **Tela de sign-in** (resolvido 2026-06-12): **card central enriquecido** — wordmark +
+  régua hairline + value-prop "Entre para votar, comentar e acompanhar o que está sendo
+  publicado." + form (e-mail/senha) + divisor "ou" + social. Não é split-screen.
+- **Seções vazias** (resolvido 2026-06-12): permanecem **visíveis** na nav e no grid
+  5-col da home com contagem `00 entradas`; a página da seção mostra o empty state.
+  Não se escondem (preserva o grid de 5 colunas e comunica o roadmap do hub).
 - **Página de tag** não foi prototipada; tag hoje só aparece como chip e no grafo.
   Decidir se vira rota própria ou filtro no ⌘K.
 
