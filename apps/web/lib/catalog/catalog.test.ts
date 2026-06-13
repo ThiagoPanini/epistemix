@@ -138,34 +138,43 @@ describe("loadCatalog — books and certifications (with_sources, invariante 16)
 });
 
 describe("loadCatalog — study_status / Now Learning (D1)", () => {
-  it("loads study_status, startedAt, lastActivity, progress from source.yml", () => {
+  it("loads study_status, startedAt, lastActivity from source.yml (no numeric progress)", () => {
     const catalog = loadCatalog(fixture("valid"));
     const aihero = catalog.getSource("courses", "aihero");
     expect(aihero).toMatchObject({
       studyStatus: "ongoing",
       startedAt: "2026-01-15",
       lastActivity: "2026-06-01",
-      progress: 60,
     });
+    // progress field must not exist in domain
+    expect((aihero as Record<string, unknown>)?.progress).toBeUndefined();
   });
 
-  it("getNowLearning returns ongoing sources ordered by lastActivity desc", () => {
+  it("getNowLearning returns ongoing sources ordered by derived lastActivity desc", () => {
     const catalog = loadCatalog(fixture("valid"));
     const items = catalog.getNowLearning();
     expect(items.map((i) => i.sourceSlug)).toEqual(["aihero", "ddia"]);
   });
 
-  it("getNowLearning items have href, title, detail, lastActivity", () => {
+  it("getNowLearning items have sectionLabel, no progress, lastActivity from most recent post", () => {
     const catalog = loadCatalog(fixture("valid"));
     const [first] = catalog.getNowLearning();
     expect(first).toMatchObject({
       kind: "source",
       href: "/courses/aihero",
       title: "AI Hero",
-      detail: "Courses",
-      lastActivity: "2026-06-01",
-      progress: 60,
+      sectionLabel: "Courses",
+      // lastActivity derived from most recent published post (primeiras-impressoes: 2026-06-05)
+      lastActivity: "2026-06-05",
     });
+    expect((first as Record<string, unknown>)?.progress).toBeUndefined();
+  });
+
+  it("getNowLearning: source with no posts falls back to source.lastActivity", () => {
+    const catalog = loadCatalog(fixture("valid"));
+    const items = catalog.getNowLearning();
+    const ddia = items.find((i) => i.sourceSlug === "ddia");
+    expect(ddia?.lastActivity).toBe("2026-05-10");
   });
 
   it("getNowLearning excludes sources with no study_status or concluded", () => {

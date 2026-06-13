@@ -2,6 +2,14 @@ import Link from "next/link";
 import type { NowLearningItem } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
 
+function recency(iso: string): string {
+  if (!iso) return "";
+  const days = Math.floor((Date.now() - new Date(`${iso}T00:00:00Z`).getTime()) / 86_400_000);
+  if (days === 0) return "hoje";
+  if (days === 1) return "há 1 dia";
+  return `há ${days} dias`;
+}
+
 export interface HomePost {
   slug: string;
   sectionSlug: string;
@@ -35,6 +43,22 @@ export function HomeView({ featured, latest, sections, nowLearning = [] }: Props
           <span>ESPAÇO PESSOAL DE APRENDIZADO E ESTUDO · THIAGO PANINI</span>
         </div>
       </div>
+
+      {nowLearning.length > 0 && (
+        <div className="now-band">
+          <span className="now-label mono">● AGORA ESTUDANDO</span>
+          <div className="now-cards">
+            {nowLearning.map((item) => (
+              <Link key={item.href} href={item.href} className="now-card">
+                <div className="now-kind mono">{item.sectionLabel}</div>
+                <div className="now-title">{item.title}</div>
+                {item.detail && <div className="now-detail">{item.detail}</div>}
+                <div className="now-rec mono">{recency(item.lastActivity)}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {featured && (
         <div className="lead-grid">
@@ -74,28 +98,6 @@ export function HomeView({ featured, latest, sections, nowLearning = [] }: Props
               </Link>
             ))}
           </div>
-        </div>
-      )}
-
-      {nowLearning.length > 0 && (
-        <div className="now-learning">
-          <div className="colhead">
-            <span>NOW LEARNING</span>
-          </div>
-          {nowLearning.map((item) => (
-            <Link key={item.href} href={item.href} className="nl-item">
-              <div className="nl-t">{item.title}</div>
-              <div className="nl-m">
-                {item.detail}
-                {item.progress !== undefined && (
-                  <>
-                    {" · "}
-                    <span className="nl-prog">{item.progress}%</span>
-                  </>
-                )}
-              </div>
-            </Link>
-          ))}
         </div>
       )}
 

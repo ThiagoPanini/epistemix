@@ -76,9 +76,9 @@ const NOW_LEARNING = [
     sourceSlug: "aihero",
     href: "/courses/aihero",
     title: "AI Hero",
-    detail: "Courses",
-    lastActivity: "2026-06-01",
-    progress: 60,
+    sectionLabel: "Courses",
+    detail: "Foco em streaming e tool use",
+    lastActivity: "2026-06-05",
   },
   {
     kind: "source" as const,
@@ -86,16 +86,16 @@ const NOW_LEARNING = [
     sourceSlug: "ddia",
     href: "/books/ddia",
     title: "Designing Data-Intensive Applications",
-    detail: "Livros",
+    sectionLabel: "Livros",
+    detail: undefined,
     lastActivity: "2026-05-10",
-    progress: undefined,
   },
 ];
 
-describe("HomeView — Now Learning", () => {
-  it("renders Now Learning header when items provided", () => {
+describe("HomeView — Agora Estudando", () => {
+  it("renders AGORA ESTUDANDO header when items provided", () => {
     render(<HomeView featured={null} latest={[]} sections={[]} nowLearning={NOW_LEARNING} />);
-    expect(screen.getByText(/NOW LEARNING/i)).toBeInTheDocument();
+    expect(screen.getByText(/AGORA ESTUDANDO/i)).toBeInTheDocument();
   });
 
   it("renders each item with title as link", () => {
@@ -104,18 +104,28 @@ describe("HomeView — Now Learning", () => {
     expect(link).toHaveAttribute("href", "/courses/aihero");
   });
 
-  it("shows progress when available", () => {
+  it("renders sectionLabel in the card", () => {
     render(<HomeView featured={null} latest={[]} sections={[]} nowLearning={NOW_LEARNING} />);
-    expect(screen.getByText("60%")).toBeInTheDocument();
+    expect(screen.getByText(/Courses/)).toBeInTheDocument();
   });
 
-  it("hides Now Learning section when empty", () => {
+  it("renders optional detail when provided", () => {
+    render(<HomeView featured={null} latest={[]} sections={[]} nowLearning={NOW_LEARNING} />);
+    expect(screen.getByText(/Foco em streaming e tool use/)).toBeInTheDocument();
+  });
+
+  it("does not render numeric progress anywhere", () => {
+    render(<HomeView featured={null} latest={[]} sections={[]} nowLearning={NOW_LEARNING} />);
+    expect(screen.queryByText(/%/)).toBeNull();
+  });
+
+  it("hides Agora Estudando section when empty", () => {
     render(<HomeView featured={null} latest={[]} sections={[]} nowLearning={[]} />);
-    expect(screen.queryByText(/NOW LEARNING/i)).toBeNull();
+    expect(screen.queryByText(/AGORA ESTUDANDO/i)).toBeNull();
   });
 
-  it("hides Now Learning section when prop is omitted", () => {
+  it("hides Agora Estudando section when prop is omitted", () => {
     render(<HomeView featured={null} latest={[]} sections={[]} />);
-    expect(screen.queryByText(/NOW LEARNING/i)).toBeNull();
+    expect(screen.queryByText(/AGORA ESTUDANDO/i)).toBeNull();
   });
 });

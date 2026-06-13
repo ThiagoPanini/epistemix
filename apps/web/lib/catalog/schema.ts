@@ -34,7 +34,7 @@ export const sourceFileSchema = z.object({
   study_status: studyStatusSchema.optional(),
   started_at: isoDateSchema.optional(),
   last_activity: isoDateSchema.optional(),
-  progress: z.number().min(0).max(100).optional(),
+  detail: z.string().optional(),
 });
 
 export const tagSchema = z.object({

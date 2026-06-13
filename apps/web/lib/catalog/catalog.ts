@@ -105,7 +105,7 @@ function loadSources(rootDir: string, section: Section): Source[] {
       studyStatus: raw.study_status,
       startedAt: raw.started_at,
       lastActivity: raw.last_activity,
-      progress: raw.progress,
+      detail: raw.detail,
     };
   });
 }
@@ -342,22 +342,23 @@ export function loadCatalog(rootDir: string): Catalog {
     getPresentation: (slug) =>
       publishedPresentations().find((presentation) => presentation.slug === slug),
     getTags: () => tags,
-    getNowLearning: () =>
-      sources
+    getNowLearning: () => {
+      const derivedLastActivity = (s: Source): string =>
+        publishedIn(s.sectionSlug, s.slug)[0]?.date ?? s.lastActivity ?? s.startedAt ?? "";
+      return sources
         .filter((s) => s.studyStatus === "ongoing")
-        .sort((a, b) =>
-          (b.lastActivity ?? b.startedAt ?? "").localeCompare(a.lastActivity ?? a.startedAt ?? ""),
-        )
+        .sort((a, b) => derivedLastActivity(b).localeCompare(derivedLastActivity(a)))
         .map((s) => ({
           kind: "source" as const,
           sectionSlug: s.sectionSlug,
           sourceSlug: s.slug,
           href: `/${s.sectionSlug}/${s.slug}`,
           title: s.name,
-          detail: sections.find((sec) => sec.slug === s.sectionSlug)?.title ?? s.sectionSlug,
-          lastActivity: s.lastActivity ?? s.startedAt ?? "",
-          progress: s.progress,
-        })),
+          sectionLabel: sections.find((sec) => sec.slug === s.sectionSlug)?.title ?? s.sectionSlug,
+          detail: s.detail,
+          lastActivity: derivedLastActivity(s),
+        }));
+    },
     getTimelineEvents: timelineEvents,
     getKnowledgeGraph: knowledgeGraph,
   };

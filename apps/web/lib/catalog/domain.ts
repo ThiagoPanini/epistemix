@@ -26,7 +26,7 @@ export interface Source {
   studyStatus?: StudyStatus;
   startedAt?: string;
   lastActivity?: string;
-  progress?: number;
+  detail?: string;
 }
 
 export interface NowLearningItem {
@@ -35,9 +35,9 @@ export interface NowLearningItem {
   sourceSlug: string;
   href: string;
   title: string;
-  detail: string;
+  sectionLabel: string;
+  detail?: string;
   lastActivity: string;
-  progress?: number;
 }
 
 export type TimelineEventType = "publication" | "note" | "lecture" | "start" | "conquest";
