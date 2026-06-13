@@ -67,11 +67,24 @@ describe("HomeView", () => {
     expect(screen.getByText("Aula 1 — Introdução")).toBeInTheDocument();
   });
 
-  it("renders sections with name and count", () => {
+  it("renders sections with zero-padded UPPERCASE count", () => {
     render(<HomeView featured={null} latest={[]} sections={SECTIONS} />);
     expect(screen.getByText("Cursos")).toBeInTheDocument();
-    expect(screen.getByText("2 entradas")).toBeInTheDocument();
-    expect(screen.getByText("1 entrada")).toBeInTheDocument();
+    expect(screen.getByText("02 ENTRADAS")).toBeInTheDocument();
+    expect(screen.getByText("01 ENTRADA")).toBeInTheDocument();
+  });
+
+  it("renders .ed span in mast-rule with month and year", () => {
+    render(<HomeView featured={null} latest={[]} sections={[]} />);
+    const ed = document.querySelector(".mast-rule .ed");
+    expect(ed).toBeInTheDocument();
+    expect(ed?.textContent).toMatch(/\d{4}/);
+  });
+
+  it("lat-m shows section before date", () => {
+    render(<HomeView featured={DIRECT_POST} latest={[DIRECT_POST]} sections={[]} />);
+    const latM = document.querySelector(".lat-m");
+    expect(latM?.textContent).toMatch(/^BLOG/);
   });
 
   it("renders without featured gracefully (no btn-read)", () => {

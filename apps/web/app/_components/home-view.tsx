@@ -2,6 +2,26 @@ import Link from "next/link";
 import type { NowLearningItem } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
 
+const MONTHS_PT = [
+  "JANEIRO",
+  "FEVEREIRO",
+  "MARÇO",
+  "ABRIL",
+  "MAIO",
+  "JUNHO",
+  "JULHO",
+  "AGOSTO",
+  "SETEMBRO",
+  "OUTUBRO",
+  "NOVEMBRO",
+  "DEZEMBRO",
+];
+
+function editionLabel(): string {
+  const d = new Date();
+  return `ED. — ${MONTHS_PT[d.getMonth()]} ${d.getFullYear()} · OPEN SOURCE`;
+}
+
 function recency(iso: string): string {
   if (!iso) return "";
   const days = Math.floor((Date.now() - new Date(`${iso}T00:00:00Z`).getTime()) / 86_400_000);
@@ -62,6 +82,7 @@ export function HomeView({ featured, latest, sections, nowLearning = [] }: Props
         <h1>epistemix</h1>
         <div className="mast-rule">
           <span>ESPAÇO PESSOAL DE APRENDIZADO E ESTUDO · THIAGO PANINI</span>
+          <span className="ed">{editionLabel()}</span>
         </div>
       </div>
 
@@ -131,7 +152,7 @@ export function HomeView({ featured, latest, sections, nowLearning = [] }: Props
               >
                 <div className="lat-t">{post.title}</div>
                 <div className="lat-m">
-                  {formatDate(post.date)} · {post.sectionSlug.toUpperCase()}
+                  {post.sectionSlug.toUpperCase()} · {formatDate(post.date)}
                 </div>
               </Link>
             ))}
@@ -144,7 +165,7 @@ export function HomeView({ featured, latest, sections, nowLearning = [] }: Props
           <Link key={sec.slug} href={`/${sec.slug}`} className="sec-col">
             <div className="sec-name">{sec.title}</div>
             <div className="sec-count">
-              {sec.count} {sec.count === 1 ? "entrada" : "entradas"}
+              {String(sec.count).padStart(2, "0")} {sec.count === 1 ? "ENTRADA" : "ENTRADAS"}
             </div>
             <div className="sec-desc">{sec.description}</div>
           </Link>
