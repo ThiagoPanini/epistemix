@@ -66,15 +66,19 @@ export function HomeView({ featured, latest, sections, nowLearning = [] }: Props
       </div>
 
       {nowLearning.length > 0 && (
-        <div className="now-band">
-          <span className="now-label mono">● AGORA ESTUDANDO</span>
-          <div className="now-cards">
+        <div className="nowl">
+          <div className="nowl-label">
+            <span className="live-dot" /> AGORA ESTUDANDO
+          </div>
+          <div className="nowl-items">
             {nowLearning.map((item) => (
-              <Link key={item.href} href={item.href} className="now-card">
-                <div className="now-kind mono">{item.sectionLabel}</div>
-                <div className="now-title">{item.title}</div>
-                {item.detail && <div className="now-detail">{item.detail}</div>}
-                <div className="now-rec mono">{recency(item.lastActivity)}</div>
+              <Link key={item.href} href={item.href} className="nowl-item">
+                <div className="nowl-kind">{item.sectionLabel}</div>
+                <div className="nowl-title">{item.title}</div>
+                <div className="nowl-det">
+                  {item.detail && <>{item.detail} · </>}
+                  <span className="ago">{recency(item.lastActivity)}</span>
+                </div>
               </Link>
             ))}
           </div>

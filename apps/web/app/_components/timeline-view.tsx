@@ -14,39 +14,37 @@ export function TimelineView({ events }: { events: TimelineEvent[] }) {
   const years = groupByYear(events);
 
   return (
-    <div className="content-inner timeline-page">
+    <div className="wrap page">
       <div className="page-head">
-        <span className="page-eyebrow">Cronologia · catálogo derivado</span>
-        <h1 className="page-title">Cronologia</h1>
-        <p className="page-desc">
+        <span className="kicker">Diário de aprendizado</span>
+        <h1>Cronologia</h1>
+        <p className="desc">
           Publicações, notas de estudo, inícios e conquistas, todos derivados do catálogo MDX.
         </p>
       </div>
 
       {years.length > 0 ? (
-        <div className="timeline-stack">
-          {years.map(([year, yearEvents]) => (
-            <section className="tl-year-group" key={year}>
-              <h2 className="tl-year">{year}</h2>
-              <div className="tl-lines">
-                {yearEvents.map((event) => (
-                  <Link className="tl-row" href={event.href} key={event.id}>
-                    <time className="tl-date" dateTime={event.date}>
-                      {formatDate(event.date)}
-                    </time>
-                    <span className={`tl-type${event.hot ? " hot" : ""}`}>
-                      {TYPE_LABEL[event.type]}
-                    </span>
-                    <span className="tl-main">
-                      <span className="tl-t">{event.label}</span>
-                      <span className="tl-detail">{event.detail}</span>
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+        years.map(([year, yearEvents]) => (
+          <section className="tl-year-group" key={year}>
+            <h2 className="tl-year">{year}</h2>
+            <div className="tl-lines">
+              {yearEvents.map((event) => (
+                <Link className="tl-row" href={event.href} key={event.id}>
+                  <time className="tl-date" dateTime={event.date}>
+                    {formatDate(event.date)}
+                  </time>
+                  <span className={`tl-type${event.hot ? " hot" : ""}`}>
+                    {TYPE_LABEL[event.type]}
+                  </span>
+                  <span className="tl-main">
+                    <span className="tl-t">{event.label}</span>
+                    <span className="tl-detail">{event.detail}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))
       ) : (
         <div className="empty-state">
           <h2>Cronologia vazia</h2>

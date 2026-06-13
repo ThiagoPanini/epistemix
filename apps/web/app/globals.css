@@ -1274,13 +1274,13 @@ button {
   letter-spacing: 0.04em;
 }
 
-.cmt-cta a,
-.cmt-cta a:hover {
+.cmt-cta a {
   color: var(--ac-text);
 }
 
-/* biome-ignore lint/style/noDescendingSpecificity: intentional cascade for hover state */
+/* biome-ignore lint/style/noDescendingSpecificity: .lead h2 a:hover has higher specificity but is a different context */
 .cmt-cta a:hover {
+  color: var(--ac-text);
   text-decoration: underline;
 }
 
@@ -1357,7 +1357,6 @@ button {
   transition: color 140ms;
 }
 
-/* biome-ignore lint/style/noDescendingSpecificity: intentional cascade for hover state */
 .tl-row:hover .tl-t {
   color: var(--ac-text);
 }
