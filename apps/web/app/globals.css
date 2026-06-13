@@ -1838,6 +1838,20 @@ svg.graph {
   font-size: 17px;
   letter-spacing: -0.02em;
   color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.auth-rule {
+  height: 1px;
+  background: var(--ln);
+  border: none;
+  margin: 0 0 20px;
+}
+
+.auth-value-prop {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--fnt);
   margin-bottom: 28px;
 }
 

@@ -55,7 +55,10 @@ export default function SignInPage() {
         <Link href="/" className="auth-brand">
           epistemix
         </Link>
-        <h1 className="auth-title">Entrar</h1>
+        <div className="auth-rule" />
+        <p className="auth-value-prop">
+          Entre para votar, comentar e acompanhar o que está sendo publicado.
+        </p>
 
         {HAS_SOCIAL && (
           <div className="auth-social">
