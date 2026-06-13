@@ -1,0 +1,10 @@
+- slug: courses
+  title: Courses
+  kind: with_sources
+  order: 1
+  description: "Section whose directory does not exist yet."
+- slug: blog
+  title: Blog
+  kind: direct
+  order: 2
+  description: "Direct section with no posts."

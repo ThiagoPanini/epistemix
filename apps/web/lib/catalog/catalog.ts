@@ -91,7 +91,14 @@ function loadDirectPosts(rootDir: string, section: Section, knownTags: Set<strin
 function loadSources(rootDir: string, section: Section): Source[] {
   if (section.kind !== "with_sources") return [];
 
-  return listDirs(join(rootDir, section.slug)).map((slug) => {
+  let slugs: string[];
+  try {
+    slugs = listDirs(join(rootDir, section.slug));
+  } catch {
+    return [];
+  }
+
+  return slugs.map((slug) => {
     const raw = sourceFileSchema.parse(readYaml(join(rootDir, section.slug, slug, "source.yml")));
     return {
       slug,

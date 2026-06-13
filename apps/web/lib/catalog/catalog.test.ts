@@ -256,6 +256,22 @@ describe("loadCatalog — Knowledge Graph (D3)", () => {
   });
 });
 
+describe("loadCatalog — missing content directories", () => {
+  it("returns empty list when a with_sources section directory does not exist", () => {
+    const catalog = loadCatalog(fixture("missing-dir"));
+    expect(catalog.getSources("courses")).toEqual([]);
+  });
+
+  it("returns empty list when a direct section directory does not exist", () => {
+    const catalog = loadCatalog(fixture("missing-dir"));
+    expect(catalog.getDirectPosts("blog")).toEqual([]);
+  });
+
+  it("does not throw when loading catalog with missing content directories", () => {
+    expect(() => loadCatalog(fixture("missing-dir"))).not.toThrow();
+  });
+});
+
 describe("loadCatalog — build-time validation", () => {
   it("throws when a post uses a tag outside tags.yml (invariante 9)", () => {
     expect(() => loadCatalog(fixture("invalid-tag"))).toThrow(/naoexiste/);
