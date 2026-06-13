@@ -149,7 +149,9 @@ export default async function SourceOrDirectPostPage({
               <h1>{post.title}</h1>
               {post.summary && <p className="standfirst">{post.summary}</p>}
               <div className="metaline">
-                <span><b>{formatDate(post.date)}</b></span>
+                <span>
+                  <b>{formatDate(post.date)}</b>
+                </span>
                 <span>{getReadTime(post.body)} de leitura</span>
               </div>
               {post.tags.length > 0 && (
