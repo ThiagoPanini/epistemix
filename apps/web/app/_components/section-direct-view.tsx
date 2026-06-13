@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Post, Section, Tag } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
+import { TagLink } from "./tag-link";
 
 export function SectionDirectView({
   section,
@@ -37,14 +38,7 @@ export function SectionDirectView({
               {post.tags.length > 0 && (
                 <div className="tagrow" style={{ marginTop: "6px" }}>
                   {post.tags.map((tag) => (
-                    <Link
-                      key={tag}
-                      href={`/tags/${tag}`}
-                      className="tag"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {tagLabel(tag)}
-                    </Link>
+                    <TagLink key={tag} slug={tag} label={tagLabel(tag)} />
                   ))}
                 </div>
               )}
