@@ -30,10 +30,17 @@ export async function GET(
   const contentType =
     CONTENT_TYPE_BY_EXT[extname(absolutePath).toLowerCase()] ?? "application/octet-stream";
 
-  return new Response(new Uint8Array(data), {
-    headers: {
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=3600",
-    },
-  });
+  const headers: Record<string, string> = {
+    "Content-Type": contentType,
+    "Cache-Control": "public, max-age=3600",
+  };
+
+  // SEC-3: SVG can execute script in the site's origin when served as image/svg+xml.
+  // Sandbox + default-src 'none' neutralises any embedded script/event handler.
+  if (contentType === "image/svg+xml") {
+    headers["Content-Security-Policy"] = "sandbox; default-src 'none'";
+    headers["Content-Disposition"] = "inline";
+  }
+
+  return new Response(new Uint8Array(data), { headers });
 }
