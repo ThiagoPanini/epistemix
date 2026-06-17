@@ -46,4 +46,17 @@ describe("articleJsonLd", () => {
     const parsed = JSON.parse(json);
     expect("description" in parsed).toBe(false);
   });
+
+  it("SEC-4: escapes < so </script> in title cannot break the JSON-LD script tag", () => {
+    const json = articleJsonLd({
+      title: "XSS </script><script>alert(1)</script>",
+      summary: "",
+      date: "2026-06-10",
+      url: "x",
+    });
+    expect(json).not.toContain("</script>");
+    // must still be parseable and round-trip correctly
+    const parsed = JSON.parse(json);
+    expect(parsed.headline).toBe("XSS </script><script>alert(1)</script>");
+  });
 });

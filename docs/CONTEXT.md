@@ -48,6 +48,7 @@ Este documento é o **glossário e conjunto de invariantes** que define a lingua
 16. `Source` pertence a exatamente uma `Section` com `kind = with_sources`. As Sections `Courses`, `Books` e `Certifications` são `with_sources` (o curso/livro/certificação é o `Source`; resenhas e notas são `Post`s vinculados a ele). `Blog` e `Presentations` são `direct`.
 17. **Status de estudo é ortogonal à visibilidade.** `ongoing`/`concluded` não substituem nem se misturam com `draft`/`published`. Um `Artifact` `draft` permanece oculto (invariante 6) independentemente do status de estudo.
 18. **`Now Learning`, `Timeline` e `Knowledge Graph` são projeções derivadas do catálogo.** Não têm persistência, autoria, nem identidade próprias: todo item que aparece neles existe como `Artifact` ou `Source`. Mudar o catálogo é a única forma de mudá-los.
+19. **`role` é atribuído server-side; nunca aceito como input do cliente.** O campo `role` do `User` é declarado com `input: false` no better-auth — o servidor sempre ignora qualquer `role` enviado no corpo de signup ou update. Valor padrão é `"user"`; promoção a `"admin"` é operação manual exclusiva do operador no banco (SEC-1).
 
 ## Boundaries de domínio
 

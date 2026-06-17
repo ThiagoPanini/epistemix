@@ -50,6 +50,10 @@ async def record_view(
 ) -> bool:
     """Inserts a view row; dedup via unique constraint.
 
+    SEC-6 (dívida consciente): view count é falsável — epistemix_sid é cookie
+    controlável pelo cliente e o filtro de bot é heurístico (UA-based). A contagem
+    é métrica de vaidade, não controle de segurança; aceita deliberadamente sem fix.
+
     Returns True if a new row was inserted, False if deduped or bot-filtered.
     """
     if is_bot(user_agent):

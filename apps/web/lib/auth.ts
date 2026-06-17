@@ -48,6 +48,8 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "user",
+        // SEC-1: server-controlled — client cannot set role at signup (see docs/CONTEXT.md invariant 19).
+        input: false,
       },
     },
   },

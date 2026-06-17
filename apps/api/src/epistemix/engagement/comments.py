@@ -104,9 +104,13 @@ async def delete_comment(
     is_admin: bool,
 ) -> None:
     """Removes a comment. Admins can remove any; users can only remove their own."""
-    result = await db.execute(
-        select(ArtifactComment).where(ArtifactComment.id == uuid.UUID(comment_id))
-    )
+    try:
+        comment_uuid = uuid.UUID(comment_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found."
+        ) from None
+    result = await db.execute(select(ArtifactComment).where(ArtifactComment.id == comment_uuid))
     comment = result.scalar_one_or_none()
     if comment is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found.")

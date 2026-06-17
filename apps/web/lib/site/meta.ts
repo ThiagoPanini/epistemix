@@ -24,7 +24,9 @@ export function articleJsonLd(opts: {
   date: string;
   url: string;
 }): string {
-  return JSON.stringify({
+  // SEC-4: JSON.stringify does not escape `<`, so a title/summary containing
+  // `</script>` would break the surrounding <script> tag. Escape after stringify.
+  const raw = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Article",
     headline: opts.title,
@@ -34,4 +36,5 @@ export function articleJsonLd(opts: {
     author: { "@type": "Person", name: SITE_AUTHOR },
     publisher: { "@type": "Person", name: SITE_AUTHOR },
   });
+  return raw.replace(/</g, "\\u003c");
 }

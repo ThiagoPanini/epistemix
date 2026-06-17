@@ -266,6 +266,18 @@ async def test_delete_comment_raises_403_for_other_user():
     assert exc_info.value.status_code == 403
 
 
+@pytest.mark.asyncio
+async def test_delete_comment_raises_404_for_malformed_uuid():
+    """SEC-5: malformed comment_id must return 404, not 500 (ValueError unhandled)."""
+    from fastapi import HTTPException
+
+    db = AsyncMock()
+
+    with pytest.raises(HTTPException) as exc_info:
+        await delete_comment(db, "not-a-uuid", requesting_user_id="user123", is_admin=False)
+    assert exc_info.value.status_code == 404
+
+
 # ---------------------------------------------------------------------------
 # API endpoint tests
 # ---------------------------------------------------------------------------
