@@ -1,0 +1,248 @@
+---
+title: "Progressive disclosure: dar ao agente o mapa, não o território"
+date: 2026-06-22
+status: published
+tags: [ai, agents]
+summary: "De onde vem o progressive disclosure (UX, 1995), por que o orçamento de atenção do agente o exige, e como ele vira a forma madura de steering: dar um mapa e deixar o agente navegar em vez de despejar tudo no contexto."
+---
+
+No Post anterior, eu deixei uma tarefa pendente: cortar a árvore de diretórios do `AGENTS.md` e
+empurrar o que é de um domínio só para fora do raiz. Aquilo tinha nome, e eu citei de passagem. O
+nome é *progressive disclosure*.
+
+A ideia cabe numa frase. Em vez de despejar toda a complexidade no contexto de uma vez, você dá ao
+agente um mapa e deixa ele navegar até o que precisa. O Post passado diagnosticou a doença, o
+arquivo global que incha e custa token em toda request. Este é sobre a cura, em detalhe.
+
+A aula `04.03` do **AI Coding for Real Engineers** apresenta o conceito quase sem querer, como
+descoberta orgânica de quem está organizando um `CLAUDE.md` grande demais. Mas a ideia não nasceu
+em 2025, e não nasceu para agentes. Ela tem trinta anos e veio do design de interface.
+
+## De onde vem a ideia: 1995, não 2025
+
+*Progressive disclosure* é um termo de UX, cunhado por Jakob Nielsen. Ele introduziu a técnica em
+1995 e a documentou num artigo da Nielsen Norman Group em 2006. A definição é enxuta: mostre ao
+usuário só as poucas opções mais importantes primeiro, e ofereça o conjunto maior de opções
+especializadas sob demanda.
+
+O exemplo canônico é a caixa de diálogo de impressão. Você abre e vê o básico, quantas cópias,
+quais páginas, qual impressora. As opções raras, escala e ordem inversa, vivem atrás de um botão de
+avançado. Quem imprime todo dia nunca precisa do segundo nível, e quem precisa, acha.
+
+Nielsen mediu o ganho. A técnica melhora três dos cinco componentes de usabilidade: a facilidade de
+aprender, a eficiência de uso e a taxa de erro. O critério de corte é a chave, e é uma frase só:
+você precisa revelar de cara tudo que o usuário precisa com frequência, para que ele só vá ao
+segundo nível em ocasiões raras. Guarde essa frase, porque ela governa o resto do texto.
+
+## O mesmo problema, agora no contexto do agente
+
+Matt chega ao conceito pela porta dos fundos. Ele pega o `CLAUDE.md` da aula anterior e enche de
+sedimento, como se vários devs tivessem despejado suas ideias ali ao longo de meses. Se você usa o
+agente em time, seu arquivo provavelmente se parece com esse.
+
+O problema é o que o Post passado já cobriu, visto de outro ângulo. As instruções estão todas no
+escopo global, e nem todas valem para toda request. Pior: elas competem com as instruções da
+tarefa, com o plano que você acabou de escrever. Uma sessão que só toca front-end paga pela regra
+de parâmetro posicional, pela regra de serviço, pela regra de timestamp no banco, e não usa
+nenhuma.
+
+A visualização que Matt usa fixa a imagem. Imagine cada instrução do arquivo como um borrão cinza
+dentro da janela de contexto. Alguns borrões só importam para o front-end, outros só para o banco,
+outros só para o React Router. Olhando assim, é estranho que estejam todos no mesmo arquivo.
+
+Esse é exatamente o menu de site ruim que Nielsen descreve. Cem opções numa lista única e plana no
+topo da página, todas visíveis, todas disputando a atenção. O arquivo inchado é esse menu. Joga
+toda a complexidade de uma vez em vez de revelar aos poucos.
+
+## A mecânica: agrupar, separar, apontar
+
+A saída é organizar por relevância, não por conveniência de ter um arquivo só. Instruções que andam
+juntas vão para o mesmo lugar, porque uma sessão que precisa de um conselho de React Router
+provavelmente vai precisar de mais conselhos de React Router. Cada grupo vira um arquivo Markdown
+separado, e o `CLAUDE.md` guarda só os links que levam ao grupo certo quando ele faz falta.
+
+```markdown
+<!-- Antes: a regra inteira mora no arquivo global, paga em toda request -->
+Sempre use objeto em vez de parâmetros posicionais. Funções com dois
+argumentos do mesmo tipo aceitam a chamada com os campos trocados...
+
+<!-- Depois: um ponteiro, a regra mora fora e carrega sob demanda -->
+Para convenções de TypeScript, veja `docs/TYPESCRIPT.md`.
+```
+
+O que muda é o que o agente paga por padrão. No arquivo separado, a regra de TypeScript não entra
+em toda conversa: ela carrega só quando o agente vai mexer em TypeScript. Matt resume com a metáfora
+que dá título a este Post. Em vez de despejar a complexidade, você entrega um mapa e deixa o agente
+navegar por ele.
+
+| Habitat | O que fica de cara | O que espera no segundo nível |
+| --- | --- | --- |
+| Diálogo de impressão (UX) | cópias, páginas, impressora | escala e ordem inversa, atrás de "avançado" |
+| `CLAUDE.md` (steering) | descrição do projeto, build não óbvio | regra de domínio, atrás de um link |
+| Runtime do agente | caminhos e nomes de arquivo | o conteúdo, lido via ferramenta sob demanda |
+
+A tabela mostra que é a mesma jogada em três escalas. Reduzir as escolhas de cara, e deixar o resto
+a um salto de distância.
+
+## Por que funciona: o orçamento de atenção é físico
+
+Até aqui a justificativa é intuição. A Anthropic deu a ela uma base concreta, no artigo sobre
+engenharia de contexto. A tese é que contexto é recurso finito, e não no sentido de cota de tokens.
+É finito no sentido de atenção.
+
+O fenômeno tem nome: *context rot*, a podridão de contexto. Conforme o número de tokens na janela
+cresce, a capacidade do modelo de recuperar com precisão qualquer informação dali cai. Não é que o
+token extra seja só caro. Ele degrada o que já estava lá.
+
+A causa está na arquitetura. Em uma janela de n tokens, há n² relações entre pares para a atenção
+processar. Quanto mais longo o contexto, mais essa atenção se estica fino, e surge uma tensão
+direta entre tamanho do contexto e foco. O modelo tem, ainda por cima, menos parâmetros
+especializados para dependências de longo alcance, porque foi treinado mais em sequências curtas.
+
+Daí a Anthropic chega a um princípio que repete duas vezes no texto, de propósito: ache o menor
+conjunto possível de tokens de alto sinal que maximiza a chance do resultado que você quer.
+*Progressive disclosure* é uma das formas de obedecer a ele. Você não enche o orçamento de atenção
+com a regra que talvez não use. Você deixa o ponteiro, e gasta o orçamento só quando a regra
+importa.
+
+## Just-in-time: o agente busca em vez de receber tudo
+
+Tem um segundo modo de pensar a mesma ideia, e ele inverte a direção. Em vez de você empurrar
+contexto para o agente, o agente puxa contexto quando precisa. A Anthropic chama isso de
+*just-in-time*.
+
+A mecânica é guardar identificadores leves, caminho de arquivo, query salva, link, e usar esses
+ponteiros para carregar o dado em runtime, via ferramenta. O paralelo com a cognição humana é
+direto. A gente não decora corpus inteiro: a gente usa sistema de arquivos, caixa de entrada e
+*bookmarks* para achar o que precisa na hora.
+
+O próprio Claude Code trabalha assim com dados grandes. Ele escreve uma query direcionada, guarda o
+resultado, e usa `head` e `tail` para analisar volume sem nunca carregar o objeto inteiro no
+contexto. A exploração vira sinal: o tamanho do arquivo sugere complexidade, a convenção de nome
+sugere propósito, o timestamp serve de proxy de relevância. O agente monta o entendimento camada
+por camada, e mantém na memória de trabalho só o necessário.
+
+## A forma madura: Agent Skills e os três níveis
+
+O *progressive disclosure* deixa de ser truque de organização de arquivo e vira padrão de sistema
+nos *Agent Skills* da Anthropic. Uma *skill* é uma pasta com instruções, scripts e recursos que o
+agente descobre e carrega sob demanda. Ela é construída em três níveis de revelação.
+
+| Nível | O que carrega | Quando |
+| --- | --- | --- |
+| 1, metadado | `name` e `description` no frontmatter | no startup, sempre, para o agente saber quando a skill serve |
+| 2, instrução | o corpo do `SKILL.md` | quando o agente julga a skill relevante |
+| 3, recurso | arquivos e scripts anexos | só quando o agente navega até eles |
+
+O nível 1 é o índice, e ele é minúsculo de propósito. Só o que o agente lê no startup:
+
+```yaml
+---
+name: pdf-form-filler
+description: Preenche e extrai campos de formulários PDF.
+---
+```
+
+A analogia da Anthropic é a de um manual bem organizado: índice primeiro, depois o capítulo certo, e
+o apêndice detalhado só no fim. O metadado dá ao agente sinal suficiente para saber quando abrir o
+capítulo, sem pagar pelo capítulo inteiro antes da hora.
+
+O efeito é forte: o contexto que você pode empacotar numa skill é, na prática, ilimitado.
+Documentação de API enorme, dataset grande, pilha de exemplos, nada disso custa token enquanto o
+agente não abre. E há um nível que escapa do contexto de vez. Um script anexo roda como ferramenta,
+então o agente extrai campos de um PDF rodando código pronto, sem carregar nem o script nem o PDF na
+janela. A operação determinística substitui a geração cara em tokens.
+
+## O conceito recorre, e não só em Markdown
+
+Matt avisa, no fim da aula, que *progressive disclosure* vai voltar de novo e de novo ao longo do
+curso. Ele não exagera. O mesmo problema que incha o arquivo de instrução incha o catálogo de
+ferramentas, e a saída é idêntica.
+
+O sintoma nas ferramentas espelha o do `CLAUDE.md` gordo. A maioria dos clientes de MCP carrega toda
+definição de ferramenta de cara, direto no contexto. Conforme o número de ferramentas conectadas
+cresce, as definições e os resultados intermediários passando pela janela pesam, deixam o agente
+lento e caro. A resposta da Anthropic tem um número que não dá para ignorar. Em vez de expor cada
+ferramenta como chamada direta, você apresenta os servidores MCP como API de código: só o nome e uma
+descrição truncada entram no *system prompt*, e o modelo lê o módulo da ferramenta do filesystem só
+quando vai usá-la. Um fluxo que consumia cerca de 150 mil tokens passando tudo pelo modelo foi
+reescrito assim e caiu para cerca de 2 mil. Uma redução de 98,7%, com a mesma ideia de revelar o
+nome e esconder a definição.
+
+O subagente é a versão da jogada para a exploração. Ele roda numa janela de contexto própria, faz a
+busca pesada por arquivos e padrões, e devolve à conversa principal só a conclusão. O thread
+principal paga pelo resultado, não pelo caminho até ele. É a mesma economia, aplicada ao raciocínio
+em vez do arquivo: o detalhe da investigação fica fora, e só a síntese sobe.
+
+E o conceito é mais velho que tudo isso. Esconder o detalhe atrás de uma interface pequena é
+*information hiding*, que David Parnas descreveu em 1972 para decidir como quebrar um sistema em
+módulos. Um módulo bom expõe um contrato enxuto e guarda a implementação para si. O `AGENTS.md`
+enxuto é o mesmo princípio com outra roupa: uma interface pequena para o agente, com o resto
+escondido até fazer falta. Não é moda de 2025. É engenharia de software de sempre, reaplicada à
+janela de contexto.
+
+## O custo que ninguém conta: navegar tem preço
+
+Aqui entra a auto-auditoria, porque *progressive disclosure* não é ganho de graça. O próprio Nielsen
+avisa: passar de dois níveis de revelação costuma derrubar a usabilidade, porque o usuário se perde
+no meio do caminho. Quando os passos são interdependentes, ele ainda vai e volta entre eles,
+corrigindo.
+
+O agente herda a mesma conta. Cada salto até um arquivo apontado é uma chamada de ferramenta, com
+latência e token próprios. E tem um agravante que o Post passado já nomeou: o arquivo é contexto,
+não é lei. O agente pode simplesmente não seguir o ponteiro, porque julgou que não precisava. Você
+dispersou a regra, e ela não foi lida.
+
+O modo de falhar do excesso é o espelho do modo de falhar da bola de lama. Espalhe a única regra que
+importa por cinco arquivos, e o agente nunca a monta inteira. *Progressive disclosure* é um botão de
+regulagem, não um interruptor. O critério do Nielsen continua valendo: revele de cara o que quase
+toda sessão precisa, e só empurre para o segundo nível o que é raro de verdade.
+
+## No epistemix: o que já está disperso e o que ainda está empilhado
+
+Esse conceito conversa diretamente com o epistemix, e dessa vez a leitura é mais elogiosa que a do
+Post passado. O repositório já pratica *progressive disclosure* em vários lugares, sem nunca ter
+chamado pelo nome.
+
+O `AGENTS.md` aponta para `docs/adr/` em quase toda decisão, manda o glossário de domínio para
+`docs/CONTEXT.md` e o sistema visual para `docs/DESIGN.md`. O agente só paga por esses detalhes
+quando vai atrás deles. As *skills* em `.agents/skills/` são o padrão maduro em miniatura: a própria
+skill que escreve este texto carrega `commands/<comando>.md` sob demanda, e o `SKILL.md` dela manda,
+em letra de forma, não ler tudo sempre. É o nível 2 e o nível 3 funcionando dentro do meu fluxo.
+
+O que ainda está empilhado é o que o Post passado já tinha apontado. O `AGENTS.md` carrega a árvore
+de diretórios inteira e a lista de stack no raiz, visível em toda request, e essa é a parte de menu
+plano que devia virar ponteiro. A cura tem nome agora, e não é mais "cortar coisa": é mover a árvore
+para um doc apontado, deixar no raiz só a descrição de uma frase e o que toda tarefa usa, e medir a
+diferença em tokens. O conceito que faltava para fechar a tarefa amarela do Post anterior era esse.
+
+## O que fica para o meu fluxo
+
+*Progressive disclosure* é a mesma ideia em três escalas. Nielsen aplicou à tela, Matt ao arquivo de
+steering, a Anthropic ao runtime do agente. Em todas, o jogo é o mesmo: poucos itens de cara, o
+resto a um salto de distância, sob demanda.
+
+A disciplina que levo é tratar a janela de contexto como o orçamento de atenção que ela é, não como
+um depósito. Virou uma regra de três:
+
+1. Revelar de cara só o que quase toda sessão usa, pelo critério do Nielsen, e mandar o raro para um
+   arquivo apontado.
+2. Preferir ponteiro leve a conteúdo inline, para o agente puxar *just-in-time* em vez de carregar
+   tudo de antemão.
+3. Verificar que o agente seguiu o ponteiro, porque dispersar uma regra que ele não lê é tão ruim
+   quanto enchê-lo de regra que ele ignora.
+
+No fim, *progressive disclosure* não é sobre esconder informação do agente. É sobre confiar que ele
+navega um mapa melhor do que lê um território inteiro. O `AGENTS.md` do epistemix ainda entrega
+território demais. Essa é a próxima linha que vou cortar, agora com o nome certo na mão.
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [Progressive Disclosure, Jakob Nielsen, Nielsen Norman Group](https://www.nngroup.com/articles/progressive-disclosure/)
+- [Equipping agents for the real world with Agent Skills, Anthropic](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
+- [Effective context engineering for AI agents, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [Code execution with MCP: building more efficient AI agents, Anthropic](https://www.anthropic.com/engineering/code-execution-with-mcp)
+- David Parnas, "On the Criteria To Be Used in Decomposing Systems into Modules", 1972, a origem do *information hiding*
+- Aula `04.03-progressive-disclosure`, do material bruto extraído do cohort
+- Post anterior, `agents-md-e-claude-md-steering-que-entra-em-toda-request`, sobre o custo global do arquivo

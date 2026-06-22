@@ -1,0 +1,231 @@
+---
+title: "Memória do agente: o steering que ele escreve sozinho"
+date: 2026-06-22
+status: published
+tags: [ai, agents]
+summary: "O que é a memória automática do Claude Code, como ela inverte a autoria do steering ao deixar o agente anotar sobre o seu projeto, onde isso se encaixa nos quatro tipos de memória de agente, que ferramentas da comunidade vão além do built-in, e por que todo sistema de memória corre o risco de apodrecer junto com o repo."
+---
+
+A série inteira foi sobre o mesmo gesto: eu escrevo o *steering*, o agente lê. Eu escrevo o
+`AGENTS.md`, eu escrevo a skill, eu decido o que entra em cada request. Esta aula vira a mão na
+direção contrária.
+
+A memória automática deixa o agente escrever o próprio *steering*. Ele anota o que aprendeu sobre o
+seu projeto e relê na sessão seguinte, sem você digitar nada. Matt resume numa frase: a função
+permite que o Claude se guie sozinho ao longo do tempo.
+
+E aqui eu preciso ser honesto, do mesmo jeito que o Matt foi. Ele abre a aula `04.06` dizendo que
+ainda não sabe como se sentir sobre isso. Eu também não sei, e é por isso que este Post é metade
+explicação, metade pergunta em aberto.
+
+## A inversão de autoria: de quem você instrui para o que ele anota
+
+O Claude Code carrega dois mecanismos de memória no começo de toda conversa, e eles não são a mesma
+coisa. O `CLAUDE.md` é o que você escreve para o agente. A memória automática é o que o agente
+escreve para si mesmo.
+
+A distinção mais limpa que achei está na própria documentação. O `CLAUDE.md` é a sua instrução para
+o Claude. O `MEMORY.md` é o caderno do Claude sobre o seu projeto. Um é prescrição que desce de
+cima, o outro é aprendizado que sobe da prática.
+
+Você descobre os dois com o comando `/memory`. Ele lista três tipos: a memória de usuário, que é o
+seu `CLAUDE.md` global, a memória de projeto, que é o mesmo arquivo versionado no repo, e a memória
+automática, gerada pelo próprio agente. Os dois primeiros você conhece desde o primeiro Post da
+série. O terceiro é o assunto novo.
+
+A memória automática junta conhecimento entre sessões sem você escrever nada. O agente anota comando
+de build, achado de *debug*, preferência de estilo, hábito de fluxo. Ele não salva toda sessão:
+decide o que vale guardar pelo critério de a informação ser útil numa conversa futura.
+
+| Eixo | `CLAUDE.md` | Memória automática |
+| --- | --- | --- |
+| Quem escreve | você | o agente |
+| O que guarda | instrução e regra | aprendizado e padrão |
+| Escopo | projeto, usuário ou org | por repositório, dividido entre worktrees |
+| Carga | toda sessão, inteiro | toda sessão, primeiras 200 linhas ou 25KB |
+| Serve para | padrão de código, fluxo, arquitetura | build, achado de debug, preferência que ele descobre |
+
+No Claude Code isso já vem ligado desde a versão `2.1.59`, e dá para desligar com
+`autoMemoryEnabled: false` ou apagar o que não quiser. Não é um plugin que você instala. É um
+comportamento que já está rodando enquanto você trabalha, anotando nos bastidores.
+
+## Como funciona por baixo: onde mora, o que carrega, quando
+
+Cada projeto ganha um diretório próprio em `~/.claude/projects/<project>/memory/`. Esse caminho de
+projeto vem do repositório Git, então todas as worktrees e subpastas do mesmo repo dividem a mesma
+memória. Ela
+é local da máquina: não viaja para outro computador nem para um ambiente na nuvem.
+
+O diretório tem uma estrutura que vai soar familiar. Há um `MEMORY.md` no topo, que é um índice
+conciso, e arquivos de tópico ao lado, um por assunto, tipo `debugging.md` ou `api-conventions.md`.
+O índice carrega em toda sessão. Os arquivos de tópico só quando o agente precisa deles.
+
+Aqui o sistema repete o princípio que nomeei no segundo Post. Só as primeiras 200 linhas do
+`MEMORY.md`, ou os primeiros 25KB, entram no contexto no *startup*. O resto espera. O agente mantém
+o índice enxuto movendo o detalhe para os arquivos de tópico, e lê cada um sob demanda com as
+ferramentas normais de arquivo.
+
+Isso é *progressive disclosure*, agora virada para dentro. O índice é o nível um, sempre presente. O
+arquivo de tópico é o nível dois, carregado *just-in-time*. O agente faz com as próprias anotações
+exatamente o que uma skill faz com os anexos dela: mostra pouco de graça, e guarda o caro atrás de
+um salto.
+
+## Memória não é configuração, é contexto
+
+Tem um detalhe na documentação que muda como eu leio o sistema inteiro. O Claude trata os dois
+mecanismos como contexto, não como configuração obrigatória. Uma nota de memória é uma sugestão que
+o agente lê, não uma regra que ele tem que obedecer.
+
+Essa diferença importa na hora de confiar. Se você quer barrar uma ação aconteça o que acontecer, o
+lugar certo não é a memória, é um *hook* de `PreToolUse`, que roda como comando de shell num evento
+fixo do ciclo de vida. A memória molda comportamento. O hook força comportamento.
+
+Esse ponto conversa direto com a distinção que venho carregando. O `AGENTS.md` é fato que o agente
+lê, a skill é procedimento que ele puxa, e a memória é aprendizado que ele anota, mas nenhum dos três
+é lei. Lei mesmo, no Claude Code, é hook e permissão. O resto é contexto bem-escrito tentando
+influenciar uma decisão.
+
+## A amnésia do agente e os quatro tipos de memória
+
+Vale subir o nível de abstração, porque a feature do Claude Code é uma instância de um problema
+maior. Todo agente começa cada sessão com uma *context window* limpa. Ele esquece tudo da conversa
+anterior no instante em que ela fecha. Esse esquecimento tem nome na literatura: **amnésia do agente**.
+
+O campo convergiu numa taxonomia emprestada da ciência cognitiva. O framework CoALA, de Princeton,
+formalizou em 2023 quatro tipos de memória de agente. Eu achei útil porque ele dá lugar a cada peça
+que a série já tocou.
+
+| Tipo | O que é | Onde vive num agente de código |
+| --- | --- | --- |
+| *Working* | o contexto da conversa atual | a context window, o assunto do primeiro Post |
+| *Procedural* | a lógica de decisão, o system prompt | as instruções e as skills |
+| *Semantic* | fato e preferência acumulados | o `CLAUDE.md` e a memória automática |
+| *Episodic* | registro das interações passadas | log de sessão, ferramentas externas |
+
+Encaixar a memória automática do Claude nesse mapa esclarece o que ela é e o que ela não é. Ela é,
+sobretudo, memória semântica: fato e preferência que o agente destila do seu jeito de trabalhar. Ela
+toca um pouco a procedural, quando anota um procedimento de build. Mas ela não é episódica: não
+guarda o histórico bruto das conversas, guarda a lição extraída delas.
+
+Essa leitura também explica por que a memória automática é tão barata. Guardar todo episódio custaria
+um armazenamento enorme e devolveria ruído. Guardar só a lição semântica é o que cabe num punhado de
+Markdown e ainda ajuda na sessão seguinte. O agente joga fora o diário e fica com a conclusão.
+
+## As ferramentas da comunidade: quando o built-in não basta
+
+A memória automática do Claude resolve o caso barato e local: o que vale lembrar sobre este repo,
+nesta máquina. Quando a necessidade cresce, a comunidade já tem ferramenta. Vale conhecer o terreno,
+porque o built-in é o piso, não o teto.
+
+O Serena é um toolkit MCP de recuperação semântica de código, que dá ao agente uma visão por
+símbolos em vez de leitura de arquivo por arquivo, e traz um sistema de memória que muita gente
+combina com o próprio `AGENTS.md`. O codebase-memory-mcp vai por outra via: indexa o repositório num
+*knowledge graph* persistente e deixa o agente consultar o grafo em vez de ler arquivo, com a
+promessa de cortar tokens em ordens de grandeza.
+
+Do lado dos frameworks de memória pura, dois nomes aparecem sempre. O Letta, herdeiro do MemGPT, é um
+*runtime* onde o agente roda dentro, com uma hierarquia inspirada em sistema operacional: memória
+central sempre no contexto, memória de recall pesquisável, arquivo de longo prazo, e o agente edita a
+própria memória por chamada de ferramenta. O Mem0 é a camada que você acopla a um agente que já
+existe, com uma API de `add()` e `search()` e resolução automática de conflito.
+
+Vale uma correção honesta sobre um terceiro nome que eu tinha na cabeça. O headroom não é memória:
+ele comprime saída de ferramenta, log e arquivo antes de chegarem ao LLM, com a meta de cortar
+tokens sem perder a resposta. É primo do mesmo problema de orçamento que a série toda persegue, mas é
+economia de contexto, não armazenamento de aprendizado. Eu o tinha posto na lista por engano de
+categoria, e prefiro deixar o engano à mostra a fingir que sabia.
+
+| Ferramenta | O que ela lembra | Abordagem |
+| --- | --- | --- |
+| Serena | estrutura do código, notas de projeto | MCP por símbolos via *language server* mais memória |
+| codebase-memory-mcp | a arquitetura do repo como grafo | knowledge graph persistente, consulta no lugar de leitura |
+| Letta (MemGPT) | tudo, em hierarquia de memória | runtime que auto-edita a memória por ferramenta |
+| Mem0 | fato e preferência do usuário | camada de memória plugável, com add e search |
+
+O critério para sair do built-in é direto. Você sobe para uma dessas quando precisa de memória que
+atravessa projetos, de um grafo do código maior do que cabe no contexto, ou de um runtime que
+gerencia a própria memória como um sistema operacional gerencia RAM e disco. Para o resto, o que já
+vem ligado no Claude Code resolve.
+
+## O problema que todo sistema de memória tem: o drift
+
+Aqui mora a ansiedade do Matt, e ela é legítima. O pior que pode acontecer com a memória é ela ficar
+desatualizada em relação ao estado real do repo. Ele diz que esse é o medo que sempre o pega quando
+vê sistema de memória, e eu assino embaixo.
+
+O exemplo da aula é concreto. A memória anotou que os testes usam `pushSchema`, mas ele já
+tinha sido depreciado naquele repo. A nota foi verdadeira no dia em que o agente a escreveu. O código
+andou, a nota ficou, e agora ela mente com confiança.
+
+Esse é o **drift**, e ele é pior que a ausência de memória. Memória vazia faz o agente perguntar.
+Memória velha faz o agente agir errado achando que está certo, porque o aprendizado salvo tem a mesma
+cara de um aprendizado válido. O sistema que se escreve sozinho também apodrece sozinho.
+
+A mitigação que o Matt propõe é higiene manual: a cada par de semanas, abrir o `MEMORY.md` e remover
+o que conflita com o que você de fato quer. É bom conselho, e é incompleto. A defesa mais forte não é
+confiar menos, é verificar na hora de ler.
+
+E essa defesa não é invenção minha. As instruções de memória que rodam nesta sessão dizem, em letra
+de forma, que a memória reflete o que era verdade quando foi escrita, e que se ela cita um arquivo,
+função ou flag, eu devo conferir que aquilo ainda existe antes de recomendar. A memória registra o
+que era verdade, não o que é verdade. Ler com essa suspeita embutida é o que a torna segura.
+
+## No epistemix: a governança que eu já tinha escrito sem entender
+
+Dessa vez o epistemix não é uma analogia, é o ambiente onde isto está acontecendo agora. Enquanto eu
+escrevo este Post, o Claude Code mantém um diretório de memória para o repositório, com um `MEMORY.md`
+de índice e dois arquivos de fato: um sobre cuidado com Git, outro sobre a captura da minha voz de
+escrita. É o sistema da aula `04.06`, rodando no meu projeto, sem eu ter pedido.
+
+O que me pega de surpresa é uma regra que eu já tinha escrito no `AGENTS.md`. Ela diz que a memória
+auto-salva local deve conter apenas perfil do usuário e feedback de colaboração, nunca decisão de
+projeto, porque decisão de projeto vive em `docs/`, nos ADRs e no `CONTEXT.md`. Escrevi essa
+fronteira meses atrás, por instinto, e só agora entendo por que ela é a resposta certa para o drift.
+
+A regra separa o que apodrece do que não apodrece. Quem eu sou e como gosto de trabalhar muda
+devagar, então cabe numa memória local de máquina. Uma decisão de arquitetura muda rápido e precisa
+de revisão, então vive num doc versionado, onde um PR a discute e um diff a data. Memória guarda o
+durável e pessoal. O repositório guarda o decidido e revisável.
+
+Esse arranjo desarma o drift na origem. A coisa que mais muda, a decisão técnica, nunca entra no
+lugar que ninguém revisa. E a estrutura que eu rodo bate com o padrão da documentação sem eu ter
+copiado: um fato por arquivo, um índice apontando para cada um, e links entre eles. É
+o mesmo progressive disclosure da feature oficial, o índice no contexto e o detalhe a um salto de
+distância. O instinto acertou a forma antes de eu ler a teoria.
+
+## O que fica para o meu fluxo
+
+A série andou um arco completo de autoria. Os três primeiros Posts foram sobre o *steering* que eu
+escrevo e o agente lê: o arquivo global, o princípio da revelação progressiva, a skill que empacota
+capacidade. Este foi sobre o *steering* que o agente escreve e relê. A mão inverteu.
+
+A pergunta também inverteu. Não é mais o que eu instruo o agente a fazer. É o que eu deixo o agente
+lembrar sobre mim. A resposta que levo virou uma regra de três:
+
+1. Deixar a memória guardar o durável e pessoal: preferência, correção que se repete, jeito de
+   colaborar. Isso muda devagar e ganha em ser lembrado.
+2. Manter o que apodrece fora dela: decisão de arquitetura e invariante de domínio ficam em doc
+   versionado, onde o PR revisa e o diff data.
+3. Ler toda memória com suspeita de validade: ela registra o que era verdade, não o que é, então
+   confiro o arquivo, a função e a flag antes de agir.
+
+No fim, a memória automática não é sobre o agente saber mais. É sobre o agente parar de me fazer
+repetir, sem passar a me enganar com o que envelheceu. Matt ainda não sabe como se sentir, e eu fico
+com uma posição morna de propósito: deixo ligado, leio o que ele anota, e trato cada nota como
+verdade datada. A próxima linha que vou mexer no epistemix não é cortar nem promover. É revisar o que
+o agente já anotou sobre mim, e ver se ainda é verdade.
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [How Claude remembers your project, documentação do Claude Code](https://code.claude.com/docs/en/memory)
+- [Types of AI Agent Memory: Episodic, Semantic, Procedural and More, Atlan](https://atlan.com/know/types-of-ai-agent-memory/)
+- [Serena, toolkit MCP de recuperação semântica de código](https://github.com/oraios/serena)
+- [codebase-memory-mcp, knowledge graph do código](https://github.com/DeusData/codebase-memory-mcp)
+- [headroom, compressão de contexto antes do LLM](https://github.com/chopratejas/headroom)
+- [Mem0 vs Letta (MemGPT), comparação da Vectorize](https://vectorize.io/articles/mem0-vs-letta)
+- [Agent Memory Techniques, compêndio de NirDiamant](https://github.com/NirDiamant/Agent_Memory_Techniques)
+- Aula `04.06-automatic-memory`, do material bruto extraído do cohort
+- Post `agents-md-e-claude-md-steering-que-entra-em-toda-request`, sobre o custo global do arquivo
+- Post `progressive-disclosure-o-mapa-nao-o-territorio`, sobre o princípio que a memória reencarna
+- Post `agent-skills-capacidade-que-o-agente-descobre`, sobre o artefato que o agente descobre

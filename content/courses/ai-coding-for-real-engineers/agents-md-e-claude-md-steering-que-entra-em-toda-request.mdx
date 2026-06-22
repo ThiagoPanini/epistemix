@@ -1,0 +1,289 @@
+---
+title: "AGENTS.md e CLAUDE.md: o steering que entra em toda request"
+date: 2026-06-22
+status: published
+tags: [ai, agents]
+summary: "O que é AGENTS.md, por que Claude Code lê CLAUDE.md, e como esse arquivo barato de steering vira sedimento quando você esquece que ele custa tokens em toda request."
+---
+
+Um agente esquece tudo quando você limpa o contexto. O `AGENTS.md` é a tentativa de devolver
+memória ao repositório, não a você.
+
+Esse é o começo do Dia 02 do **AI Coding for Real Engineers**, o dia de *steering*: como guiar o
+agente para os seus padrões sem repetir a mesma instrução em toda sessão. A primeira ferramenta da
+caixa é a mais simples e a mais perigosa. É um arquivo Markdown que você comita no Git e que o
+agente lê antes de qualquer outra coisa.
+
+A promessa é boa: ensine sua preferência uma vez, colha o comportamento para sempre. A conta tem
+letra miúda: esse arquivo entra em toda request, custa token em toda request, e o agente pode
+ignorá-lo quando quiser. As aulas `04.01` e `04.02` são sobre essa troca, e sobre como não
+estragá-la.
+
+## AGENTS.md é um README para agentes
+
+Um `AGENTS.md` é um arquivo Markdown versionado que customiza o comportamento de agentes de código
+no seu repositório. Ele senta no topo do histórico da conversa, logo abaixo do *system prompt*.
+Pense nele como uma camada de configuração entre as instruções base do agente e o seu código de
+verdade.
+
+Matt usa uma imagem que pega: um *README* para agentes. O *README* normal é para humanos, com
+introdução e *quick start*; o `AGENTS.md` é o lugar previsível onde o agente vai procurar o
+contexto e as instruções para trabalhar no projeto. O conteúdo costuma ter dois escopos. Um escopo
+pessoal, com suas manias de commit e padrões que você prefere, e um escopo de projeto, com o que o
+sistema faz, qual gerenciador de pacotes ele usa e quais decisões de arquitetura valem.
+
+O que mais surpreende é o tamanho da adoção. O `AGENTS.md` virou um padrão aberto, hoje sob a
+guarda da Agentic AI Foundation dentro da Linux Foundation, com mais de 60 mil projetos no
+GitHub usando o formato. A lista de quem lê é longa: Codex, Cursor, Gemini CLI, Devin, Jules,
+Aider, Zed, Copilot, Windsurf. Em monorepo, o agente lê o arquivo mais próximo na árvore de
+diretórios, então cada subprojeto pode ter o seu, e o mais perto vence.
+
+A exceção notável é justamente a ferramenta deste curso. O Claude Code não lê `AGENTS.md`. Ele lê
+`CLAUDE.md`. Matt acha isso bobo a ponto de, durante o curso inteiro, chamar o conceito de
+"agents.md" enquanto escreve, na prática, um `CLAUDE.md`. A ponte entre os dois é trivial: ou um
+*symlink* de `AGENTS.md` para `CLAUDE.md`, ou um import explícito.
+
+```bash
+# A ponte por symlink: um arquivo, dois nomes
+ln -s AGENTS.md CLAUDE.md
+```
+
+A documentação da Anthropic recomenda o import como rota preferida, porque ele deixa você anexar
+instruções específicas do Claude embaixo da fonte compartilhada. É exatamente o que o epistemix
+faz, e eu volto nesse ponto no fim.
+
+## O preço escondido: o arquivo é global
+
+Tem um detalhe na demonstração da aula `04.01` que muda tudo. Matt cria um `CLAUDE.md` com uma
+única linha, "sempre responda em linguagem de pirata", abre o Claude, manda um "oi", e o agente
+responde como pirata. O *steering* funcionou de primeira. Mas ele não optou por aquilo em momento
+nenhum: o arquivo simplesmente entrou na conversa.
+
+Esse é o ponto que governa todo o resto. O arquivo é global para o repositório inteiro. Ele entra
+em toda conversa que você tiver com o agente, relevante ou não para a tarefa da vez. Não
+existe "carregar só quando precisa" no arquivo raiz: ele está sempre lá, custando contexto.
+
+Para deixar a conta visível, Matt cola a linha do pirata umas mil vezes até virar um arquivo de
+duas mil linhas. O resultado aparece na hora: o Claude exibe um aviso de que um `CLAUDE.md` grande
+afeta a performance, e a visualização de contexto mostra cerca de 10% da janela queimada só com o
+arquivo de memória. Dez por cento, antes de o trabalho começar, em algo que diz a mesma coisa duas
+mil vezes. Tudo que você coloca ali custa token em toda request.
+
+Duas mil linhas é caricatura. O problema real é mais discreto. Matt diz ter visto, soltos por aí,
+`CLAUDE.md` com 500 ou 1000 linhas de instrução, e a postura dele com esses arquivos é uma só:
+paranoia. É uma paranoia saudável. O arquivo é global e pago a cada chamada, então o que mora nele
+precisa valer para quase toda chamada.
+
+## Orçamento de instruções é coisa real
+
+A intuição da paranoia tem nome técnico, e veio de fora do curso. O Kyle, da Humanlayer, escreveu
+um artigo sobre `CLAUDE.md` que Matt cita em aula, e a ideia central é a de *instruction budget*,
+um orçamento de instruções.
+
+A medida é direta: LLMs de fronteira com raciocínio seguem por volta de 150 a 200 instruções com
+consistência razoável. Modelos menores atendem a menos que os maiores, e modelos sem raciocínio
+atendem a menos que os com raciocínio. O detalhe que aperta o orçamento: o próprio *system prompt*
+do Claude Code já gasta cerca de 50 dessas vagas. Sobra algo entre 100 e 150 para você.
+
+Cada token do seu `AGENTS.md` disputa esse mesmo espaço, em toda request, mesmo quando é
+irrelevante para a tarefa. Daí o orçamento vira um problema duro de alocação.
+
+| Cenário | Efeito |
+| --- | --- |
+| `AGENTS.md` pequeno e focado | Mais tokens livres para instruções da tarefa específica |
+| `AGENTS.md` grande e inchado | Menos tokens para o trabalho real, e o agente se confunde |
+| Instrução irrelevante carregada | Desperdício de token somado a distração, igual a performance pior |
+
+A conclusão prática é desconfortável para quem gosta de documentar tudo: o `AGENTS.md` ideal é o
+menor possível. A Humanlayer mantém o arquivo raiz dela com menos de 60 linhas, e o consenso que
+ela reporta é que abaixo de 300 já é bom, e quanto menor, melhor. A documentação da Anthropic
+fixa a mira em menos de 200 linhas por arquivo, com o mesmo aviso: arquivo mais longo consome mais
+contexto e reduz a aderência.
+
+## É contexto, não é lei
+
+Aqui mora o ponto mais honesto da aula, e o que mais mudou minha cabeça. O `CLAUDE.md` não é uma
+camada de aplicação. É contexto, não é configuração que obriga.
+
+O Claude Code injeta o arquivo de memória como uma mensagem de usuário acompanhada de um lembrete
+de sistema, e o lembrete diz, em letra de forma, que aquele contexto pode ou não ser relevante e
+que o agente não deve responder a ele a menos que seja altamente relevante para a tarefa. A
+documentação da Anthropic confirma sem rodeio: o Claude trata o `CLAUDE.md` como contexto, não
+como configuração obrigatória. Para bloquear uma ação independentemente do que o modelo decidir, o
+caminho é um *hook*, não uma frase no arquivo.
+
+Isso tem uma consequência que parece contraditória, mas não é. Você pode escrever a regra certa,
+no lugar certo, e ainda assim ver o agente ignorá-la, porque ele julgou que ela não se aplicava
+ali. O *steering* por esse arquivo é uma sugestão forte, não uma garantia. Quanto mais inchado e
+genérico o arquivo, mais o agente trata o conjunto como ruído de fundo e menos ele obedece a
+qualquer linha específica.
+
+Essa é a razão de o tamanho não ser só uma questão de token. Um arquivo enxuto não é só mais
+barato: ele é mais obedecido. Sinal sobre ruído é o jogo inteiro.
+
+## Como o arquivo vira uma bola de lama
+
+Existe um laço de realimentação que engorda `AGENTS.md` de um jeito perigoso, e ele é quase
+gravitacional. O agente faz algo que você não gosta. Você adiciona uma regra para impedir. Você
+repete isso centenas de vezes ao longo de meses. O arquivo vira uma *ball of mud*, uma bola de
+lama.
+
+O agravante é a colaboração. Pessoas diferentes adicionam opiniões que se contradizem, ninguém
+nunca faz uma passada de limpeza no estilo, e o resultado é uma massa que piora a performance do
+agente em vez de melhorar. Regras que brigam entre si são o pior caso: quando duas linhas se
+contradizem, o agente escolhe uma de forma arbitrária. Você acha que steerou, mas só jogou uma
+moeda.
+
+O segundo culpado é a geração automática. Eu tenho a mesma paranoia que Matt com o comando
+`/init`, que olha o repositório e escreve um `CLAUDE.md` inicial sozinho. Na aula, o comando dispara
+um subagent de exploração e propõe um arquivo gordo, recheado de coisas que o agente descobriria
+sozinho lendo o `package.json`. Pior: no dia em que você mudar um script, vai precisar lembrar de
+atualizar o arquivo à mão, ou ele mente. Arquivo gerado otimiza para abrangência, quando o que
+o orçamento pede é contenção.
+
+Esse último ponto abre o terceiro risco, que é o mais silencioso: documentação velha envenena o
+contexto. Para um humano, um doc desatualizado é só irritante, porque ele tem memória própria para
+desconfiar. Para um agente que relê o documento em toda request, a informação velha tem autoridade.
+Se o `AGENTS.md` diz que a autenticação vive em `src/auth/handlers.ts` e o arquivo foi renomeado, o
+agente vai procurar, confiante, no lugar errado.
+
+A regra que tiro disso é evitar documentar estrutura de arquivos, que muda toda hora, e preferir
+descrever capacidades e formato do projeto. Conceito de domínio é mais estável que caminho de
+arquivo: a diferença entre "organização", "grupo" e "workspace" sobrevive a um *rename*, então é
+mais seguro de registrar. Mesmo assim, com mão leve.
+
+## O mínimo que de fato pertence ao arquivo
+
+Se o ideal é o menor arquivo possível, a pergunta vira: qual é o mínimo absoluto? A aula dá uma
+resposta curta e quase decepcionante de tão pequena.
+
+1. Uma descrição do projeto em uma frase, que funciona como um *prompt* de papel e ancora toda
+   decisão do agente.
+2. O gerenciador de pacotes, só se não for o padrão da linguagem.
+3. Comandos de build ou typecheck, só se forem não óbvios.
+
+Sinceramente, é isso. "Esta é uma biblioteca de componentes React para visualização de dados
+acessível" já dá ao agente o escopo dele. "Este projeto usa pnpm workspaces" evita que ele invente
+um `npm install` errado. Todo o resto deveria morar em outro lugar.
+
+Esse outro lugar é o *progressive disclosure*, a divulgação progressiva: dar ao agente só o que ele
+precisa agora e apontar para o resto quando precisar. Agentes navegam hierarquia de documentação
+rápido, então em vez de empilhar regra de TypeScript no arquivo raiz, você escreve "para convenções
+de TypeScript, veja `docs/TYPESCRIPT.md`" e deixa a regra carregar só quando o agente toca
+TypeScript. Repare no tom: sem "sempre", sem caixa-alta forçando. Uma referência conversada.
+
+| Onde colocar | Quando usar |
+| --- | --- |
+| `AGENTS.md` raiz | Relevante para toda tarefa do repositório |
+| Arquivo separado, citado por link | Relevante a um domínio só, como TypeScript ou testes |
+| Árvore aninhada ou *skill* | Pode ser organizado por hierarquia, ou puxado sob demanda |
+
+A mecânica da Anthropic foi mais longe nesse exato problema. Hoje o `CLAUDE.md` suporta imports com
+`@caminho/para/arquivo`, e existe um diretório `.claude/rules/` onde cada regra pode ter um
+*frontmatter* de `paths` e só entrar no contexto quando o agente abre um arquivo que casa com o
+glob. O efeito é o mesmo da divulgação progressiva, agora nativo: a regra de API carrega quando se
+mexe em API, e não em toda conversa. A memória também tem hierarquia de escopo, e isso muda onde
+cada coisa deve viver.
+
+| Escopo | Local | Para quê |
+| --- | --- | --- |
+| Política gerenciada | `/etc/claude-code/CLAUDE.md` (Linux) | Padrão de toda a organização, não excluível |
+| Usuário | `~/.claude/CLAUDE.md` | Suas preferências, em todo projeto |
+| Projeto | `./CLAUDE.md` ou `./.claude/CLAUDE.md` | Time, versionado no Git |
+| Local | `./CLAUDE.local.md` | Suas preferências neste projeto, no `.gitignore` |
+
+## Steering na prática: o exercício dos bookmarks
+
+A aula `04.02` tira o conceito do papel. O exercício é construir uma feature de bookmarks de aulas,
+a partir de um plano pronto, num codebase plantado com uma armadilha. As funções desse codebase
+usam parâmetros posicionais quando deveriam usar um objeto.
+
+O problema é concreto e fácil de errar. Uma função `addUserToPost(userId, postId)` com dois
+parâmetros do mesmo tipo aceita, sem reclamar, a chamada com os dois trocados. Um objeto resolve,
+porque obriga a nomear cada campo na hora da chamada.
+
+```ts
+// Ruim: posicional, fácil de chamar com userId e postId trocados
+const addUserToPost = (userId: string, postId: string) => {};
+
+// Bom: objeto, cada campo nomeado na chamada
+const addUserToPost = (opts: { userId: string; postId: string }) => {};
+```
+
+O que torna o exercício esperto é o conflito plantado. O codebase inteiro faz do jeito ruim, e a
+memória manda fazer do jeito bom. Durante a fase de exploração, o agente vê o padrão ruim espalhado
+por toda parte, enquanto o arquivo sussurra o oposto. A pergunta da aula é exatamente
+essa: quem ganha, o que o arquivo manda ou o que o código mostra? É o teste mais limpo possível de
+quão forte o *steering* via `CLAUDE.md` realmente é.
+
+Tem um comando que fecha o ciclo sem fricção. O `/memory` injeta a regra recém-escrita no contexto
+ativo da sessão, atualizando o `CLAUDE.md` e a conversa de uma vez, então você não precisa
+reiniciar o agente para testar. Escreve a regra, injeta com `/memory`, pede para continuar a
+feature, e observa se o código novo nasce com objeto em vez de posicional.
+
+No fundo, o curso destila o *steering* num laço de três passos, e ele é o que de fato fica:
+
+1. Notar um padrão que o agente usa e que você não quer.
+2. Escrever uma regra no `CLAUDE.md` para empurrá-lo na direção melhor.
+3. Verificar que funcionou, rodando o agente de novo e olhando o código.
+
+O terceiro passo não é opcional. Como o arquivo é sugestão, e não lei, "escrevi a regra" e "o
+agente obedeceu" são duas afirmações diferentes. Só a verificação fecha a distância entre elas.
+
+## O AGENTS.md do epistemix, auditado sem dó
+
+Esse ponto conversa diretamente com o epistemix, e a conversa não é só elogio. O repositório já faz
+a parte certa da ponte: o `CLAUDE.md` dele tem uma linha só, `@AGENTS.md`, e todo o resto vive num
+`AGENTS.md` único que serve Claude Code, Codex e Copilot ao mesmo tempo. É o padrão que a aula
+prega, fonte única para todos os agentes, com o import fazendo o trabalho. Essa parte eu acertei
+sem saber que estava acertando.
+
+A parte incômoda é o tamanho. O `AGENTS.md` do epistemix tem 174 linhas e quase 1900 palavras. Está
+muito longe das duas mil linhas da caricatura do Matt, mas também está bem acima das menos de 200
+linhas que a Anthropic recomenda e do enxuto de 60 da Humanlayer. Pela régua do orçamento de
+instruções, ele já é gordo.
+
+E ele comete o pecado nomeado na aula: documenta estrutura. Tem um bloco com a árvore alvo do
+repositório, `apps/web`, `apps/api`, `packages/ui`, e essa é exatamente a parte que envelhece
+primeiro e mente para o agente quando um diretório muda de lugar. Por outro lado, ele faz bastante
+divulgação progressiva de verdade: quase toda decisão é um ponteiro para um ADR em `docs/adr/`, e o
+glossário de domínio mora em `docs/CONTEXT.md`, não inline. O agente só paga por esses detalhes
+quando vai atrás deles.
+
+A leitura honesta é que o arquivo é meio certo e meio bola de lama. O esqueleto está bom, fonte
+única, ponteiros para `docs/`, vocabulário de domínio centralizado. O excesso está em tratar o
+`AGENTS.md` como manual de onboarding de projeto em vez de orçamento de instruções, o que ele de
+fato é. A próxima limpeza tem alvo claro: cortar a árvore de diretórios, empurrar o que for de um
+domínio só para fora do raiz, e medir o resultado em linhas e tokens, não em boa intenção.
+
+## O que fica para o meu fluxo
+
+O `AGENTS.md` é a alavanca de *steering* mais barata que existe, e por isso mesmo a mais fácil de
+estragar. Ele resolve um problema real, ensinar a preferência uma vez em vez de toda sessão, ao
+custo de entrar global e pago em cada request. Quem esquece o custo transforma a solução no
+problema.
+
+A disciplina que levo é a mesma do resto do curso, agora aplicada a um arquivo de texto: deixar o
+estado importante em lugares auditáveis, reduzir acoplamento, e não carregar complexidade
+invisível. Em prática, virou uma regra de três:
+
+1. Manter o raiz no mínimo absoluto, descrição em uma frase mais o que não dá para descobrir
+   sozinho, e empurrar o resto para divulgação progressiva.
+2. Medir o arquivo em linhas e tokens, com paranoia, e desconfiar de `/init` e de qualquer geração
+   automática.
+3. Verificar o *steering* contra o código gerado, porque a regra é sugestão, não lei, e só o
+   resultado prova que ela pegou.
+
+No limite, o `AGENTS.md` não é onde você documenta o projeto. É onde você gasta, com cuidado, um
+orçamento pequeno que toda request vai pagar. Tratar essas 174 linhas com o mesmo rigor de uma
+migration é a próxima tarefa amarela que esse curso me deu.
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [AGENTS.md, o padrão aberto](https://agents.md/)
+- [Writing a good CLAUDE.md, Humanlayer](https://www.humanlayer.dev/blog/writing-a-good-claude-md)
+- [How Claude remembers your project, documentação do Claude Code](https://code.claude.com/docs/en/memory)
+- [AGENTS.md Emerges as Open Standard for AI Coding Agents, InfoQ](https://www.infoq.com/news/2025/08/agents-md/)
+- Aula `04.01-what-is-an-agents-md-file`, do material bruto extraído do cohort
+- Aula `04.02-steering-an-agent-with-the-agents-md-file`, do material bruto extraído do cohort

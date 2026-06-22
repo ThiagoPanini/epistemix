@@ -1,0 +1,251 @@
+---
+title: "Agent Skills: capacidade que o agente descobre, não que você empurra"
+date: 2026-06-22
+status: published
+tags: [ai, agents]
+summary: "O que são Agent Skills, por que são a forma built-in e portátil de progressive disclosure para steering, e como os dois eixos de controle, agent-invoked e user-invoked, decidem o que o agente descobre sozinho e o que só você dispara."
+---
+
+No Post anterior eu dei nome à cura e parei ali. O nome é *progressive disclosure*, e eu disse que
+a forma madura dele tem um nome próprio: *Agent Skills*. Faltou a parte concreta.
+
+Uma *skill* é progressive disclosure virada artefato. É uma capacidade que você empacota, nomeia e
+compartilha, e que o agente descobre sozinho quando precisa. Esse verbo é o ponto inteiro do texto.
+O agente descobre a capacidade, você para de empurrar.
+
+Matt abre a aula `04.04` com a pergunta certa. Depois de duas aulas maltratando o `AGENTS.md` por
+jogar tudo no escopo global, ele pergunta: não seria ótimo se existisse uma solução *built-in*,
+aceita pela comunidade, para fazer progressive disclosure quando se guia um agente? A resposta são
+os *Agent Skills*. As aulas `04.04` e `04.05` são sobre o que uma skill é e sobre como se constrói
+uma.
+
+## A solução built-in: um formato aberto que a Anthropic deu de presente
+
+*Agent Skills* é um formato aberto para dar capacidades e expertise novas a um agente. A Anthropic
+inventou o formato e abriu mão dele: virou um padrão público, aceito por vários agentes de código,
+incluindo o Claude Code. Não é uma feature trancada num produto, é uma especificação que qualquer
+ferramenta pode ler.
+
+A definição cabe numa frase. Uma skill é uma pasta com instruções, scripts e recursos que o agente
+pode **descobrir**. A palavra-chave é descobrir, e Matt bate nela de propósito. O agente não é
+forçado a absorver aquela informação, não é obrigado a vê-la, mas ela está num lugar onde ele acha
+com facilidade quando faz falta.
+
+Esse detalhe separa a skill do `AGENTS.md` de forma limpa. O arquivo global empurra tudo para
+dentro de toda request, relevante ou não. A skill faz o contrário: senta num lugar conhecido e
+espera o agente puxá-la. É a inversão *just-in-time* que descrevi no Post passado, agora com um
+formato e um nome.
+
+## A anatomia: SKILL.md, e o que o agente vê por padrão
+
+Uma skill é um diretório com um arquivo `SKILL.md` dentro. O arquivo tem duas partes: um
+*frontmatter* YAML no topo, com `name` e `description`, e o corpo em Markdown logo abaixo, com as
+instruções de verdade. O resto da pasta pode trazer o que você quiser anexar.
+
+O que importa é o que o agente vê por padrão. Por padrão, ele só enxerga o `name` e a `description`.
+O corpo do `SKILL.md` fica invisível até o agente julgar a skill relevante e decidir abri-la. São
+os três níveis de revelação que detalhei no Post anterior, agora encarnados num arquivo: o metadado
+no startup, o corpo sob demanda, os anexos só se ele navegar até eles.
+
+```yaml
+---
+name: pnpm-not-found
+description: Conserta erros de pnpm command not found habilitando o corepack. Use quando o pnpm não for encontrado, aparecerem erros de corepack ou o gerenciador de pacotes sumir.
+---
+```
+
+Isso muda onde o orçamento de atenção é gasto. A descrição é a peça mais cara da skill, porque
+é a única coisa que decide se ela vai ser descoberta. Se a descrição é vaga, o agente nunca conecta
+o problema da vez àquela skill, e ela morre na gaveta por mais boa que seja a instrução lá dentro.
+
+E esse orçamento é medido, não é metáfora. No Claude Code, a `description` somada ao campo opcional
+`when_to_use` é truncada em 1.536 caracteres na listagem de skills, justamente para não inchar o
+contexto. O nível 1 tem um teto. Você escreve a descrição com o cuidado de quem sabe que ela paga
+aluguel em toda sessão.
+
+## O caso de uso que o AGENTS.md não cobre: o raro de alto valor
+
+As duas skills de exemplo da aula deixam o critério explícito. A primeira, `pnpm-not-found`,
+resolve um erro que LLMs não conhecem: quando o `pnpm` some, a correção é rodar `corepack enable` e
+tudo se reconecta. A segunda conserta um *mismatch* de módulo nativo do `better-sqlite3` rodando
+`pnpm rebuild`. Erros raros, correções de uma linha, alto valor quando acontecem.
+
+Matt diz por que isso não vai para o `CLAUDE.md` global. O erro acontece raramente, então não vale
+ocupar o orçamento de instrução de toda request com uma regra que quase nunca dispara. Mas quando
+dispara, é alavanca alta: o agente sabe exatamente o que fazer em vez de chutar. A skill é o lugar
+onde mora o raro de alto valor.
+
+Isso fecha o laço com o critério do Nielsen que carreguei do Post passado. Revele de cara o que
+quase toda sessão usa, e empurre para o segundo nível o que é raro de verdade. A skill é esse
+segundo nível, agora concreto e endereçável.
+
+| Onde mora | O que pertence | Por quê |
+| --- | --- | --- |
+| `AGENTS.md` raiz | descrição do projeto, build não óbvio | relevante para quase toda tarefa, paga em toda request |
+| *Skill* (agent-invoked) | o raro de alto valor, a correção que o LLM não sabe | custo zero até o agente descobrir que precisa |
+| Anexo dentro da skill | documentação extensa, script, dataset | só carrega se o agente navegar até ele |
+
+A documentação do Claude Code dá um gatilho ainda mais útil para decidir o que extrair. Crie uma
+skill quando você repete a mesma instrução ou checklist toda hora, ou quando uma seção do
+`CLAUDE.md` deixou de ser um fato e virou um procedimento. Fato fica no arquivo. Procedimento vira
+skill.
+
+## Dois eixos de controle: quem invoca, o agente ou você
+
+Aqui está a parte que o Post anterior não cobriu, e é o que torna a skill mais que um arquivo
+apontado. Existem dois tipos de skill, separados por quem as invoca. A *agent-invoked* é a que o
+LLM dispara sozinho para completar a tarefa. A *user-invoked* é a que você dispara para mudar o
+comportamento do agente, como escrever um PRD, rodar TDD ou planejar um *refactor*.
+
+Dois campos de *frontmatter* controlam isso, e Matt corrige no meio da aula uma versão antiga em que
+ensinava errado. Não se faz isso omitindo `name` e `description`, porque sem eles a skill deixa de
+ser distribuível. Faz-se com flags explícitas.
+
+```yaml
+---
+name: deploy
+description: Faz deploy da aplicação para produção.
+disable-model-invocation: true
+---
+```
+
+O `disable-model-invocation: true` diz que só você invoca a skill. É para fluxo com efeito
+colateral ou de timing controlado, `/deploy`, `/commit`, mandar mensagem no Slack. Você não quer o
+agente decidindo dar deploy só porque o código parece pronto. O `user-invocable: false` faz o
+oposto: só o agente invoca. É para conhecimento de fundo que não é uma ação útil de menu, como uma
+skill que explica um sistema legado, algo que o agente deve saber quando for relevante mas que
+você nunca digitaria como comando.
+
+O detalhe fino é que essas flags não controlam só acesso, controlam contexto. A descrição de uma
+skill normal mora no contexto o tempo todo, para o agente saber que ela existe. Com
+`disable-model-invocation`, a descrição sai do contexto, porque o agente não precisa pesá-la se nunca
+vai disparar a skill. Cada flag é também uma decisão de orçamento.
+
+| Frontmatter | Você invoca | O agente invoca | Quando entra no contexto |
+| --- | --- | --- | --- |
+| padrão | sim | sim | descrição sempre no contexto, corpo carrega ao invocar |
+| `disable-model-invocation: true` | sim | não | descrição fora do contexto, corpo carrega quando você invoca |
+| `user-invocable: false` | não | sim | descrição sempre no contexto, corpo carrega ao invocar |
+
+## Progressive disclosure dentro da própria skill
+
+A skill não para no `SKILL.md`. Você pode ir mais fundo no mesmo princípio dentro dela. Matt
+pergunta na aula se daria para colocar a documentação inteira do React Router dentro de uma skill,
+e a resposta é que daria, sem problema.
+
+A mecânica é a do nível 3. Você cria arquivos extras na pasta, um script, um doc denso, uma imagem, e
+referencia cada um por um link Markdown no `SKILL.md`, que o agente segue com facilidade. O corpo
+principal fica enxuto, e o detalhe pesado espera atrás do link. É progressive disclosure aninhada:
+a skill faz com seus anexos o que o arquivo de memória faz com as skills.
+
+Esse arranjo tem uma consequência forte de custo. O contexto que cabe numa skill é, na prática,
+ilimitado, porque nada do que está anexado custa token enquanto o agente não abre. E um script anexo
+escapa do contexto de vez: ele roda como ferramenta, então o agente executa a operação sem carregar
+nem o script nem o dado na janela. A operação determinística entra no lugar da geração cara em
+tokens.
+
+## Escopo: do seu setup ao time inteiro
+
+Uma skill vive em um de dois lugares, igual ao `CLAUDE.md`. No escopo de usuário, em
+`~/.claude/skills/`, ela vale para todos os seus projetos. No escopo de projeto, em `.claude/skills/`,
+ela vale só para aquele repositório. A diferença prática é compartilhamento: a skill de projeto
+está versionada no Git, então ela viaja com o repo e chega aos seus colegas de time.
+
+Vale notar uma convergência recente. No Claude Code, comandos customizados e skills se fundiram: um
+arquivo em `.claude/commands/deploy.md` e uma skill em `.claude/skills/deploy/SKILL.md` produzem o
+mesmo `/deploy`. A skill só ganha extras, uma pasta para anexos e o *frontmatter* de invocação que
+descrevi acima.
+
+A portabilidade é o que fecha o argumento contra o `AGENTS.md` como única alavanca. Ele é
+texto preso a um repo. A skill, por ser padrão aberto, roda no Claude.ai, no Claude Code, no Agent
+SDK e na plataforma de desenvolvedor da Anthropic. Você escreve a capacidade uma vez e ela atravessa
+os produtos.
+
+## Por que isso pode ser maior que o MCP
+
+Vale ouvir uma voz de fora do curso. O Simon Willison, numa nota de outubro de 2025, escreveu que as
+skills são ótimas e talvez um negócio maior que o MCP. O argumento dele rima com tudo que vim
+medindo nesta série.
+
+A razão é a simplicidade. Uma skill é Markdown com um punhado de YAML e scripts opcionais, o que
+está mais perto do espírito do LLM: joga texto e deixa o modelo se virar. E o custo é o mesmo refrão.
+Willison aponta que uma skill gasta dezenas de tokens, contra as dezenas de milhares que uma
+implementação de MCP, como a do GitHub, chega a queimar só para se apresentar. Ele prevê uma explosão
+cambriana de skills.
+
+O ponto conversa direto com o Post sobre MCP como API de código, onde a mesma economia apareceu. A
+diferença é a barreira de autoria. Um servidor MCP é um processo que roda e expõe ferramentas. Uma
+skill é um punhado de arquivos no disco. Não são rivais exatos, o MCP conecta a sistemas vivos e a
+skill empacota saber, mas a comparação mostra por que a skill tem a forma certa para se espalhar.
+
+## Usar uma skill para escrever uma skill
+
+A aula `04.05` tira a teoria do papel com um truque que eu gosto. A melhor forma de aprender a
+escrever uma skill é usar uma skill para escrever uma skill. O curso entrega uma `/write-a-skill`
+e manda você apontá-la contra um alvo concreto.
+
+O alvo é o `CLAUDE.md` com mais de cem linhas de padrões de código, daqueles que entram em toda
+request. A tarefa é extrair esses padrões para uma skill bem organizada, com seções progressivamente
+reveladas, fáceis do agente achar, e que não são empurradas para o contexto por padrão. No fim, você
+apaga os padrões do `CLAUDE.md` e deixa só uma referência para a skill nova.
+
+O que a aula insiste, e o que de fato importa, é que a craft está na conversa. A `/write-a-skill` não
+despeja um arquivo: ela faz perguntas, itera na estrutura, força você a pensar em como o LLM vai
+usar aqueles padrões de verdade. Esse é o trabalho. A skill não é um depósito de regra, é uma
+interface que você projeta para o agente.
+
+E essa é a resposta direta para a tarefa amarela que venho carregando desde o primeiro Post. Os
+padrões de código que incham o `AGENTS.md` não precisam só ser cortados. Eles precisam ser
+re-alojados numa skill que carrega sob demanda, com um ponteiro de uma linha no lugar onde antes
+moravam cem.
+
+## No epistemix: as skills que já escrevo, auditadas
+
+Esse conceito conversa diretamente com o epistemix, e dessa vez ele me pega em flagrante fazendo a
+coisa certa sem ter teorizado. O repositório já tem uma pasta de skills em `.agents/skills/`, com
+`grill-me`, `to-issues`, `grill-with-docs`, `solo-dev-assistant`, `eptmx` e outras, e a própria
+skill que escreve este texto, a `write-as-me`, mora em `.claude/skills/`.
+
+A `write-as-me` é o nível 2 e o nível 3 funcionando no meu fluxo. O `SKILL.md` dela é um roteador
+enxuto: ele decide qual comando se aplica e carrega o playbook de `commands/<comando>.md` só então, e
+manda, em letra de forma, não reler o que já leu. É progressive disclosure aninhada de verdade,
+exatamente o arranjo de anexos que descrevi acima, rodando enquanto eu escrevo isto.
+
+A auditoria honesta tem duas frentes. A primeira é que eu nunca olhei minhas descrições com o
+rigor que esta aula exige, e elas são a única coisa que decide se o agente descobre cada skill. A
+segunda é mais incômoda e fecha a série. O `AGENTS.md` do epistemix tem blocos que já são
+procedimento, não fato: as convenções de código, o semáforo de operações de MCP, a lista de o-que-
+fazer-e-não-fazer. Pelo gatilho da própria Anthropic, procedimento que cresceu dentro do arquivo de
+memória é candidato a virar skill. A próxima limpeza não é só cortar a árvore de diretórios. É
+promover esses procedimentos a skills descobríveis e deixar para trás um ponteiro de uma linha.
+
+## O que fica para o meu fluxo
+
+A skill é a peça que faltava na série. O primeiro Post diagnosticou o `AGENTS.md` que empurra tudo,
+o segundo nomeou o progressive disclosure como cura, e este mostra o artefato *built-in* que
+entrega a cura e ainda viaja entre ferramentas. Diagnóstico, princípio, artefato.
+
+A disciplina que levo virou uma regra de três:
+
+1. Pôr o frequente no `AGENTS.md`, o raro de alto valor numa skill, e todo procedimento que cresceu
+   dentro do arquivo de memória numa skill também.
+2. Tratar a descrição como a interface real, porque ela é a única coisa que o agente descobre, e
+   escrevê-la sabendo que ela tem teto e paga aluguel.
+3. Escolher o eixo de invocação de propósito: *agent-invoked* para saber que o agente puxa, e
+   `disable-model-invocation` para o fluxo com efeito colateral que só eu disparo.
+
+No fim, a skill não é sobre dar mais capacidade ao agente. É sobre parar de empurrar capacidade e
+deixar que ele descubra a certa na hora certa. O `AGENTS.md` do epistemix ainda guarda procedimento
+que devia ser skill. Essa é a próxima linha que vou mover, agora com o formato certo na mão.
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [Equipping agents for the real world with Agent Skills, Anthropic](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
+- [Agent Skills, o padrão aberto](https://agentskills.io/home)
+- [Extend Claude with skills, documentação do Claude Code](https://code.claude.com/docs/en/skills)
+- [Claude Skills are awesome, maybe a bigger deal than MCP, Simon Willison](https://simonwillison.net/2025/Oct/16/claude-skills/)
+- Aula `04.04-what-are-agent-skills`, do material bruto extraído do cohort
+- Aula `04.05-using-skills-for-steering`, do material bruto extraído do cohort
+- Post `agents-md-e-claude-md-steering-que-entra-em-toda-request`, sobre o custo global do arquivo
+- Post `progressive-disclosure-o-mapa-nao-o-territorio`, sobre o princípio que a skill encarna
