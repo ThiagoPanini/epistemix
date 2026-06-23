@@ -17,6 +17,8 @@ referencias:
   prs: "#22-#25 (skeleton/CI/Lefthook/deploy), #27 (curl), #28 (fetch timeout)"
 ---
 
+> **Nota-ponte (2026-06-22):** o produto foi rebatizado para **ethitorial** e migrou para `ethitorial.panlabs.tech` (API internalizada, sem FQDN público) — ver [ADR-0021](../adr/0021-rebatismo-ethitorial-e-migracao-panlabs-tech.md). Este registro preserva os nomes e domínios `epistemix.dev`/`api.epistemix.dev` da época.
+
 # 20260605 — Cutover do epistemix.dev e api.epistemix.dev pública
 
 Fechamento do **Portão 3** ([ADR-0005](../adr/0005-deploy-checks-em-tres-portoes.md)): subir `apps/web` + `apps/api` reais no Coolify a partir das imagens GHCR, fazer o **cutover** de `epistemix.dev` (do placeholder `hello-world` para o `web`) e ligar a fiação `web → api`. Continuação direta de [0004](0004-publicar-epistemix-dev.md).
