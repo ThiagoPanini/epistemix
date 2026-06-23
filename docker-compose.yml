@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      EPISTEMIX_API_URL: http://api:8000
+      ETHITORIAL_API_URL: http://api:8000
     depends_on:
       api:
         condition: service_started
@@ -26,15 +26,15 @@ services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_USER: epistemix
-      POSTGRES_PASSWORD: epistemix
-      POSTGRES_DB: epistemix
+      POSTGRES_USER: ethitorial
+      POSTGRES_PASSWORD: ethitorial
+      POSTGRES_DB: ethitorial
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U epistemix -d epistemix"]
+      test: ["CMD-SHELL", "pg_isready -U ethitorial -d ethitorial"]
       interval: 5s
       timeout: 5s
       retries: 5
