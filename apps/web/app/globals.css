@@ -2,8 +2,8 @@
 
 /* ============================================================
    DIREÇÃO A — "Prensa"
-   Fonte de verdade visual: docs/DESIGN.md + protótipo em
-   .claude/design/epistemix-redesenho-completo/project/
+   Fonte de verdade as-built: este arquivo + docs/design/.
+   O bundle congelado em .claude/design/ é origem creditada.
    ============================================================ */
 
 :root {
@@ -810,10 +810,15 @@ button {
   color: var(--ac-text);
 }
 
-.up-btn.on {
+.up-btn--active {
   background: var(--ac-soft);
   border-color: var(--ac-line);
   color: var(--ac-text);
+}
+
+.up-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .eng-stat {

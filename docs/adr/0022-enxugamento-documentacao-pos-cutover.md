@@ -25,7 +25,11 @@ Adotar um **modelo de documentação enxuto**, separando o que é **vivo** (carr
 
 4. **Diário de ops aposentado.** A convenção `docs/ai-ops/` (§4 do [ADR-0017](0017-desenvolvimento-autonomo-afk.md)) é encerrada; o audit trail das operações 🟡 passa a ser o `git log` (commit/PR que dispara a operação). Ver emenda 2026-06-23 no ADR-0017.
 
-**Docs vivos remanescentes:** `docs/VISION.md`, `docs/CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`, `docs/adr/` e `docs/agents/`.
+**Docs vivos remanescentes:** `docs/VISION.md`, `docs/CONTEXT.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`, `docs/design/`, `docs/adr/` e `docs/agents/`.
+
+### Emenda 2026-06-23: contrato de design as-built
+
+Após o redesign estar implementado e no ar, `docs/DESIGN.md` deixou de ser suficiente como única fonte operacional para agentes. O sistema visual passa a viver em `docs/design/`, com contratos por componente, procedência e deltas. `docs/DESIGN.md` permanece como entrada curta de compatibilidade. O bundle congelado da Direção A em `.claude/design/` é origem creditada; divergências de forma resolvem a favor do código as-built.
 
 ## Justificativa
 
