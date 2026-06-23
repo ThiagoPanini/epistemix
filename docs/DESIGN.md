@@ -1,4 +1,4 @@
-# DESIGN.md — Sistema visual do epistemix (Direção A · "Prensa")
+# DESIGN.md — Sistema visual do ethitorial (Direção A · "Prensa")
 
 > **Fonte de verdade visual.** Este documento destila os tokens e padrões da
 > **Direção A — "Prensa"** do protótipo de alta fidelidade em

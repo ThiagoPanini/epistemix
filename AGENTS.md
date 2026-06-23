@@ -1,10 +1,10 @@
 # AGENTS.md — Instruções para agentes de IA neste repositório
 
-Este arquivo é a fonte única de instruções operacionais para qualquer agente de IA (Claude Code, OpenAI Codex, GitHub Copilot, Cursor, Aider) trabalhando no `epistemix`.
+Este arquivo é a fonte única de instruções operacionais para qualquer agente de IA (Claude Code, OpenAI Codex, GitHub Copilot, Cursor, Aider) trabalhando no `ethitorial`.
 
 Outros arquivos esperados por agentes específicos (`CLAUDE.md`, `.github/copilot-instructions.md`) devem apontar para este. Evite duplicar conteúdo entre eles.
 
-## O que é o epistemix
+## O que é o ethitorial
 
 Hub pessoal open source de aprendizado que centraliza artefatos intelectuais (posts de blog, notas de cursos, reviews de livros, anotações de certificações e apresentações técnicas) num espaço público de alto padrão visual. A identidade visual é o **protótipo da Direção A "Prensa"** — editorial técnica: masthead tipográfico, hairlines de jornal, serif na prosa, acento laranja como tinta de destaque. Dark-first, leitura sem fricção, navegação por teclado.
 
@@ -30,7 +30,7 @@ Hub pessoal open source de aprendizado que centraliza artefatos intelectuais (po
 ## Layout do repositório (alvo)
 
 ```
-epistemix/
+ethitorial/
 ├── AGENTS.md                       # este arquivo
 ├── CLAUDE.md                       # importa AGENTS.md
 ├── README.md
@@ -63,9 +63,9 @@ docker compose up --build
 # — ou desenvolvimento local sem Docker —
 
 # Backend (FastAPI em :8000; uv gerencia o Python 3.13)
-cd apps/api && uv sync && uv run uvicorn epistemix.main:app --reload
+cd apps/api && uv sync && uv run uvicorn ethitorial.main:app --reload
 
-# Frontend (Next.js em :3000; lê EPISTEMIX_API_URL, default http://localhost:8000)
+# Frontend (Next.js em :3000; lê ETHITORIAL_API_URL, default http://localhost:8000)
 cd apps/web && pnpm install && pnpm dev
 
 # Apenas o banco local

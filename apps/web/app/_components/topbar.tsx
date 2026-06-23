@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AccountNav } from "./account-nav";
 
-const GITHUB_URL = "https://github.com/ThiagoPanini/epistemix";
+const GITHUB_URL = "https://github.com/ThiagoPanini/ethitorial";
 
 const DAYS = [
   "DOMINGO",
@@ -35,7 +35,7 @@ export function Topbar({ onPaletteOpen }: TopbarProps) {
     <header className="topbar">
       <div className="topbar-in wrap">
         <Link href="/" className="brand">
-          epistemix
+          ethitorial
         </Link>
         <LiveDate />
         <span className="spacer" aria-hidden="true" />

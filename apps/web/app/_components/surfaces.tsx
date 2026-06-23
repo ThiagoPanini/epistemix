@@ -170,7 +170,7 @@ export function SourcePageView({
 
 export function WipTemplate({ section }: { section?: SiteSection | null }) {
   const isAbout = !section;
-  const title = isAbout ? "Sobre o epistemix" : section.title;
+  const title = isAbout ? "Sobre o ethitorial" : section.title;
   const description = isAbout
     ? "Um hub pessoal e open source para registrar o que estou aprendendo em público."
     : "Estou construindo isto. A Section já está desenhada — o conteúdo entra nas próximas fatias da Fase 1.";

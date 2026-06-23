@@ -10,13 +10,13 @@ Existe um instante curto, entre o clique em "Create VPS" no painel do provedor e
 
 Esse é o ponto de partida, e ele é desconfortável de propósito. Não existe um momento mágico em que a VPS nasce "segura por padrão". Existe um intervalo em que ela está exposta com *defaults* amistosos, e existe o que a gente faz dentro desse intervalo.
 
-Eu precisava de um lugar para hospedar o **epistemix**, este hub de aprendizado. A decisão de infraestrutura já estava registrada: uma VPS na Hostinger, com Coolify orquestrando os containers e a Cloudflare na frente. Mas antes de qualquer `docker compose up`, antes de apontar DNS, antes de criar o primeiro admin de painel, havia um trabalho mais básico e mais importante: transformar uma máquina genérica numa máquina opinada. Com identidade, com lista nominal de quem entra, com portas justificadas uma a uma, e com uma rotina silenciosa aplicando patches enquanto eu durmo.
+Eu precisava de um lugar para hospedar o **ethitorial**, este hub de aprendizado. A decisão de infraestrutura já estava registrada: uma VPS na Hostinger, com Coolify orquestrando os containers e a Cloudflare na frente. Mas antes de qualquer `docker compose up`, antes de apontar DNS, antes de criar o primeiro admin de painel, havia um trabalho mais básico e mais importante: transformar uma máquina genérica numa máquina opinada. Com identidade, com lista nominal de quem entra, com portas justificadas uma a uma, e com uma rotina silenciosa aplicando patches enquanto eu durmo.
 
 Este post conta essa história inteira. É a jornada de uma VPS qualquer saindo do estado "existe e está exposta" para o estado "estreita e operável", organizada em torno de três coisas que eu queria garantir: **segurança** (a superfície de ataque mais fina possível), **eficiência** (não desperdiçar trabalho nem reinventar o que o provedor já entrega) e **operabilidade** (uma máquina que eu consiga entender e operar daqui a seis meses, às três da manhã, no meio de um incidente).
 
 ## O modelo de ameaça é mundano, e isso é libertador
 
-Antes de listar comandos, vale calibrar contra o quê a gente está defendendo. Eu não estou protegendo a VPS do epistemix de um adversário estatal. Estou defendendo contra *scanners* automatizados, *brute force* de SSH e exploração oportunista de pacotes desatualizados. Essa é a base estatística de qualquer servidor exposto, e é mundana.
+Antes de listar comandos, vale calibrar contra o quê a gente está defendendo. Eu não estou protegendo a VPS do ethitorial de um adversário estatal. Estou defendendo contra *scanners* automatizados, *brute force* de SSH e exploração oportunista de pacotes desatualizados. Essa é a base estatística de qualquer servidor exposto, e é mundana.
 
 Saber disso é libertador porque dimensiona o esforço. Não preciso de um SIEM, de auditoria de *syscalls* nem de criptografia de disco na primeira sessão. Preciso de algumas camadas finas, cada uma fechando um vetor diferente, compostas na ordem certa. É a aritmética da **defesa em profundidade**: várias barreiras modestas somam mais do que uma barreira única "boa".
 
@@ -85,7 +85,7 @@ A heurística que eu sigo: snapshot antes de tocar em qualquer coisa que possa m
 
 ### O template do provedor é input, não output
 
-Muitos provedores oferecem *templates* que entregam a VPS com um stack já rodando. No caso do epistemix, faz sentido o template do Coolify: ele já sobe o orquestrador e poupa uma classe inteira de erros de instalação. Mas template pede uma postura específica: tratar a entrega como **input para auditoria**, não como trabalho pronto.
+Muitos provedores oferecem *templates* que entregam a VPS com um stack já rodando. No caso do ethitorial, faz sentido o template do Coolify: ele já sobe o orquestrador e poupa uma classe inteira de erros de instalação. Mas template pede uma postura específica: tratar a entrega como **input para auditoria**, não como trabalho pronto.
 
 Quando eu herdo containers rodando, banco interno com schema próprio e diretórios de dados pré-criados, minha primeira ação não é "começar a usar". É perguntar:
 
@@ -138,11 +138,11 @@ Quando o terminal cospe `0 upgraded, 0 newly installed, 0 to remove and 0 not up
 ## Nomear a máquina é trabalho de observabilidade
 
 ```bash
-hostnamectl set-hostname epistemix-prod
+hostnamectl set-hostname ethitorial-prod
 timedatectl set-timezone UTC
 ```
 
-Hostname não é cosmético. Ele aparece no prompt, nos logs do `journald`, nos cabeçalhos dos e-mails de relatório do `unattended-upgrades` e em qualquer dashboard que venha a agregar essa máquina. O nome de fábrica, algo como `srv1700377`, comunica nada. `epistemix-prod` comunica função e ambiente, que é exatamente o que eu quero ler num alerta às três da manhã. Isso é a perna de **operabilidade** começando cedo.
+Hostname não é cosmético. Ele aparece no prompt, nos logs do `journald`, nos cabeçalhos dos e-mails de relatório do `unattended-upgrades` e em qualquer dashboard que venha a agregar essa máquina. O nome de fábrica, algo como `srv1700377`, comunica nada. `ethitorial-prod` comunica função e ambiente, que é exatamente o que eu quero ler num alerta às três da manhã. Isso é a perna de **operabilidade** começando cedo.
 
 UTC é a decisão chata e correta. No momento em que existir mais de uma máquina, ou uma integração cruzando regiões, ou um *cron* rodando "às quatro da manhã", a única forma de correlacionar eventos sem perder tempo é todo mundo falar a mesma língua temporal. Horário de verão deslocando logs em uma hora é o tipo de armadilha que custa caro num incidente. UTC é o esperanto da operação.
 
@@ -331,7 +331,7 @@ sudo unattended-upgrade --dry-run --debug 2>&1 | tail -30
 
 ## Quando NÃO criar a credencial de admin
 
-Depois de tudo isso (sistema atualizado, identidade definida, `root` exilado do SSH, chave Ed25519 no portão, firewall negando por padrão, fail2ban observando, patches automatizados), ainda falta um ato com ordem específica: criar o admin do painel de orquestração. No caso do epistemix, o admin do Coolify.
+Depois de tudo isso (sistema atualizado, identidade definida, `root` exilado do SSH, chave Ed25519 no portão, firewall negando por padrão, fail2ban observando, patches automatizados), ainda falta um ato com ordem específica: criar o admin do painel de orquestração. No caso do ethitorial, o admin do Coolify.
 
 Um painel administrativo, uma vez com credencial, é poder concentrado. Ele orquestra deploys, conhece todos os containers, guarda as variáveis de ambiente sensíveis das aplicações e executa comandos com privilégio dentro da máquina. Criar esse admin antes de a base estar estreita é abrir uma superfície administrativa numa máquina ainda menos endurecida, exatamente o vetor que o resto do trabalho tentou fechar. A regra é simples: primeiro tornar a máquina estreita, depois introduzir o ponto de poder.
 

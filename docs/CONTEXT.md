@@ -1,8 +1,8 @@
-# Contexto de Domínio — epistemix
+# Contexto de Domínio — ethitorial
 
 Este documento é o **glossário e conjunto de invariantes** que define a linguagem comum do projeto. É lido por humanos e por agentes de IA antes de qualquer trabalho substantivo. Mudanças aqui são mudanças no jeito de pensar o produto.
 
-> **Status:** atualizado após sessão `grill-with-docs` de pivô (2026-05-31): de hub de apresentações (`talkingpres`) para hub pessoal de aprendizado multi-formato (`epistemix`). Atualizado novamente na sessão `grill-with-docs` de **redesenho completo (2026-06-12)**: o protótipo de alta fidelidade da Direção A ("Prensa") em `.claude/design/` passa a ser o alvo absoluto de produto; entram os conceitos derivados *Now Learning*, *Timeline* e *Knowledge Graph*, e o eixo de **status de estudo**. Mudanças futuras passam por ADR + atualização inline.
+> **Status:** atualizado após sessão `grill-with-docs` de pivô (2026-05-31): de hub de apresentações (`talkingpres`) para hub pessoal de aprendizado multi-formato (`epistemix`). Atualizado novamente na sessão `grill-with-docs` de **redesenho completo (2026-06-12)**: o protótipo de alta fidelidade da Direção A ("Prensa") em `.claude/design/` passa a ser o alvo absoluto de produto; entram os conceitos derivados *Now Learning*, *Timeline* e *Knowledge Graph*, e o eixo de **status de estudo**. Sessão `grill-with-docs` de **rebatismo (2026-06-22)**: decidido renomear o produto `epistemix` → `ethitorial` e migrar `epistemix.dev` → `ethitorial.panlabs.tech` — ver [ADR-0021](adr/0021-rebatismo-ethitorial-e-migracao-panlabs-tech.md). A reescrita dos termos neste glossário (e demais docs Vivos) foi **executada** nesta migração; ADRs e guides preservam a nomenclatura da época. Mudanças futuras passam por ADR + atualização inline.
 
 ## Glossário
 

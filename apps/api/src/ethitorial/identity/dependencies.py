@@ -9,8 +9,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from epistemix.db import SessionLocal
-from epistemix.identity.models import AuthSession, AuthUser
+from ethitorial.db import SessionLocal
+from ethitorial.identity.models import AuthSession, AuthUser
 
 
 async def get_db() -> AsyncGenerator[AsyncSession]:

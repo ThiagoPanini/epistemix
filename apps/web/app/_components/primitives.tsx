@@ -221,7 +221,7 @@ export function BrandMark() {
 }
 
 export function Wordmark() {
-  return <span className="wordmark">epistemix</span>;
+  return <span className="wordmark">ethitorial</span>;
 }
 
 export function Avatar({

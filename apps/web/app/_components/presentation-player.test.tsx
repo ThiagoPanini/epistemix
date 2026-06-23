@@ -5,9 +5,9 @@ import type { Presentation } from "@/lib/catalog";
 import { PresentationPlayer } from "./presentation-player";
 
 const PRESENTATION: Presentation = {
-  slug: "epistemix-visao",
+  slug: "ethitorial-visao",
   sectionSlug: "presentations",
-  title: "epistemix — visão e arquitetura",
+  title: "ethitorial — visão e arquitetura",
   date: "2026-06-11",
   status: "published",
   tags: ["ai"],
@@ -38,7 +38,7 @@ describe("PresentationPlayer", () => {
   });
 
   it("resumes from localStorage", () => {
-    window.localStorage.setItem("epx:player:epistemix-visao", "1");
+    window.localStorage.setItem("epx:player:ethitorial-visao", "1");
 
     render(<PresentationPlayer onExit={() => {}} presentation={PRESENTATION} />);
 

@@ -7,9 +7,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from epistemix.db import SessionLocal  # noqa: F401 — re-exported for endpoint mocking
-from epistemix.engagement.models import ArtifactComment
-from epistemix.identity.models import AuthUser
+from ethitorial.db import SessionLocal  # noqa: F401 — re-exported for endpoint mocking
+from ethitorial.engagement.models import ArtifactComment
+from ethitorial.identity.models import AuthUser
 
 RATE_LIMIT_PER_HOUR = 10
 MAX_BODY_LENGTH = 2000

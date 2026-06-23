@@ -30,7 +30,7 @@ A identidade visual já está estabelecida e é para ser preservada: violeta de 
 
 ## Anti-references
 
-O epistemix explicitamente NÃO pode parecer:
+O ethitorial explicitamente NÃO pode parecer:
 
 - **Landing SaaS genérica** — fundo creme/areia, template hero-métrica (número gigante + label + stats), grids de cards idênticos com ícone+título+texto repetidos ao infinito, copy de buzzword (streamline / empower / supercharge / seamless).
 - **Plataforma de cursos / LMS** (Udemy, Coursera) — densidade de dashboard, barras de progresso onipresentes, selos e gamificação, upsell, trilhas e quizzes.

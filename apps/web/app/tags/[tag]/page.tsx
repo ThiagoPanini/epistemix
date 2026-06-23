@@ -24,7 +24,7 @@ export async function generateMetadata({
   if (!tag) return {};
   return {
     title: `#${tag.label}`,
-    description: `Todos os posts com a tag ${tag.label} no epistemix.`,
+    description: `Todos os posts com a tag ${tag.label} no ethitorial.`,
   };
 }
 

@@ -7,8 +7,8 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from epistemix.db import SessionLocal  # noqa: F401 — re-exported for endpoint mocking
-from epistemix.engagement.models import ArtifactView
+from ethitorial.db import SessionLocal  # noqa: F401 — re-exported for endpoint mocking
+from ethitorial.engagement.models import ArtifactView
 
 _BOT_UA_FRAGMENTS = frozenset(
     [
@@ -50,7 +50,7 @@ async def record_view(
 ) -> bool:
     """Inserts a view row; dedup via unique constraint.
 
-    SEC-6 (dívida consciente): view count é falsável — epistemix_sid é cookie
+    SEC-6 (dívida consciente): view count é falsável — ethitorial_sid é cookie
     controlável pelo cliente e o filtro de bot é heurístico (UA-based). A contagem
     é métrica de vaidade, não controle de segurança; aceita deliberadamente sem fix.
 

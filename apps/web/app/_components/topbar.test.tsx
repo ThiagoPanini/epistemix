@@ -4,21 +4,21 @@ import { describe, expect, it } from "vitest";
 import { Topbar } from "./topbar";
 
 describe("Topbar", () => {
-  it("renders the wordmark 'epistemix'", () => {
+  it("renders the wordmark 'ethitorial'", () => {
     render(<Topbar />);
-    expect(screen.getByText("epistemix")).toBeInTheDocument();
+    expect(screen.getByText("ethitorial")).toBeInTheDocument();
   });
 
   it("wordmark is a link to /", () => {
     render(<Topbar />);
-    const brand = screen.getByRole("link", { name: "epistemix" });
+    const brand = screen.getByRole("link", { name: "ethitorial" });
     expect(brand).toHaveAttribute("href", "/");
   });
 
   it("renders a GITHUB external link", () => {
     render(<Topbar />);
     const githubLink = screen.getByRole("link", { name: /github/i });
-    expect(githubLink).toHaveAttribute("href", "https://github.com/ThiagoPanini/epistemix");
+    expect(githubLink).toHaveAttribute("href", "https://github.com/ThiagoPanini/ethitorial");
     expect(githubLink).toHaveAttribute("target", "_blank");
     expect(githubLink).toHaveAttribute("rel", "noreferrer");
   });

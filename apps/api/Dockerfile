@@ -29,4 +29,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 # Runs pending migrations before starting the server; container fails fast if
 # DATABASE_URL is missing or DB is unreachable, preventing serving with stale schema.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn epistemix.main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn ethitorial.main:app --host 0.0.0.0 --port 8000"]

@@ -1,5 +1,5 @@
 ---
-name: epistemix
+name: ethitorial
 description: Hub pessoal de aprendizado, dark-first, no espírito de um caderno de laboratório.
 colors:
   bg: "#08090a"
@@ -110,13 +110,13 @@ components:
     padding: "0 11px"
 ---
 
-# Design System: epistemix
+# Design System: ethitorial
 
 ## 1. Overview
 
 **Creative North Star: "The Lab Notebook"**
 
-O epistemix é o caderno de laboratório de um engenheiro, levado a público e mantido com rigor. A tela é quase-preta (`#08090a`), como uma bancada à noite; o conteúdo é o que importa e a interface é o instrumento que desaparece na tarefa. Cada Post é uma entrada datada; índices em mono (`01`, `02`), datas tabulares e capas com grid sutil dão ao hub a textura de um registro técnico, não a de uma vitrine de marketing. O craft está no rigor do registro, não no enfeite.
+O ethitorial é o caderno de laboratório de um engenheiro, levado a público e mantido com rigor. A tela é quase-preta (`#08090a`), como uma bancada à noite; o conteúdo é o que importa e a interface é o instrumento que desaparece na tarefa. Cada Post é uma entrada datada; índices em mono (`01`, `02`), datas tabulares e capas com grid sutil dão ao hub a textura de um registro técnico, não a de uma vitrine de marketing. O craft está no rigor do registro, não no enfeite.
 
 A profundidade vem de camadas tonais, não de sombras: superfícies empilham por luminosidade (`bg → surface → surface-raised → surface-hover`) e bordas finas (branco a 8–14%) separam regiões. A única cor é o **Aurora Violet** (OKLCH hue 256), reservada para ação, seleção e estado; ela aparece em ≤10% de qualquer tela e ganha um glow deliberado no botão primário e na brand mark. A aurora de fundo (três blobs violeta à deriva) é a assinatura da marca, calibrada para ser sentida, não notada.
 

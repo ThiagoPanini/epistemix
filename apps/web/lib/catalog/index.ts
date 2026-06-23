@@ -24,7 +24,7 @@ export type {
 
 // `content/` vive na raiz do monorepo. O Next roda (dev/build) com cwd em
 // `apps/web`, então subimos dois níveis. Override via env para outros contextos.
-const contentDir = process.env.EPISTEMIX_CONTENT_DIR ?? join(process.cwd(), "..", "..", "content");
+const contentDir = process.env.ETHITORIAL_CONTENT_DIR ?? join(process.cwd(), "..", "..", "content");
 
 let cached: Catalog | undefined;
 

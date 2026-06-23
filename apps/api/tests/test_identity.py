@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from epistemix.identity.models import AuthSession, AuthUser
-from epistemix.main import app
+from ethitorial.identity.models import AuthSession, AuthUser
+from ethitorial.main import app
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -53,7 +53,7 @@ def _make_session(user: AuthUser, expired: bool = False) -> AuthSession:
 
 
 def test_me_returns_401_without_cookie():
-    from epistemix.identity.dependencies import get_current_user
+    from ethitorial.identity.dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: None  # type: ignore[assignment]
     try:
@@ -71,7 +71,7 @@ def test_me_returns_401_without_cookie():
 
 @pytest.mark.asyncio
 async def test_get_current_user_returns_none_without_cookie():
-    from epistemix.identity.dependencies import get_current_user
+    from ethitorial.identity.dependencies import get_current_user
 
     result = await get_current_user(better_auth_session_token=None)
     assert result is None
@@ -92,10 +92,10 @@ async def test_get_current_user_returns_user_with_valid_session():
     mock_session_maker.return_value.__aenter__ = AsyncMock(return_value=mock_db)
     mock_session_maker.return_value.__aexit__ = AsyncMock(return_value=None)
 
-    from epistemix.identity import dependencies
+    from ethitorial.identity import dependencies
 
     with patch.object(dependencies, "SessionLocal", mock_session_maker):
-        from epistemix.identity.dependencies import get_current_user
+        from ethitorial.identity.dependencies import get_current_user
 
         result = await get_current_user(better_auth_session_token="valid-session-token")
 
@@ -116,10 +116,10 @@ async def test_get_current_user_returns_none_when_session_expired():
     mock_session_maker.return_value.__aenter__ = AsyncMock(return_value=mock_db)
     mock_session_maker.return_value.__aexit__ = AsyncMock(return_value=None)
 
-    from epistemix.identity import dependencies
+    from ethitorial.identity import dependencies
 
     with patch.object(dependencies, "SessionLocal", mock_session_maker):
-        from epistemix.identity.dependencies import get_current_user
+        from ethitorial.identity.dependencies import get_current_user
 
         result = await get_current_user(better_auth_session_token="expired-token")
 
@@ -134,7 +134,7 @@ async def test_get_current_user_returns_none_when_session_expired():
 def test_me_returns_user_data_when_authenticated():
     user = _make_user()
 
-    from epistemix.identity.dependencies import get_current_user
+    from ethitorial.identity.dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: user  # type: ignore[assignment]
     try:
@@ -152,7 +152,7 @@ def test_me_returns_user_data_when_authenticated():
 def test_me_authenticated_returns_username_and_role_for_admin():
     user = _make_user(role="admin")
 
-    from epistemix.identity.dependencies import get_current_user
+    from ethitorial.identity.dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: user  # type: ignore[assignment]
     try:
@@ -206,7 +206,7 @@ def test_identity_migration_upgrade_creates_tables(tmp_path):
 def test_get_author_returns_profile_when_user_exists():
     user = _make_user()
 
-    import epistemix.main as main_module
+    import ethitorial.main as main_module
 
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = user
@@ -230,7 +230,7 @@ def test_get_author_returns_profile_when_user_exists():
 
 
 def test_get_author_returns_404_when_user_not_found():
-    import epistemix.main as main_module
+    import ethitorial.main as main_module
 
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = None

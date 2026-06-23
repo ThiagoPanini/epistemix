@@ -13,7 +13,7 @@ interface AuthorProfile {
 }
 
 async function fetchAuthor(username: string): Promise<AuthorProfile | null> {
-  const apiUrl = process.env.EPISTEMIX_API_URL ?? "http://localhost:8000";
+  const apiUrl = process.env.ETHITORIAL_API_URL ?? "http://localhost:8000";
   try {
     const res = await fetch(`${apiUrl}/api/authors/${username}`, {
       next: { revalidate: 60 },

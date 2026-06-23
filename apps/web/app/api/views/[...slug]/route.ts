@@ -1,20 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.EPISTEMIX_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.ETHITORIAL_API_URL ?? "http://localhost:8000";
 
 type RouteContext = { params: Promise<{ slug: string[] }> };
 
 export async function POST(request: NextRequest, { params }: RouteContext) {
   const { slug } = await params;
   const artifactId = slug.join("/");
-  const sessionId = request.cookies.get("epistemix_sid")?.value;
+  const sessionId = request.cookies.get("ethitorial_sid")?.value;
   if (!sessionId) return new NextResponse(null, { status: 204 });
 
   try {
     await fetch(`${API_URL}/api/views/${artifactId}`, {
       method: "POST",
       headers: {
-        cookie: `epistemix_sid=${sessionId}`,
+        cookie: `ethitorial_sid=${sessionId}`,
         "user-agent": request.headers.get("user-agent") ?? "",
       },
     });

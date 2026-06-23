@@ -1,4 +1,4 @@
-"""epistemix API — application entrypoint."""
+"""ethitorial API — application entrypoint."""
 
 from typing import Annotated
 
@@ -6,14 +6,14 @@ from fastapi import Cookie, Depends, FastAPI, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from epistemix.db import SessionLocal, ping_db
-from epistemix.engagement import comments as comments_module
-from epistemix.engagement import views as views_module
-from epistemix.engagement import votes as votes_module
-from epistemix.identity.dependencies import get_current_user, require_auth
-from epistemix.identity.models import AuthUser
+from ethitorial.db import SessionLocal, ping_db
+from ethitorial.engagement import comments as comments_module
+from ethitorial.engagement import views as views_module
+from ethitorial.engagement import votes as votes_module
+from ethitorial.identity.dependencies import get_current_user, require_auth
+from ethitorial.identity.models import AuthUser
 
-app = FastAPI(title="epistemix API", version="0.0.0")
+app = FastAPI(title="ethitorial API", version="0.0.0")
 
 
 @app.get("/health")
@@ -113,11 +113,11 @@ async def remove_comment(
 async def post_view(
     artifact_id: str,
     request: Request,
-    epistemix_sid: Annotated[str | None, Cookie()] = None,
+    ethitorial_sid: Annotated[str | None, Cookie()] = None,
     user: Annotated[AuthUser | None, Depends(get_current_user)] = None,
 ) -> None:
     """Records a page view. No-op when session cookie is absent or UA is a bot."""
-    if epistemix_sid is None:
+    if ethitorial_sid is None:
         return
     if views_module.SessionLocal is None:
         return
@@ -126,7 +126,7 @@ async def post_view(
         await views_module.record_view(
             db,
             artifact_id=artifact_id,
-            session_id=epistemix_sid,
+            session_id=ethitorial_sid,
             user_agent=user_agent,
             user_id=user.id if user else None,
         )

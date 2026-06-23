@@ -11,7 +11,7 @@ from datetime import date, datetime
 from sqlalchemy import Date, DateTime, String, Text, UniqueConstraint, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
-from epistemix.db import Base
+from ethitorial.db import Base
 
 
 class ArtifactView(Base):

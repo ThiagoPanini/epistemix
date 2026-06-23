@@ -42,7 +42,7 @@ const SECTIONS = [
 describe("HomeView", () => {
   it("renders the masthead wordmark as h1", () => {
     render(<HomeView featured={null} latest={[]} sections={[]} />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("epistemix");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("ethitorial");
   });
 
   it("renders featured post title with link to direct path", () => {

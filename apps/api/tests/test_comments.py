@@ -7,11 +7,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from epistemix.engagement import comments as comments_module
-from epistemix.engagement.comments import create_comment, delete_comment, list_comments
-from epistemix.identity.dependencies import get_current_user, require_auth
-from epistemix.identity.models import AuthUser
-from epistemix.main import app
+from ethitorial.engagement import comments as comments_module
+from ethitorial.engagement.comments import create_comment, delete_comment, list_comments
+from ethitorial.identity.dependencies import get_current_user, require_auth
+from ethitorial.identity.models import AuthUser
+from ethitorial.main import app
 
 client = TestClient(app)
 
@@ -200,7 +200,7 @@ async def test_create_comment_raises_422_when_body_too_long():
 
 @pytest.mark.asyncio
 async def test_delete_comment_succeeds_for_admin():
-    from epistemix.engagement.models import ArtifactComment
+    from ethitorial.engagement.models import ArtifactComment
 
     comment = ArtifactComment()
     comment.id = uuid.uuid4()
@@ -223,7 +223,7 @@ async def test_delete_comment_succeeds_for_admin():
 
 @pytest.mark.asyncio
 async def test_delete_comment_succeeds_for_own_comment():
-    from epistemix.engagement.models import ArtifactComment
+    from ethitorial.engagement.models import ArtifactComment
 
     comment = ArtifactComment()
     comment.id = uuid.uuid4()
@@ -247,7 +247,7 @@ async def test_delete_comment_succeeds_for_own_comment():
 async def test_delete_comment_raises_403_for_other_user():
     from fastapi import HTTPException
 
-    from epistemix.engagement.models import ArtifactComment
+    from ethitorial.engagement.models import ArtifactComment
 
     comment = ArtifactComment()
     comment.id = uuid.uuid4()
@@ -353,7 +353,7 @@ def test_delete_comment_requires_auth():
 
 
 def test_delete_comment_succeeds_for_owner():
-    from epistemix.engagement.models import ArtifactComment
+    from ethitorial.engagement.models import ArtifactComment
 
     user = _make_user()
     comment = ArtifactComment()

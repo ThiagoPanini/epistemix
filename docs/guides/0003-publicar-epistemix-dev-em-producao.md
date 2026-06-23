@@ -4,6 +4,8 @@ description: Tutorial completo e linear para colocar o epistemix.dev no ar na VP
 nav_title: Publicar epistemix.dev
 ---
 
+> **Nota-ponte (2026-06-22):** o produto foi rebatizado para **ethitorial** e migrou para `ethitorial.panlabs.tech`; este registro preserva o nome e o domínio `epistemix.dev` da época — ver [ADR-0021](../adr/0021-rebatismo-ethitorial-e-migracao-panlabs-tech.md).
+
 Este guide leva o `epistemix.dev` (domínio do produto, já adquirido) do zero ao ar na VPS `panini-vps`, atrás da Cloudflare, com TLS válido e origem fechada — e já organiza a infra "do jeito certo desde o início": o **painel do Coolify** fica numa zona de infra (`vps.thiagopanini.dev`), separada da zona do produto. É a continuação concreta do [guide 0001](0001-criar-vps-hostinger-com-coolify.md) (VPS + Coolify) e do [guide 0002](0002-configurar-cloudflare-r2-mcp.md) (mecânica genérica de Cloudflare e fechamento de origem); aqui os valores são reais e há um passo que o 0002 não cobre: **publicar uma aplicação num domínio**.
 
 A VPS é **agnóstica e multi-projeto** ([ADR-0016](../adr/0016-vps-agnostica-multi-projeto.md)). Modelo de zonas adotado:

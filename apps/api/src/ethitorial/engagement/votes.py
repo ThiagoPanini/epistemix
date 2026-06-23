@@ -7,8 +7,8 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from epistemix.db import SessionLocal  # noqa: F401 — re-exported for endpoint mocking
-from epistemix.engagement.models import ArtifactVote
+from ethitorial.db import SessionLocal  # noqa: F401 — re-exported for endpoint mocking
+from ethitorial.engagement.models import ArtifactVote
 
 
 async def toggle_vote(db: AsyncSession, artifact_id: str, user_id: str) -> bool:

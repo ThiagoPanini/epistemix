@@ -2,7 +2,7 @@ import { AppShell } from "@/app/_components/app-shell";
 import { TimelineView } from "@/app/_components/timeline-view";
 import { getCatalog } from "@/lib/catalog";
 
-export const metadata = { title: "Cronologia · epistemix" };
+export const metadata = { title: "Cronologia · ethitorial" };
 
 export default function TimelinePage() {
   const catalog = getCatalog();

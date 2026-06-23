@@ -118,7 +118,7 @@ wheels = [
 ]
 
 [[package]]
-name = "epistemix-api"
+name = "ethitorial-api"
 version = "0.0.0"
 source = { editable = "." }
 dependencies = [

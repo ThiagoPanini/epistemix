@@ -38,7 +38,7 @@ export interface SiteModel {
   repoUrl: string;
 }
 
-const REPO_URL = "https://github.com/ThiagoPanini/epistemix";
+const REPO_URL = "https://github.com/ThiagoPanini/ethitorial";
 
 // Autor do hub (single-author). Distinto do criador externo de um Source (ex.: o
 // instrutor de um curso). É quem assina os Posts. O avatar é um asset de identidade

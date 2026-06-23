@@ -41,4 +41,4 @@ pre-push:
       run: pnpm exec biome check apps/web
     web-types:
       glob: "apps/web/**/*.{ts,tsx}"
-      run: pnpm --filter @epistemix/web typecheck
+      run: pnpm --filter @ethitorial/web typecheck

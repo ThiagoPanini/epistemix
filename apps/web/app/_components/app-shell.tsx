@@ -10,8 +10,8 @@ function Footer() {
   return (
     <footer className="foot">
       <div className="foot-in wrap">
-        <a href="https://github.com/ThiagoPanini/epistemix" rel="noreferrer" target="_blank">
-          GITHUB.COM/THIAGOPANINI/EPISTEMIX
+        <a href="https://github.com/ThiagoPanini/ethitorial" rel="noreferrer" target="_blank">
+          GITHUB.COM/THIAGOPANINI/ETHITORIAL
         </a>
         <span>MIT LICENSE</span>
         <span className="spacer" aria-hidden="true" />

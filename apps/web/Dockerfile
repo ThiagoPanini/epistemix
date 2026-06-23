@@ -24,7 +24,7 @@ COPY apps/web ./
 # content/ vem da raiz do contexto; só é necessário em build-time (SSG).
 COPY content ./content
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV EPISTEMIX_CONTENT_DIR=/app/content
+ENV ETHITORIAL_CONTENT_DIR=/app/content
 RUN pnpm build
 
 FROM node:24-alpine AS runner
@@ -33,7 +33,7 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0 \
-    EPISTEMIX_CONTENT_DIR=/app/content
+    ETHITORIAL_CONTENT_DIR=/app/content
 # curl é exigido pelo healthcheck do Coolify (Portão 3) — roda o check DENTRO
 # do container; a imagem alpine não traz curl/wget. Ver runbook 0003.
 RUN apk add --no-cache curl

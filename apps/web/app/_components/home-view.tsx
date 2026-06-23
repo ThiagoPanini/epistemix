@@ -81,7 +81,7 @@ export function HomeView({ featured, latest, sections, nowLearning = [] }: Props
   return (
     <div className="wrap">
       <div className="mast">
-        <h1>epistemix</h1>
+        <h1>ethitorial</h1>
         <div className="mast-rule">
           <span>ESPAÇO PESSOAL DE APRENDIZADO E ESTUDO · THIAGO PANINI</span>
           <span className="ed">{editionLabel()}</span>

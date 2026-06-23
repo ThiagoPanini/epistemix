@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.EPISTEMIX_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.ETHITORIAL_API_URL ?? "http://localhost:8000";
 
 type RouteContext = { params: Promise<{ slug: string[] }> };
 

@@ -2,7 +2,7 @@ import { AppShell } from "@/app/_components/app-shell";
 import { GraphView } from "@/app/_components/graph-view";
 import { getCatalog } from "@/lib/catalog";
 
-export const metadata = { title: "Grafo · epistemix" };
+export const metadata = { title: "Grafo · ethitorial" };
 
 export default function GraphPage() {
   const graph = getCatalog().getKnowledgeGraph();

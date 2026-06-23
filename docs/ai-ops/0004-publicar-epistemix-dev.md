@@ -19,6 +19,8 @@ referencias:
   runbook: ../runbooks/0001-operacao-vps.md
 ---
 
+> **Nota-ponte (2026-06-22):** o produto foi rebatizado para **ethitorial** e migrou para `ethitorial.panlabs.tech` — ver [ADR-0021](../adr/0021-rebatismo-ethitorial-e-migracao-panlabs-tech.md). Este registro preserva o nome e o domínio `epistemix.dev` da época.
+
 # 20260601 — Publicar epistemix.dev: deploy hello-world + fechar a origem
 
 Registro narrativo da sessão que executou os **Passos 4 e 5** do [guide 0003](../guides/0003-publicar-epistemix-dev-em-producao.md): publicar uma aplicação placeholder (`nginxdemos/hello`) em `https://epistemix.dev` atrás da Cloudflare com TLS `Full (strict)`, e **fechar a origem** da VPS provando por validação externa tripla. Continuação direta da [generalização da VPS](0003-generalizar-vps-panini.md). A borda Cloudflare parcial (NS migrados, painel Coolify proxied, admin) já vinha de sessão anterior (commit `chore(roadmap): marcar borda Cloudflare concluída`).

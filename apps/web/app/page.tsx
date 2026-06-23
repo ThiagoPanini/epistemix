@@ -3,7 +3,7 @@ import { getReadTime, getSiteModel } from "@/lib/site/model";
 import { AppShell } from "./_components/app-shell";
 import { type HomePost, HomeView } from "./_components/home-view";
 
-export const metadata = { title: "epistemix" };
+export const metadata = { title: "ethitorial" };
 
 export default function Home() {
   const catalog = getCatalog();

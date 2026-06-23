@@ -3,6 +3,7 @@
 - **Status:** Accepted
 - **Data:** 2026-06-04
 - **Emendado em:** 2026-06-12 — segredo **gerável por máquina** rebaixado de 🔴 para 🟡 (agente gera e seta via MCP). Ver §1 e a seção **Emenda** no fim do documento.
+- **Emendado em:** 2026-06-22 — exceção pontual e escopada à migração ethitorial: **criar/atualizar registro DNS aditivo em zona já-possuída (`panlabs.tech`) = 🟡** (faz e loga em ai-ops); DNS destrutivo (remover zona/registros, nameserver, firewall) **continua 🔴**. Ver [ADR-0021](0021-rebatismo-ethitorial-e-migracao-panlabs-tech.md).
 - **Decisores:** Thiago Panini (solo)
 - **Relacionado:** estende [ADR-0014](0014-roadmap-como-source-skill-solo-dev-assistant.md) (planejamento) e [ADR-0005](0005-deploy-checks-em-tres-portoes.md) (portões de deploy) **sem contradizê-los**; consome os MCPs configurados em [ADR-0003](0003-infra-hostinger-vps-coolify.md)/[ADR-0006](0006-cloudflare-na-frente-da-vps.md)/[ADR-0016](0016-vps-agnostica-multi-projeto.md) (guides [0004](../guides/0004-configurar-hostinger-vps-mcp.md)–[0006](../guides/0006-configurar-cloudflare-mcp.md)); herda o princípio de autonomia da [lesson 0002](../lessons/0002-harness-basico-em-github-projects.md)
 

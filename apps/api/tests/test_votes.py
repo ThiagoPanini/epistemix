@@ -5,11 +5,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from epistemix.engagement import votes as votes_module
-from epistemix.engagement.votes import get_vote_state, toggle_vote
-from epistemix.identity.dependencies import get_current_user, require_auth
-from epistemix.identity.models import AuthUser
-from epistemix.main import app
+from ethitorial.engagement import votes as votes_module
+from ethitorial.engagement.votes import get_vote_state, toggle_vote
+from ethitorial.identity.dependencies import get_current_user, require_auth
+from ethitorial.identity.models import AuthUser
+from ethitorial.main import app
 
 client = TestClient(app)
 

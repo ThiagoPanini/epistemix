@@ -59,7 +59,7 @@ describe("loadCatalog — posts", () => {
   });
 
   it("uses slug as deterministic tiebreaker for posts with the same date", () => {
-    const root = mkdtempSync(join(tmpdir(), "epistemix-catalog-order-"));
+    const root = mkdtempSync(join(tmpdir(), "ethitorial-catalog-order-"));
     try {
       writeFileSync(
         join(root, "sections.yml"),
@@ -124,7 +124,7 @@ A.
   });
 
   it("honors the Source post_order over date for reading sequence", () => {
-    const root = mkdtempSync(join(tmpdir(), "epistemix-catalog-postorder-"));
+    const root = mkdtempSync(join(tmpdir(), "ethitorial-catalog-postorder-"));
     try {
       writeFileSync(
         join(root, "sections.yml"),
@@ -322,19 +322,19 @@ describe("loadCatalog — presentations (C5)", () => {
     const [presentation] = catalog.getPresentations();
 
     expect(presentation).toMatchObject({
-      slug: "epistemix-visao",
+      slug: "ethitorial-visao",
       sectionSlug: "presentations",
-      title: "epistemix — visão e arquitetura",
+      title: "ethitorial — visão e arquitetura",
       status: "published",
     });
     expect(presentation.slides.map((slide) => slide.order)).toEqual([1, 2]);
-    expect(presentation.slides[0]?.title).toBe("epistemix");
+    expect(presentation.slides[0]?.title).toBe("ethitorial");
   });
 
   it("returns a presentation by slug", () => {
     const catalog = loadCatalog(fixture("valid"));
 
-    expect(catalog.getPresentation("epistemix-visao")?.slides).toHaveLength(2);
+    expect(catalog.getPresentation("ethitorial-visao")?.slides).toHaveLength(2);
   });
 });
 

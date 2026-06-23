@@ -19,13 +19,13 @@ describe("AppShell", () => {
     expect(screen.getByText("Hello world")).toBeInTheDocument();
   });
 
-  it("renders the topbar with epistemix wordmark", () => {
+  it("renders the topbar with ethitorial wordmark", () => {
     render(
       <AppShell>
         <div />
       </AppShell>,
     );
-    expect(screen.getByText("epistemix")).toBeInTheDocument();
+    expect(screen.getByText("ethitorial")).toBeInTheDocument();
   });
 
   it("renders the rubrics nav with all 8 sections", () => {

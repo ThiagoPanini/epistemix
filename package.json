@@ -1,5 +1,5 @@
 {
-  "name": "epistemix",
+  "name": "ethitorial",
   "private": true,
   "packageManager": "pnpm@11.1.0",
   "engines": {
@@ -7,9 +7,9 @@
   },
   "scripts": {
     "prepare": "lefthook install",
-    "dev:web": "pnpm --filter @epistemix/web dev",
-    "build:web": "pnpm --filter @epistemix/web build",
-    "typecheck:web": "pnpm --filter @epistemix/web typecheck",
+    "dev:web": "pnpm --filter @ethitorial/web dev",
+    "build:web": "pnpm --filter @ethitorial/web build",
+    "typecheck:web": "pnpm --filter @ethitorial/web typecheck",
     "lint": "biome check .",
     "format": "biome format --write ."
   },

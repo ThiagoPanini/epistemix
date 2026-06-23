@@ -1,4 +1,4 @@
-# Arquitetura — epistemix
+# Arquitetura — ethitorial
 
 Documento vivo. Reflete a arquitetura **atual e pretendida**. Mudanças significativas devem vir acompanhadas de ADR.
 
@@ -60,7 +60,7 @@ Documento vivo. Reflete a arquitetura **atual e pretendida**. Mudanças signific
 - Estrutura interna em boundaries de domínio:
 
 ```
-apps/api/src/epistemix/
+apps/api/src/ethitorial/
 ├── catalog/         # Section, Source, Artifact (Post, Presentation, Slide), Tag
 ├── identity/        # User, Session, Auth
 ├── engagement/      # View, Vote, Comment (apontam para Artifact)
@@ -99,7 +99,7 @@ Injeção de dependência: **FastAPI `Depends` puro** na composition root. Migra
 ### Assets de usuário
 
 - **Cloudflare R2** (S3-compatible, zero egress)
-- Estrutura: `r2://epistemix-assets/{artifact_slug}/{slide_id}/{asset}`
+- Estrutura: `r2://ethitorial-assets/{artifact_slug}/{slide_id}/{asset}`
 - Upload assinado direto do cliente (presigned URL emitido pela API)
 
 ### Observabilidade
@@ -130,7 +130,7 @@ PORTÃO 2 — On push da branch (minutos) ← GATE REAL
     ├── security-scan (gitleaks + bandit + npm audit)
     ├── coverage-check
     ├── preview-deploy → Coolify
-    │   └── comenta no PR: pr-<n>.preview.epistemix.dev
+    │   └── comenta no PR: pr-<n>.preview.ethitorial.panlabs.tech
     └── open-pr → abre PR para a main quando os checks ficam verdes
         (se ainda não existir; idempotente. Merge continua humano)
 

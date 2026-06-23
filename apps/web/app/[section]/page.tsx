@@ -19,7 +19,7 @@ export default async function SectionPage({ params }: { params: Promise<{ sectio
   if (sectionSlug === "about") {
     return (
       <AppShell>
-        <WipPage title="Sobre" description="Sobre o epistemix e seu autor." />
+        <WipPage title="Sobre" description="Sobre o ethitorial e seu autor." />
       </AppShell>
     );
   }

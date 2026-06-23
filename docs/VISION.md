@@ -1,8 +1,8 @@
-# Visão — epistemix
+# Visão — ethitorial
 
 ## Resumo
 
-`epistemix` é um hub pessoal open source que centraliza o aprendizado contínuo do mantenedor em um espaço público de alto padrão visual. O hub agrega múltiplos formatos de artefatos de aprendizado: posts de blog, notas de cursos, reviews de livros, anotações de certificações e apresentações técnicas em slides. Com mecanismos de engajamento de comunidade e, numa segunda versão, abertura para múltiplos autores criarem seus próprios hubs.
+`ethitorial` é um hub pessoal open source que centraliza o aprendizado contínuo do mantenedor em um espaço público de alto padrão visual. O hub agrega múltiplos formatos de artefatos de aprendizado: posts de blog, notas de cursos, reviews de livros, anotações de certificações e apresentações técnicas em slides. Com mecanismos de engajamento de comunidade e, numa segunda versão, abertura para múltiplos autores criarem seus próprios hubs.
 
 ## Por que existe
 

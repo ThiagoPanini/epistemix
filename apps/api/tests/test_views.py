@@ -6,9 +6,9 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from epistemix.engagement import views as views_module
-from epistemix.engagement.views import get_view_count, is_bot, record_view
-from epistemix.main import app
+from ethitorial.engagement import views as views_module
+from ethitorial.engagement.views import get_view_count, is_bot, record_view
+from ethitorial.main import app
 
 client = TestClient(app)
 
@@ -158,7 +158,7 @@ def test_post_view_returns_204_with_session_cookie() -> None:
     with _mock_db_for_record():
         response = client.post(
             "/api/views/blog/src/my-post",
-            cookies={"epistemix_sid": "test-session-id"},
+            cookies={"ethitorial_sid": "test-session-id"},
         )
     assert response.status_code == 204
 

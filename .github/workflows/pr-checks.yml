@@ -49,7 +49,7 @@ jobs:
       - name: lint (biome)
         run: pnpm exec biome check apps/web
       - name: typecheck (tsc)
-        run: pnpm --filter @epistemix/web typecheck
+        run: pnpm --filter @ethitorial/web typecheck
 
   api:
     name: api

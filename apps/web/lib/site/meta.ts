@@ -1,5 +1,5 @@
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://epistemix.dev";
-export const SITE_NAME = "epistemix";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ethitorial.panlabs.tech";
+export const SITE_NAME = "ethitorial";
 export const SITE_AUTHOR = "Thiago Panini";
 export const SITE_TWITTER = "@thiago_panini";
 

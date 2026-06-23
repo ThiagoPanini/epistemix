@@ -31,7 +31,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
       <div className="auth-split">
         <aside className="auth-aside">
           <Link href="/" className="auth-brand">
-            epistemix
+            ethitorial
           </Link>
           <div className="auth-rule" />
           <p className="auth-tagline">ESPAÇO PESSOAL DE APRENDIZADO E ESTUDO · THIAGO PANINI</p>

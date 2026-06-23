@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 from fastapi.testclient import TestClient
 
-from epistemix.main import app
+from ethitorial.main import app
 
 client = TestClient(app)
 
@@ -18,7 +18,7 @@ def test_health_returns_ok_with_db_unconfigured() -> None:
 
 
 def test_health_returns_ok_when_db_reachable() -> None:
-    with patch("epistemix.main.ping_db", new=AsyncMock(return_value="ok")):
+    with patch("ethitorial.main.ping_db", new=AsyncMock(return_value="ok")):
         response = client.get("/health")
 
     assert response.status_code == 200
@@ -28,7 +28,7 @@ def test_health_returns_ok_when_db_reachable() -> None:
 
 
 def test_health_returns_ok_when_db_unreachable() -> None:
-    with patch("epistemix.main.ping_db", new=AsyncMock(return_value="error")):
+    with patch("ethitorial.main.ping_db", new=AsyncMock(return_value="error")):
         response = client.get("/health")
 
     assert response.status_code == 200

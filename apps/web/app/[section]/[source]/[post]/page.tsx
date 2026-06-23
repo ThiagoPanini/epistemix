@@ -86,7 +86,7 @@ export default async function PostPage({
   const artifactId = `${sectionSlug}/${sourceSlug}/${postSlug}`;
   let initialComments: Comment[] = [];
   try {
-    const apiUrl = process.env.EPISTEMIX_API_URL ?? "http://localhost:8000";
+    const apiUrl = process.env.ETHITORIAL_API_URL ?? "http://localhost:8000";
     const res = await fetch(`${apiUrl}/api/comments/${artifactId}`, {
       next: { revalidate: 0 },
     });

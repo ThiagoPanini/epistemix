@@ -45,3 +45,5 @@ Não edite o ADR original. Crie um novo ADR de revisão que referencia o anterio
 - [0017 — Desenvolvimento autônomo (AFK): HITL nas bordas, AFK no meio](0017-desenvolvimento-autonomo-afk.md)
 - [0018 — Catálogo MDX-native no Next; API/Postgres entram com engagement](0018-catalogo-mdx-native-na-fase-1.md)
 - [0019 — Redesenho: protótipo da Direção A como alvo absoluto, push feature-completo, fases aposentadas](0019-redesenho-prototipo-absoluto-push-feature-completo.md)
+- [0020 — Autenticação com better-auth](0020-auth-better-auth.md)
+- [0021 — Rebatismo epistemix → ethitorial e migração para ethitorial.panlabs.tech](0021-rebatismo-ethitorial-e-migracao-panlabs-tech.md)

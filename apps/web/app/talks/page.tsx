@@ -3,7 +3,7 @@ import { AppShell } from "@/app/_components/app-shell";
 import { getCatalog } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
 
-export const metadata = { title: "Palestras · epistemix" };
+export const metadata = { title: "Palestras · ethitorial" };
 
 export default function TalksPage() {
   const presentations = getCatalog().getPresentations();

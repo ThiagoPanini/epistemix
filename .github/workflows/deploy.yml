@@ -2,7 +2,7 @@ name: deploy
 
 # Portão 3 (ADR-0005) — deploy em produção no merge para main.
 # Fluxo: build das imagens web+api -> push para GHCR -> dispara redeploy no
-# Coolify (webhook) -> smoke test em epistemix.dev.
+# Coolify (webhook) -> smoke test em ethitorial.panlabs.tech.
 #
 # O job `deploy` é GUARDADO pela presença do secret COOLIFY_TOKEN: enquanto o
 # operador não tiver configurado os apps no Coolify + secrets (ver
@@ -40,7 +40,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/thiagopanini/epistemix-${{ matrix.app }}
+          images: ghcr.io/thiagopanini/ethitorial-${{ matrix.app }}
           tags: |
             type=raw,value=latest
             type=sha,format=short
@@ -81,18 +81,18 @@ jobs:
               "${COOLIFY_URL}/api/v1/deploy?uuid=${uuid}&force=true"
           done
 
-      - name: Smoke test (epistemix.dev)
+      - name: Smoke test (ethitorial.panlabs.tech)
         if: steps.guard.outputs.enabled == 'true'
         run: |
           set -euo pipefail
-          echo "Aguardando o deploy estabilizar e checando epistemix.dev..."
+          echo "Aguardando o deploy estabilizar e checando ethitorial.panlabs.tech..."
           for i in $(seq 1 30); do
-            if curl -fsS https://epistemix.dev | grep -q "epistemix"; then
+            if curl -fsS https://ethitorial.panlabs.tech | grep -q "ethitorial"; then
               echo "Smoke OK (tentativa $i)"; exit 0
             fi
             sleep 10
           done
-          echo "Smoke test falhou — epistemix.dev não respondeu como esperado"; exit 1
+          echo "Smoke test falhou — ethitorial.panlabs.tech não respondeu como esperado"; exit 1
 
       - name: Deploy pulado (sem secrets do Coolify)
         if: steps.guard.outputs.enabled != 'true'
