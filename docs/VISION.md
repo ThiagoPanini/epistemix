@@ -26,7 +26,7 @@
 
 ## Atributos não-funcionais
 
-- **Estética como diferencial:** identidade da **Direção A "Prensa"** — editorial técnica, dark-first, hairlines de jornal, masthead tipográfico, serif na prosa, acento laranja como sinal (não decoração), animações contidas. Tokens em [DESIGN.md](DESIGN.md). Performance percebida não pode ser sacrificada pela estética.
+- **Estética como diferencial:** identidade da **Direção A "Prensa"** — editorial técnica, dark-first, hairlines de jornal, masthead tipográfico, serif na prosa, acento laranja como sinal (não decoração), animações contidas. Contrato visual em [docs/design/](design/README.md). Performance percebida não pode ser sacrificada pela estética.
 - **SEO:** hub público precisa indexar bem. Server rendering por padrão.
 - **Acessibilidade:** WCAG AA mínimo. Player de slides navegável via teclado.
 - **Custo previsível:** infra fixa em VPS, sem surpresas de billing serverless.

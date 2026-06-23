@@ -25,8 +25,8 @@ Operações 🟡 são registradas na **mensagem do commit/PR que as dispara** �
 
 ## Feature-dev — fluxo AFK
 
-1. 🔴 **Alinhar** (`grill-me`/`grill-with-docs`) — o operador define o *o quê*; o protótipo da Direção A é o alvo absoluto.
-2. 🟡 **Fatiar** em **issues vertical-slice** (skill `to-issues`, label `agent-ready`) — cada issue atravessa schema→API→UI→testes→e2e, ancorada na tela do protótipo + DESIGN.md/CONTEXT.md.
+1. 🔴 **Alinhar** (`grill-me`/`grill-with-docs`) — o operador define o *o quê*; design visual parte do contrato as-built em `docs/design/`.
+2. 🟡 **Fatiar** em **issues vertical-slice** (skill `to-issues`, label `agent-ready`) — cada issue atravessa schema→API→UI→testes→e2e, ancorada em `docs/design/` + `CONTEXT.md`.
 3. 🟢 **Implementar** — cada issue num **git worktree** dedicado, com TDD, até **PR verde**. Pode encadear issues como PRs separados. **Não mergeia.**
 4. 🟡 **Mergear** — CI verde, branch atualizada, sem conflito → squash-merge. Conflito → atualiza a branch, reroda CI e só mergeia no verde.
 
