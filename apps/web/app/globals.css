@@ -2308,3 +2308,82 @@ svg.graph {
     gap: 8px;
   }
 }
+
+/* ============================================================
+   SKELETON — fallback de carregamento (loading.tsx)
+   ============================================================ */
+.skl {
+  display: block;
+  background: var(--sfr);
+  border-radius: 2px;
+  animation: skl-pulse 1.4s ease-in-out infinite;
+}
+
+.skl-kicker {
+  width: 180px;
+  height: 11px;
+  margin-bottom: 18px;
+  /* O kicker é a tinta de destaque: acento laranja esmaecido. */
+  background: var(--ac-soft);
+}
+
+.skl-title {
+  width: 100%;
+  height: 38px;
+  margin-bottom: 12px;
+}
+
+.skl-title--short {
+  width: 62%;
+  margin-bottom: 20px;
+}
+
+.skl-standfirst {
+  width: 80%;
+  height: 18px;
+  margin-bottom: 22px;
+}
+
+.skl-meta {
+  width: 280px;
+  height: 11px;
+}
+
+/* Reaproveita a moldura de hairline do .engage real. */
+.skl-pill {
+  width: 64px;
+  height: 30px;
+  border: 1px solid var(--ln);
+  background: transparent;
+}
+
+.skl-stat {
+  width: 84px;
+  height: 11px;
+}
+
+.skl-line {
+  width: 100%;
+  height: 15px;
+  margin-top: 16px;
+}
+
+.skl-line--short {
+  width: 48%;
+}
+
+@keyframes skl-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skl {
+    animation: none;
+  }
+}

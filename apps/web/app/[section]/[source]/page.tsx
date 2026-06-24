@@ -10,7 +10,7 @@ import { articleJsonLd, buildPostUrl } from "@/lib/site/meta";
 import { getReadTime, getSiteModel } from "@/lib/site/model";
 import { slugify } from "@/lib/slug";
 import { AppShell } from "../../_components/app-shell";
-import type { Comment } from "../../_components/comment-section";
+import { CommentCount } from "../../_components/comment-count";
 import { CommentSection } from "../../_components/comment-section";
 import { SourceView } from "../../_components/source-view";
 import { TocSpy } from "../../_components/toc-spy";
@@ -124,16 +124,6 @@ export default async function SourceOrDirectPostPage({
   });
 
   const artifactId = `${sectionSlug}/${sourceSlug}`;
-  let initialComments: Comment[] = [];
-  try {
-    const apiUrl = process.env.ETHITORIAL_API_URL ?? "http://localhost:8000";
-    const res = await fetch(`${apiUrl}/api/comments/${artifactId}`, {
-      next: { revalidate: 0 },
-    });
-    if (res.ok) initialComments = await res.json();
-  } catch {
-    // no-op
-  }
 
   return (
     <AppShell>
@@ -168,9 +158,7 @@ export default async function SourceOrDirectPostPage({
             <div className="engage">
               <VoteButton artifactId={artifactId} />
               <ViewTracker artifactId={artifactId} />
-              <span className="eng-stat">
-                {initialComments.length} comentário{initialComments.length !== 1 ? "s" : ""}
-              </span>
+              <CommentCount artifactId={artifactId} />
             </div>
 
             <div className="prose">
@@ -234,7 +222,7 @@ export default async function SourceOrDirectPostPage({
               </nav>
             )}
 
-            <CommentSection artifactId={artifactId} initialComments={initialComments} />
+            <CommentSection artifactId={artifactId} initialComments={[]} />
           </article>
 
           {headings.length > 0 && <TocSpy headings={headings} />}

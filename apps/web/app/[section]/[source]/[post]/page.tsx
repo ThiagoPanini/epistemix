@@ -11,7 +11,7 @@ import { articleJsonLd, buildPostUrl } from "@/lib/site/meta";
 import { getReadTime, getSiteModel } from "@/lib/site/model";
 import { slugify } from "@/lib/slug";
 import { AppShell } from "../../../_components/app-shell";
-import type { Comment } from "../../../_components/comment-section";
+import { CommentCount } from "../../../_components/comment-count";
 import { CommentSection } from "../../../_components/comment-section";
 import { TocSpy } from "../../../_components/toc-spy";
 import { ViewTracker } from "../../../_components/view-tracker";
@@ -84,16 +84,6 @@ export default async function PostPage({
   });
 
   const artifactId = `${sectionSlug}/${sourceSlug}/${postSlug}`;
-  let initialComments: Comment[] = [];
-  try {
-    const apiUrl = process.env.ETHITORIAL_API_URL ?? "http://localhost:8000";
-    const res = await fetch(`${apiUrl}/api/comments/${artifactId}`, {
-      next: { revalidate: 0 },
-    });
-    if (res.ok) initialComments = await res.json();
-  } catch {
-    // no-op: comments load client-side as fallback
-  }
 
   return (
     <AppShell>
@@ -131,9 +121,7 @@ export default async function PostPage({
             <div className="engage">
               <VoteButton artifactId={artifactId} />
               <ViewTracker artifactId={artifactId} />
-              <span className="eng-stat">
-                {initialComments.length} comentário{initialComments.length !== 1 ? "s" : ""}
-              </span>
+              <CommentCount artifactId={artifactId} />
             </div>
 
             <div className="prose">
@@ -213,7 +201,7 @@ export default async function PostPage({
               </nav>
             )}
 
-            <CommentSection artifactId={artifactId} initialComments={initialComments} />
+            <CommentSection artifactId={artifactId} initialComments={[]} />
           </article>
 
           {headings.length > 0 && <TocSpy headings={headings} />}

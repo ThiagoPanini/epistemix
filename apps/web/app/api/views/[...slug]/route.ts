@@ -17,6 +17,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         cookie: `ethitorial_sid=${sessionId}`,
         "user-agent": request.headers.get("user-agent") ?? "",
       },
+      signal: AbortSignal.timeout(8000),
     });
   } catch {
     // swallow network errors — view recording is best-effort
@@ -31,6 +32,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
   try {
     const res = await fetch(`${API_URL}/api/views/${artifactId}`, {
       next: { revalidate: 60 },
+      signal: AbortSignal.timeout(8000),
     });
     if (res.ok) return NextResponse.json(await res.json());
   } catch {

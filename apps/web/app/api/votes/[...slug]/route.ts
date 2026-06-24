@@ -13,6 +13,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const res = await fetch(`${API_URL}/api/votes/${artifactId}`, {
       headers: { cookie },
       next: { revalidate: 0 },
+      signal: AbortSignal.timeout(8000),
     });
     if (res.ok) return NextResponse.json(await res.json());
   } catch {
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const res = await fetch(`${API_URL}/api/votes/${artifactId}`, {
       method: "POST",
       headers: { cookie },
+      signal: AbortSignal.timeout(8000),
     });
     if (res.ok) return NextResponse.json(await res.json());
     if (res.status === 401) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });

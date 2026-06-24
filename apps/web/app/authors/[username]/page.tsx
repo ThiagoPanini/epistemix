@@ -17,6 +17,7 @@ async function fetchAuthor(username: string): Promise<AuthorProfile | null> {
   try {
     const res = await fetch(`${apiUrl}/api/authors/${username}`, {
       next: { revalidate: 60 },
+      signal: AbortSignal.timeout(8000),
     });
     if (res.status === 404) return null;
     if (!res.ok) return null;
