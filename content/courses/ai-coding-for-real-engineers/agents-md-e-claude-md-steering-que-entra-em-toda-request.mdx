@@ -49,8 +49,7 @@ ln -s AGENTS.md CLAUDE.md
 ```
 
 A documentação da Anthropic recomenda o import como rota preferida, porque ele deixa você anexar
-instruções específicas do Claude embaixo da fonte compartilhada. É exatamente o que o ethitorial
-faz, e eu volto nesse ponto no fim.
+instruções específicas do Claude embaixo da fonte compartilhada.
 
 ## O preço escondido: o arquivo é global
 
@@ -230,32 +229,6 @@ No fundo, o curso destila o *steering* num laço de três passos, e ele é o que
 O terceiro passo não é opcional. Como o arquivo é sugestão, e não lei, "escrevi a regra" e "o
 agente obedeceu" são duas afirmações diferentes. Só a verificação fecha a distância entre elas.
 
-## O AGENTS.md do ethitorial, auditado sem dó
-
-Esse ponto conversa diretamente com o ethitorial, e a conversa não é só elogio. O repositório já faz
-a parte certa da ponte: o `CLAUDE.md` dele tem uma linha só, `@AGENTS.md`, e todo o resto vive num
-`AGENTS.md` único que serve Claude Code, Codex e Copilot ao mesmo tempo. É o padrão que a aula
-prega, fonte única para todos os agentes, com o import fazendo o trabalho. Essa parte eu acertei
-sem saber que estava acertando.
-
-A parte incômoda é o tamanho. O `AGENTS.md` do ethitorial tem 174 linhas e quase 1900 palavras. Está
-muito longe das duas mil linhas da caricatura do Matt, mas também está bem acima das menos de 200
-linhas que a Anthropic recomenda e do enxuto de 60 da Humanlayer. Pela régua do orçamento de
-instruções, ele já é gordo.
-
-E ele comete o pecado nomeado na aula: documenta estrutura. Tem um bloco com a árvore alvo do
-repositório, `apps/web`, `apps/api`, `packages/ui`, e essa é exatamente a parte que envelhece
-primeiro e mente para o agente quando um diretório muda de lugar. Por outro lado, ele faz bastante
-divulgação progressiva de verdade: quase toda decisão é um ponteiro para um ADR em `docs/adr/`, e o
-glossário de domínio mora em `docs/CONTEXT.md`, não inline. O agente só paga por esses detalhes
-quando vai atrás deles.
-
-A leitura honesta é que o arquivo é meio certo e meio bola de lama. O esqueleto está bom, fonte
-única, ponteiros para `docs/`, vocabulário de domínio centralizado. O excesso está em tratar o
-`AGENTS.md` como manual de onboarding de projeto em vez de orçamento de instruções, o que ele de
-fato é. A próxima limpeza tem alvo claro: cortar a árvore de diretórios, empurrar o que for de um
-domínio só para fora do raiz, e medir o resultado em linhas e tokens, não em boa intenção.
-
 ## O que fica para o meu fluxo
 
 O `AGENTS.md` é a alavanca de *steering* mais barata que existe, e por isso mesmo a mais fácil de
@@ -275,7 +248,7 @@ invisível. Em prática, virou uma regra de três:
    resultado prova que ela pegou.
 
 No limite, o `AGENTS.md` não é onde você documenta o projeto. É onde você gasta, com cuidado, um
-orçamento pequeno que toda request vai pagar. Tratar essas 174 linhas com o mesmo rigor de uma
+orçamento pequeno que toda request vai pagar. Tratar o arquivo de memória com o mesmo rigor de uma
 migration é a próxima tarefa amarela que esse curso me deu.
 
 ## Referências

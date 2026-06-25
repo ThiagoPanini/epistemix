@@ -198,24 +198,6 @@ importa por cinco arquivos, e o agente nunca a monta inteira. *Progressive discl
 regulagem, não um interruptor. O critério do Nielsen continua valendo: revele de cara o que quase
 toda sessão precisa, e só empurre para o segundo nível o que é raro de verdade.
 
-## No ethitorial: o que já está disperso e o que ainda está empilhado
-
-Esse conceito conversa diretamente com o ethitorial, e dessa vez a leitura é mais elogiosa que a do
-Post passado. O repositório já pratica *progressive disclosure* em vários lugares, sem nunca ter
-chamado pelo nome.
-
-O `AGENTS.md` aponta para `docs/adr/` em quase toda decisão, manda o glossário de domínio para
-`docs/CONTEXT.md` e o sistema visual para `docs/DESIGN.md`. O agente só paga por esses detalhes
-quando vai atrás deles. As *skills* em `.agents/skills/` são o padrão maduro em miniatura: a própria
-skill que escreve este texto carrega `commands/<comando>.md` sob demanda, e o `SKILL.md` dela manda,
-em letra de forma, não ler tudo sempre. É o nível 2 e o nível 3 funcionando dentro do meu fluxo.
-
-O que ainda está empilhado é o que o Post passado já tinha apontado. O `AGENTS.md` carrega a árvore
-de diretórios inteira e a lista de stack no raiz, visível em toda request, e essa é a parte de menu
-plano que devia virar ponteiro. A cura tem nome agora, e não é mais "cortar coisa": é mover a árvore
-para um doc apontado, deixar no raiz só a descrição de uma frase e o que toda tarefa usa, e medir a
-diferença em tokens. O conceito que faltava para fechar a tarefa amarela do Post anterior era esse.
-
 ## O que fica para o meu fluxo
 
 *Progressive disclosure* é a mesma ideia em três escalas. Nielsen aplicou à tela, Matt ao arquivo de
@@ -233,8 +215,8 @@ um depósito. Virou uma regra de três:
    quanto enchê-lo de regra que ele ignora.
 
 No fim, *progressive disclosure* não é sobre esconder informação do agente. É sobre confiar que ele
-navega um mapa melhor do que lê um território inteiro. O `AGENTS.md` do ethitorial ainda entrega
-território demais. Essa é a próxima linha que vou cortar, agora com o nome certo na mão.
+navega um mapa melhor do que lê um território inteiro. Quase todo `AGENTS.md` ainda entrega
+território demais. Essa é a linha que vale cortar primeiro, agora com o nome certo na mão.
 
 ## Referências
 

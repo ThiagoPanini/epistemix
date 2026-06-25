@@ -3,7 +3,9 @@
 > Camada **prescritiva** (como quero soar *aqui*). Refere a captura descritiva em
 > `~/.write-as-me/voices/me/` (global, privada). Esta camada só **MODULA** a captura, nunca a
 > reescreve.
-> Calibrada 2026-06-22 por Thiago Panini. Mudou a intenção? Recalibre com `write-as-me calibrate`.
+> Calibrada 2026-06-22 por Thiago Panini. Recalibrada 2026-06-25: a tonalidade dos Posts passa a ser
+> puramente explicativa, sem aterrar a lição em projeto pessoal do autor (ver Nuncas duros). Mudou a
+> intenção? Recalibre com `write-as-me calibrate`.
 
 ## Voz de base
 
@@ -14,9 +16,11 @@ primeira pessoa honesta, tese antes do mecanismo, jargão em itálico, e sempre 
 
 ## Transformação editorial
 
-**Dial declarado pelo autor: preservar + modular por formato.** O ethitorial é o habitat nativo
-da captura 2026 (ela foi medida das próprias notas de curso daqui), então a alma fica intacta; a
-modulação é só de registro por subtipo de Post.
+**Dial declarado pelo autor: preservar + modular por formato, e manter o texto explicativo.** A
+captura 2026 foi medida das próprias notas de curso, então a alma fica intacta; a modulação é de
+registro por subtipo de Post. A mudança de intenção forte é de altitude: o Post cobre o conteúdo
+técnico do curso e de fontes externas, sem aterrar a lição em projeto pessoal do autor (ver Nuncas
+duros). A primeira pessoa de aprendizado fica; a particularidade de um repositório específico sai.
 
 ### Preserve (intacto, vale para todo Post)
 
@@ -34,7 +38,8 @@ modulação é só de registro por subtipo de Post.
 - **Pergunta retórica como recurso deliberado:** título-pergunta, abertura respondendo, ou virada
   no meio da prosa (par "a pergunta não é X, é Y", ou rajada).
 - **Postura:** primeira pessoa candida, auto-auditoria (admite limites), marca de gosto explícita,
-  e aterrar o abstrato no ethitorial real.
+  e o abstrato aterrado em exemplo concreto do próprio material técnico (a aula, a fonte externa, um
+  caso genérico), nunca em projeto pessoal do autor.
 - **Hábitos estruturais:** fecha **sempre** com `## Referências`; links só lá, nunca inline; pelo
   menos uma **tabela** como ferramenta de comparação/enumeração; hierarquia rasa (`##`).
 
@@ -42,7 +47,7 @@ modulação é só de registro por subtipo de Post.
 
 | Subtipo | Section (kind) | Abertura | Densidade | Particularidade |
 |---|---|---|---|---|
-| **Nota de curso** | `courses` (with_sources) | tese / elo de série / reenquadre | ensaio denso, quase sem código, com tabela | aterra a lição no ethitorial; fecho tipo "O que fica para o meu fluxo". Nota de *motivações/objetivos* que abre uma série é um **lançamento de série**: por que escolhi, escopo por contraste, o que a ementa promete, o que espero aprender, como vou registrar. |
+| **Nota de curso** | `courses` (with_sources) | tese / elo de série / reenquadre | ensaio denso, quase sem código, com tabela | fecho tipo "O que fica para o meu fluxo", sobre a prática geral de trabalhar com agentes, sem aterrar a lição em projeto pessoal. Nota de *motivações/objetivos* que abre uma série é um **lançamento de série**: por que escolhi, escopo por contraste, o que a ementa promete, o que espero aprender, como vou registrar. |
 | **Blog post** | `blog` (direct) | direto na tese ou no problema | média; mais código se for técnico-prático | vínculo direto à Section, sem Source. |
 | **Review de livro** | `books` (with_sources) | a tese do livro e se valeu | prosa, pouco código | resumo por capítulo + trechos marcados; o Source é o livro. |
 | **Anotação de certificação** | `certifications` (with_sources) | tema em `##` | alta, conceitual, pouca moldura | formato FAQ: pergunta numerada em **negrito**, resposta começando com "R:"; o Source é a certificação; registra o caminho de estudo. |
@@ -61,12 +66,20 @@ modulação é só de registro por subtipo de Post.
   tabela.
 - **O que o leitor sai com:** um princípio transferível mais a leitura honesta do autor sobre o
   que funcionou e o que não. Aprender em público, o ato de estudar é o conteúdo.
-- **Ancoragem:** puxa o abstrato para o ethitorial real (o repositório, o fluxo de trabalho).
+- **Ancoragem:** puxa o abstrato para exemplo concreto do próprio conteúdo técnico (a aula, a fonte
+  externa, um caso genérico), não para um projeto pessoal do autor.
 
 ## Nuncas duros
 
 O linter e o juiz tratam isto como **gate**, não sugestão.
 
+- **Sem aterrar a lição em projeto pessoal.** O Post é explicativo: cobre o conteúdo técnico do
+  curso e de fontes externas, com exemplo do próprio material ou genérico. Não citar o `ethitorial`/
+  `epistemix` nem outro projeto pessoal do autor, sua infra (VPS, Coolify, Cloudflare), sua
+  arquitetura (monorepo, ADRs, boundaries, vocabulário de catálogo como domínio de um repo real),
+  nem a jornada de construí-lo, e nenhuma seção "No [projeto]:" mapeando a aula no repositório. A
+  primeira pessoa de aprendizado continua (o que aprendi, como mudei meu jeito de trabalhar com
+  agentes); o que sai é a particularidade de um projeto específico.
 - **Em-dash (—): zero.** Ramifica por vírgula, anuncia por dois-pontos; aparte vira frase própria,
   não parêntese nem travessão.
 - **Sem saudação ritual nem vocativo:** nada de "Olá, caro leitor", "Seja (muito) bem-vindo",

@@ -199,26 +199,6 @@ padrões de código que incham o `AGENTS.md` não precisam só ser cortados. Ele
 re-alojados numa skill que carrega sob demanda, com um ponteiro de uma linha no lugar onde antes
 moravam cem.
 
-## No ethitorial: as skills que já escrevo, auditadas
-
-Esse conceito conversa diretamente com o ethitorial, e dessa vez ele me pega em flagrante fazendo a
-coisa certa sem ter teorizado. O repositório já tem uma pasta de skills em `.agents/skills/`, com
-`grill-me`, `to-issues`, `grill-with-docs`, `solo-dev-assistant`, `eptmx` e outras, e a própria
-skill que escreve este texto, a `write-as-me`, mora em `.claude/skills/`.
-
-A `write-as-me` é o nível 2 e o nível 3 funcionando no meu fluxo. O `SKILL.md` dela é um roteador
-enxuto: ele decide qual comando se aplica e carrega o playbook de `commands/<comando>.md` só então, e
-manda, em letra de forma, não reler o que já leu. É progressive disclosure aninhada de verdade,
-exatamente o arranjo de anexos que descrevi acima, rodando enquanto eu escrevo isto.
-
-A auditoria honesta tem duas frentes. A primeira é que eu nunca olhei minhas descrições com o
-rigor que esta aula exige, e elas são a única coisa que decide se o agente descobre cada skill. A
-segunda é mais incômoda e fecha a série. O `AGENTS.md` do ethitorial tem blocos que já são
-procedimento, não fato: as convenções de código, o semáforo de operações de MCP, a lista de o-que-
-fazer-e-não-fazer. Pelo gatilho da própria Anthropic, procedimento que cresceu dentro do arquivo de
-memória é candidato a virar skill. A próxima limpeza não é só cortar a árvore de diretórios. É
-promover esses procedimentos a skills descobríveis e deixar para trás um ponteiro de uma linha.
-
 ## O que fica para o meu fluxo
 
 A skill é a peça que faltava na série. O primeiro Post diagnosticou o `AGENTS.md` que empurra tudo,
@@ -235,8 +215,8 @@ A disciplina que levo virou uma regra de três:
    `disable-model-invocation` para o fluxo com efeito colateral que só eu disparo.
 
 No fim, a skill não é sobre dar mais capacidade ao agente. É sobre parar de empurrar capacidade e
-deixar que ele descubra a certa na hora certa. O `AGENTS.md` do ethitorial ainda guarda procedimento
-que devia ser skill. Essa é a próxima linha que vou mover, agora com o formato certo na mão.
+deixar que ele descubra a certa na hora certa. Quase todo `AGENTS.md` ainda guarda procedimento que
+devia ser skill. Essa é a linha que vale mover primeiro, agora com o formato certo na mão.
 
 ## Referências
 
