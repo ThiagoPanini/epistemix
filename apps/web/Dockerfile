@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
 # Contexto de build = RAIZ do monorepo (não apps/web), porque o catálogo é
-# MDX-native e lê `content/` (na raiz) em build-time/SSG — ADR-0018. O layout
+# MDX-native e lê `content/` (na raiz) em build-time/SSG — ADR-0001. O layout
 # do container segue plano (app em /app) para o standalone do Next ficar plano
 # e o estágio runner permanecer idêntico ao da Fase 0. Ver docker-compose.yml
 # (context: . / dockerfile: apps/web/Dockerfile).

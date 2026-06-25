@@ -11,7 +11,7 @@ name: pr-checks
 # guardado quando surgir contribuidor externo).
 #
 # Ao final dos checks (verdes), o job `open-pr` abre um PR para a main se ainda
-# não existir um (ADR-0017: abrir PR é AFK; o merge continua humano).
+# não existir um (ADR-0010: abrir PR e mergear no verde são autônomos).
 #
 # Enxuto por enquanto: lint + typecheck + test + secret scan. Preview-deploy,
 # e2e, coverage gate e bandit/npm-audit entram quando houver código que os
@@ -84,7 +84,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Ao final dos checks verdes: abre PR para a main se ainda não existir um.
-  # Idempotente — push subsequente reusa o PR existente (no-op). Merge é humano.
+  # Idempotente — push subsequente reusa o PR existente (no-op). O agente mergeia no verde (ADR-0005 emenda).
   open-pr:
     name: open-pr
     needs: [web, api, security]
@@ -119,7 +119,7 @@ jobs:
           fi
 
           # Título = subject do commit mais recente da branch que NÃO seja um
-          # 'chore(roadmap):' (auto-commit do hook do ADR-0014, que costuma ser
+          # 'chore(roadmap):' (auto-commit de hook de roadmap (histórico), que costuma ser
           # o tip e faria um título ruim). Já em Conventional Commits; vira a
           # mensagem do squash-merge na main. Fallback: último commit.
           title="$(git log "FETCH_HEAD..HEAD" --pretty=%s | grep -v '^chore(roadmap):' | head -n1 || true)"
@@ -129,6 +129,6 @@ jobs:
             --base main \
             --head "$BRANCH" \
             --title "$title" \
-            --body "🤖 PR aberto automaticamente quando os checks do push ficaram verdes (pr-checks → open-pr). A validação do Portão 2 (ADR-0005) já rodou neste push. **Merge continua humano** (ADR-0005 Portão 3 / ADR-0017): revise o diff e mergeie quando quiser. Preencha resumo, riscos e screenshots (se houver UI) antes do merge."
+            --body "🤖 PR aberto automaticamente quando os checks do push ficaram verdes (pr-checks → open-pr). A validação do Portão 2 (ADR-0005) já rodou neste push. **Merge autônomo no verde** (ADR-0005 emenda / ADR-0010): o agente pode aplicar squash-merge com os checks verdes; o operador pode revisar antes se quiser. Preencha resumo, riscos e screenshots (se houver UI)."
 
           echo "::notice::PR aberto: $BRANCH → main — $title"

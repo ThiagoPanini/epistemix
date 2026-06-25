@@ -1,4 +1,4 @@
-# ADR 0009 — `View` como entidade persistida, com gatilho relaxado e filtro de bots
+# ADR 0008 — `View` como entidade persistida, com gatilho relaxado e filtro de bots
 
 - **Status:** Accepted
 - **Data:** 2026-05-23

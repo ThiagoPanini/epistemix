@@ -28,7 +28,7 @@ const contentDir = process.env.ETHITORIAL_CONTENT_DIR ?? join(process.cwd(), "..
 
 let cached: Catalog | undefined;
 
-// O catálogo é derivado de arquivos read-only (ADR-0018); ler uma vez por
+// O catálogo é derivado de arquivos read-only (ADR-0001); ler uma vez por
 // processo basta. A validação (tags, slugs reservados) roda aqui e quebra a
 // build se o conteúdo for inválido.
 export function getCatalog(): Catalog {

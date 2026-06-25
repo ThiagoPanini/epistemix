@@ -74,7 +74,7 @@ function loadDirectPosts(rootDir: string, section: Section, knownTags: Set<strin
     if (unknown.length > 0) {
       const where = join(section.slug, file);
       throw new Error(
-        `Tag(s) fora de tags.yml em ${where}: ${unknown.join(", ")} (ver invariante 9 / ADR-0008)`,
+        `Tag(s) fora de tags.yml em ${where}: ${unknown.join(", ")} (ver invariante 9)`,
       );
     }
 
@@ -129,7 +129,7 @@ function loadPosts(rootDir: string, source: Source, knownTags: Set<string>): Pos
     if (unknown.length > 0) {
       const where = join(source.sectionSlug, source.slug, file);
       throw new Error(
-        `Tag(s) fora de tags.yml em ${where}: ${unknown.join(", ")} (ver invariante 9 / ADR-0008)`,
+        `Tag(s) fora de tags.yml em ${where}: ${unknown.join(", ")} (ver invariante 9)`,
       );
     }
 

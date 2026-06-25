@@ -1,4 +1,4 @@
-# Conjunto curado fechado de Tags (ADR-0008 / invariante 9).
+# Conjunto curado fechado de Tags (invariante 9).
 # Tag em frontmatter fora desta lista quebra a build.
 - slug: ai
   label: "AI"

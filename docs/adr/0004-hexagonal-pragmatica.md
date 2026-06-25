@@ -112,6 +112,10 @@ app = FastAPI()
 - Mapping explícito custa boilerplate em CRUD simples (mitigado por granularidade variável)
 - Disciplina exigida para não acoplar boundaries via imports cruzados (mitigada por lint custom + revisão por agent)
 
+## Corolário — Server Actions e a fronteira web↔API (Next 15)
+
+Toda mutation que toca estado de domínio (`catalog`, `identity`, `engagement`, `narration`) vai para a FastAPI; as Server Actions do Next ficam restritas a concerns do próprio Next: `revalidatePath`/`revalidateTag`, cookies funcionais e redirects. O caminho de menor resistência do "Next 15 way" — Server Action com SQL direto ou route handler como BFF de domínio — é rejeitado deliberadamente, para não vazar domínio para `apps/web` e colapsar o domínio puro que vive na API. Proxies finos de transporte em route handlers do Next (sem regra de domínio) são tolerados na prática para resolver o hop de rede web→api.
+
 ## Opções rejeitadas
 
 - **MVC clássico (`models/`, `services/`, `controllers/` na raiz do `apps/api`):** legível no início, mata o desacoplamento por domínio, dificulta extração de serviços.

@@ -1,4 +1,4 @@
-// Modelo de domínio do catálogo materializado em TypeScript (ADR-0015 + ADR-0018).
+// Modelo de domínio do catálogo materializado em TypeScript (ADR-0009 + ADR-0001).
 // Na Fase 1 o catálogo é MDX-native: estes tipos são derivados de `content/`
 // pelo content source (adapter de filesystem), não de uma API.
 

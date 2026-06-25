@@ -3,7 +3,7 @@ import { extname } from "node:path";
 import { resolveContentAssetPath } from "@/lib/catalog";
 
 // Serve imagens (capa de Source, avatar de autor) colocadas junto ao conteúdo em
-// content/<section>/<source>/. O catálogo é read-only no filesystem (ADR-0018) e
+// content/<section>/<source>/. O catálogo é read-only no filesystem (ADR-0001) e
 // o Next só serve public/ estático, então este handler é a ponte para o browser.
 // A resolução de caminho (anti path-traversal, só imagens) vive em lib/catalog.
 const CONTENT_TYPE_BY_EXT: Record<string, string> = {

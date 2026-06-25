@@ -1,9 +1,9 @@
 # ADR 0006 — Cloudflare como camada de borda na frente da VPS
 
-- **Status:** Accepted — complementado por [ADR-0016](0016-vps-agnostica-multi-projeto.md) (2026-05-31: a zona única `talkingpres.com` deste ADR generaliza para N zonas, uma por projeto, sob a mesma conta Cloudflare e o mesmo IP de origem)
+- **Status:** Accepted
 - **Data:** 2026-05-23
 - **Decisores:** Thiago Panini (solo)
-- **Relacionado:** [ADR-0003](0003-infra-hostinger-vps-coolify.md), [ADR-0016](0016-vps-agnostica-multi-projeto.md)
+- **Relacionado:** [ADR-0003](0003-infra-hostinger-vps-coolify.md)
 
 ## Contexto
 

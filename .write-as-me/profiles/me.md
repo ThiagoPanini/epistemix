@@ -1,4 +1,4 @@
-# profile — me @ epistemix
+# profile — me @ ethitorial
 
 > Camada **prescritiva** (como quero soar *aqui*). Refere a captura descritiva em
 > `~/.write-as-me/voices/me/` (global, privada). Esta camada só **MODULA** a captura, nunca a
@@ -14,7 +14,7 @@ primeira pessoa honesta, tese antes do mecanismo, jargão em itálico, e sempre 
 
 ## Transformação editorial
 
-**Dial declarado pelo autor: preservar + modular por formato.** O epistemix é o habitat nativo
+**Dial declarado pelo autor: preservar + modular por formato.** O ethitorial é o habitat nativo
 da captura 2026 (ela foi medida das próprias notas de curso daqui), então a alma fica intacta; a
 modulação é só de registro por subtipo de Post.
 
@@ -34,7 +34,7 @@ modulação é só de registro por subtipo de Post.
 - **Pergunta retórica como recurso deliberado:** título-pergunta, abertura respondendo, ou virada
   no meio da prosa (par "a pergunta não é X, é Y", ou rajada).
 - **Postura:** primeira pessoa candida, auto-auditoria (admite limites), marca de gosto explícita,
-  e aterrar o abstrato no epistemix real.
+  e aterrar o abstrato no ethitorial real.
 - **Hábitos estruturais:** fecha **sempre** com `## Referências`; links só lá, nunca inline; pelo
   menos uma **tabela** como ferramenta de comparação/enumeração; hierarquia rasa (`##`).
 
@@ -42,7 +42,7 @@ modulação é só de registro por subtipo de Post.
 
 | Subtipo | Section (kind) | Abertura | Densidade | Particularidade |
 |---|---|---|---|---|
-| **Nota de curso** | `courses` (with_sources) | tese / elo de série / reenquadre | ensaio denso, quase sem código, com tabela | aterra a lição no epistemix; fecho tipo "O que fica para o meu fluxo". Nota de *motivações/objetivos* que abre uma série é um **lançamento de série**: por que escolhi, escopo por contraste, o que a ementa promete, o que espero aprender, como vou registrar. |
+| **Nota de curso** | `courses` (with_sources) | tese / elo de série / reenquadre | ensaio denso, quase sem código, com tabela | aterra a lição no ethitorial; fecho tipo "O que fica para o meu fluxo". Nota de *motivações/objetivos* que abre uma série é um **lançamento de série**: por que escolhi, escopo por contraste, o que a ementa promete, o que espero aprender, como vou registrar. |
 | **Blog post** | `blog` (direct) | direto na tese ou no problema | média; mais código se for técnico-prático | vínculo direto à Section, sem Source. |
 | **Review de livro** | `books` (with_sources) | a tese do livro e se valeu | prosa, pouco código | resumo por capítulo + trechos marcados; o Source é o livro. |
 | **Anotação de certificação** | `certifications` (with_sources) | tema em `##` | alta, conceitual, pouca moldura | formato FAQ: pergunta numerada em **negrito**, resposta começando com "R:"; o Source é a certificação; registra o caminho de estudo. |
@@ -61,7 +61,7 @@ modulação é só de registro por subtipo de Post.
   tabela.
 - **O que o leitor sai com:** um princípio transferível mais a leitura honesta do autor sobre o
   que funcionou e o que não. Aprender em público, o ato de estudar é o conteúdo.
-- **Ancoragem:** puxa o abstrato para o epistemix real (o repositório, o fluxo de trabalho).
+- **Ancoragem:** puxa o abstrato para o ethitorial real (o repositório, o fluxo de trabalho).
 
 ## Nuncas duros
 
@@ -87,7 +87,7 @@ O linter e o juiz tratam isto como **gate**, não sugestão.
 
 ## Alvo de tamanho e densidade
 
-- **Default: deep dive, 3k+ palavras** (escolha do autor para o epistemix).
+- **Default: deep dive, 3k+ palavras** (escolha do autor para o ethitorial).
 - **Densidade de prosa preservada da captura:** frase mediana ~13 palavras (p90 25), parágrafo ~3
   frases / ~41 palavras. O comprimento total cresce; a frase e o parágrafo não.
 - **Código:** quase nenhum em nota/ensaio (code/prose ~0.002); sobe em blog técnico/tutorial.
@@ -152,7 +152,7 @@ Real Engineers").
 aceita ainda campos de acompanhamento (`study_status`, `started_at`, `last_activity`, `progress`).
 O slug do Source é o nome do diretório (kebab-case). Verdade no Zod `sourceFileSchema`.
 
-### Tag gate FECHADO (ADR-0008 / invariante 9)
+### Tag gate FECHADO (invariante 9)
 
 `content/tags.yml` é a lista curada; tag fora dela **quebra a build**. Fluxo:
 1. Mapear os temas do Post contra os slugs existentes.
@@ -169,5 +169,5 @@ O slug do Source é o nome do diretório (kebab-case). Verdade no Zod `sourceFil
 ### Fronteira
 
 Para no **draft** (`status: draft`). Não abre PR, não mergeia (revisão e merge são humanos:
-`AGENTS.md` / ADR-0017). Toda criação de plumbing do catálogo (Section, Source, tag) é **proposta
+`AGENTS.md` / ADR-0010). Toda criação de plumbing do catálogo (Section, Source, tag) é **proposta
 antes de gravar**, nunca em silêncio.

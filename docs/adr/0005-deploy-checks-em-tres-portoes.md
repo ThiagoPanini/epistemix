@@ -14,7 +14,7 @@ Princípios:
 - Erro barato (lint, format, type, unit test) deve ser pego o mais cedo possível, no local do desenvolvedor.
 - Erro caro (integration, e2e, segurança) deve ser pego antes do merge na `main`.
 - `main` está sempre deployável; merge na `main` dispara deploy em produção automaticamente.
-- Sem ambiente intermediário (`develop`/`staging`) na V1; preview environments por PR cobrem o caso.
+- Sem ambiente intermediário (`develop`/`staging`); `main` sempre deployável cobre o caso (preview por PR fica deferido).
 
 ## Decisão
 
@@ -31,8 +31,8 @@ Roda na máquina do dev antes do push subir para o GitHub.
 | Types Python (modo rápido) | `pyright --warnings` |
 | Format/lint TS | `biome check` |
 | Types TS | `tsc --noEmit` |
-| Unit tests **arquivos afetados** | `pytest -m "not integration"` + `vitest run --changed` |
-| Segredos | `gitleaks protect --staged` |
+| Unit tests Python (afetados) | `pytest -m "not integration"` |
+| Segredos | `gitleaks git --staged` |
 | Conventional commits (no commit-msg) | `commitlint` |
 
 **Orquestrador: [Lefthook](https://github.com/evilmartians/lefthook).** Single binary Go, parallel-first, language-agnostic. Config em `lefthook.yml` na raiz.
@@ -44,17 +44,14 @@ Pre-push hooks são **conveniência, não segurança** — podem ser pulados com
 GitHub Actions workflow `pr-checks.yml`. **Esta é a gate real.**
 
 ```
-pr-checks.yml
-├── lint-and-format (paralelo)
-├── typecheck (paralelo)
-├── test-unit (paralelo, com cobertura)
-├── test-integration (Postgres em service container)
-├── test-e2e (Playwright contra preview deploy)
-├── security-scan (gitleaks + bandit + npm audit)
-├── coverage-check (mínimo configurável, e.g., 80%)
-└── preview-deploy → Coolify cria ambiente efêmero
-    └── comenta no PR: https://pr-<n>.preview.epistemix.dev
+pr-checks.yml (as-built)
+├── web:      biome check + tsc --noEmit (typecheck)
+├── api:      ruff format --check + ruff check + pyright --warnings + pytest -m "not integration"
+├── security: gitleaks
+└── open-pr:  needs[web, api, security] → abre PR para a main no verde (idempotente)
 ```
+
+> **Deferido** (entra quando houver código que justifique, como o próprio `pr-checks.yml` registra): test-integration (Postgres em service container), test-e2e (Playwright), coverage gate, security-scan adicional (bandit/npm-audit) e preview-deploy por PR.
 
 **Branch protection na `main`:**
 - PR obrigatório
@@ -69,16 +66,16 @@ pr-checks.yml
 GitHub Actions workflow `deploy.yml`.
 
 ```
-deploy.yml
-├── build-images (paralelo: web, api)
-├── push-to-ghcr
+deploy.yml (as-built)
+├── build-images (matrix: web, api) → push GHCR
 ├── webhook → Coolify
 │   ├── pull image
 │   ├── rolling restart com health check
 │   └── rollback automático se health falha
-├── post-deploy-smoke-tests
-└── notify-sentry (release marker associando errors ao SHA)
+└── post-deploy-smoke-test (curl em ethitorial.panlabs.tech)
 ```
+
+> **Deferido:** release marker no Sentry (sem integração Sentry no código hoje — ver [ARCHITECTURE.md](../ARCHITECTURE.md)).
 
 ### Convenção de branches
 

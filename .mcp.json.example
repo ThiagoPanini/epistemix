@@ -1,6 +1,6 @@
 {
   "//": "Template local do Claude Code. Copie para .mcp.json (gitignored), depois cole somente o token Coolify na copia.",
-  "//setup": "Setup multiagente em docs/guides/0007-configurar-mcps-multiagente.md.",
+  "//setup": "Setup multiagente em docs/agents/mcps.md.",
   "mcpServers": {
     "hostinger-vps": {
       "//": "O MCP oficial pinado le HOSTINGER_API_TOKEN do .env via dotenv.",
@@ -23,12 +23,12 @@
         "@masonator/coolify-mcp@2.12.0"
       ],
       "env": {
-        "COOLIFY_BASE_URL": "https://vps.thiagopanini.dev",
+        "COOLIFY_BASE_URL": "https://vps.panlabs.tech",
         "COOLIFY_ACCESS_TOKEN": "<COLE_O_TOKEN_DO_COOLIFY>"
       }
     },
     "cloudflare": {
-      "//": "MCP remoto (http) — autenticação via OAuth no primeiro uso, sem token no arquivo. Ver docs/guides/0006-configurar-cloudflare-mcp.md.",
+      "//": "MCP remoto (http) — autenticação via OAuth no primeiro uso, sem token no arquivo. Ver docs/agents/mcps.md.",
       "type": "http",
       "url": "https://mcp.cloudflare.com/mcp"
     }

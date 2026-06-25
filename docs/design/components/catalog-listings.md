@@ -2,8 +2,7 @@
 
 ## Status
 
-As-built para Courses e Blog. Shell construído, conteúdo pendente para Books e
-Certifications. Talks tem rota própria documentada em `presentation-player.md`.
+As-built para Courses e Blog. Shell construído, conteúdo pendente para Books e Certifications (servidos via `WipPage` por `ready: false` no model). Presentations também é `direct` e `ready: false` no model — hoje cai no `WipPage`; a rota própria do player descrita em `presentation-player.md` ainda não está as-built para conteúdo produtivo.
 
 ## Propósito
 
@@ -14,14 +13,14 @@ Listar o catálogo MDX respeitando o domínio:
 
 ## Fronteira de código
 
-- `apps/web/app/[section]/page.tsx:15`
-- `apps/web/app/_components/section-view.tsx:17`
-- `apps/web/app/_components/section-direct-view.tsx:6`
-- `apps/web/app/_components/source-view.tsx:11`
-- `apps/web/app/_components/wip-page.tsx:1`
-- `apps/web/lib/site/model.ts:51`
-- `content/sections.yml:2`
-- `apps/web/app/globals.css:569`, `600`, `694`, `730`
+- `apps/web/app/[section]/page.tsx` (rota de seção)
+- `apps/web/app/_components/section-view.tsx` (componente `SectionView`, listagem `with_sources`)
+- `apps/web/app/_components/section-direct-view.tsx` (componente `SectionDirectView`, listagem `direct`)
+- `apps/web/app/_components/source-view.tsx` (componente `SourceView`, notas dentro de Source)
+- `apps/web/app/_components/wip-page.tsx` (componente `WipPage`)
+- `apps/web/lib/site/model.ts` (flags de section, ex.: `ready`)
+- `content/sections.yml` (declaração das seções)
+- `apps/web/app/globals.css`: blocos `.page-head`, `.art-row`, `.src-card`, `.note-row`
 
 ## Estrutura / DOM
 
@@ -34,8 +33,7 @@ Listar o catálogo MDX respeitando o domínio:
 
 ## Tokens usados
 
-`--ln`, `--lns`, `--ln-heavy`, `--sf`, `--bg2`, `--ink`, `--mut`, `--fnt`,
-`--ac-text`, `--ac-line`, `--row-pad`, `--serif`, `--mono`.
+`--ln`, `--lns`, `--ln-heavy`, `--sf`, `--bg2`, `--ink`, `--mut`, `--fnt`, `--ac-text`, `--ac-line`, `--row-pad`, `--serif`, `--mono`.
 
 ## Estados e interação
 
@@ -47,12 +45,11 @@ Listar o catálogo MDX respeitando o domínio:
 
 ## Movimento
 
-Hover muda fundo/borda/cor em 140ms. Sem movimento espacial local.
+Todas as transições são 140ms; o hover difere por componente. `.art-row:hover` muda o fundo (`background`) e a cor do título `.art-t`. `.src-card:hover` muda `border-color` + `background`. `.note-row:hover` muda apenas a cor do título `.art-t` — não muda fundo nem borda. Nenhuma listagem muda fundo, borda e cor simultaneamente. Sem movimento espacial local.
 
 ## A11y
 
-Listagens são links inteiros com texto suficiente. Datas visíveis devem ser
-mantidas em texto, não apenas ícone/cor.
+Listagens são links inteiros com texto suficiente: `.src-card`, `.art-row` e `.note-row` são `<Link>` envolvendo a row inteira. O único link fora das rows é o breadcrumb da Section no `.page-head` de `SourceView` (kicker `<Link>` para `/<section>`). Datas visíveis devem ser mantidas em texto, não apenas ícone/cor.
 
 ## Invariantes
 
@@ -62,6 +59,4 @@ mantidas em texto, não apenas ícone/cor.
 
 ## Como editar
 
-Para nova Section produtiva, atualize `content/sections.yml`, o catálogo e, se
-ela exigir ícone/estado planejado, `apps/web/lib/site/model.ts:51`. Não crie rota
-especial se a hierarquia `direct`/`with_sources` resolver.
+Para nova Section produtiva, atualize `content/sections.yml`, o catálogo e, se ela exigir ícone/estado planejado, o read-model em `apps/web/lib/site/model.ts`. Não crie rota especial se a hierarquia `direct`/`with_sources` resolver. Nota de acoplamento: o label de coluna `NOTAS DO CURSO` é hardcoded em `SourceView` (`source-view.tsx`) e usado para qualquer `with_sources`, não só Courses.

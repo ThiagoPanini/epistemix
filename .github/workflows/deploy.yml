@@ -6,7 +6,7 @@ name: deploy
 #
 # O job `deploy` é GUARDADO pela presença do secret COOLIFY_TOKEN: enquanto o
 # operador não tiver configurado os apps no Coolify + secrets (ops via MCP em
-# docs/agents/afk-ops.md), o build/push roda e o deploy
+# docs/agents/workflow.md), o build/push roda e o deploy
 # é pulado (não falha). Depois do setup, o deploy passa a rodar.
 
 on:
@@ -47,7 +47,7 @@ jobs:
       - uses: docker/build-push-action@v7
         with:
           # web precisa do contexto na raiz para enxergar content/ (catálogo
-          # MDX-native lido em build-time, ADR-0018); api segue com contexto
+          # MDX-native lido em build-time, ADR-0001); api segue com contexto
           # próprio. file é relativo ao workspace nos dois casos.
           context: ${{ matrix.app == 'web' && '.' || format('apps/{0}', matrix.app) }}
           file: apps/${{ matrix.app }}/Dockerfile
@@ -98,4 +98,4 @@ jobs:
         if: steps.guard.outputs.enabled != 'true'
         run: |
           echo "::notice::COOLIFY_TOKEN ausente — build/push para GHCR feito, deploy pulado."
-          echo "::notice::Configure os apps + secrets via Coolify MCP (ver docs/agents/afk-ops.md)"
+          echo "::notice::Configure os apps + secrets via Coolify MCP (ver docs/agents/workflow.md)"

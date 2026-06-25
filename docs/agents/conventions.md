@@ -4,8 +4,8 @@ Padrões de código e git para qualquer agente trabalhando no `ethitorial`. Carr
 
 ## Linguagens
 
-- **Python** (`apps/api`): `ruff format` + `ruff check` + `pyright`. Async-first (FastAPI). `uv` para deps. SQLModel para modelos.
-- **TypeScript** (`apps/web`): `biome` para format/lint. App Router + RSC sempre que possível. Server Actions só para concerns do Next; mutations de domínio vão na FastAPI ([ADR-0010](../adr/0010-server-actions-apenas-para-concerns-do-next.md)). Rotas API só para webhook ou client externo.
+- **Python** (`apps/api`): `ruff format` + `ruff check` + `pyright`. Async-first (FastAPI). `uv` para deps. SQLAlchemy 2.0 (async) para modelos e queries.
+- **TypeScript** (`apps/web`): `biome` para format/lint. App Router + RSC sempre que possível. Server Actions só para concerns do Next; mutations de domínio vão na FastAPI ([ADR-0004](../adr/0004-hexagonal-pragmatica.md)). Rotas API só para webhook ou client externo.
 
 ## Arquitetura por boundary
 

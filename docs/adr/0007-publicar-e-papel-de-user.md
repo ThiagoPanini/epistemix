@@ -23,7 +23,7 @@ Opções consideradas:
 
 - `Presentation.published_by: UserId` (value object em `shared`).
 - `Comment.user_id: UserId` (renomeada da antiga `Comment.author_id`).
-- UI pública pode usar o rótulo "author" como linguagem de display ("by Thiago Panini", `/authors/<slug>` ou `/@<slug>`); isso **não** ressuscita o termo no domínio.
+- UI pública pode usar o rótulo "author" como linguagem de display ("by Thiago Panini"); isso **não** ressuscita o termo no domínio. A URL pública canônica do publicador é `/authors/<username>` (onde `<username>` é `User.username`): `/@<username>` foi rejeitada por tom de rede social e `/users/<username>` por expor o schema numa interface humana.
 
 **Boundary discipline preservada:** `catalog.Presentation` carrega só `UserId`. Enriquecimento de display (nome, avatar) acontece na camada `presentation/` de `catalog` via `UserQueryPort`, cujo adapter chama o use case de `identity`. Sem import direto cross-boundary. Compatível com a regra 6 de [ADR-0004](0004-hexagonal-pragmatica.md).
 

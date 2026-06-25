@@ -1,9 +1,9 @@
 # ADR 0003 — Infra: VPS Hostinger + Coolify + Cloudflare
 
-- **Status:** Accepted — complementado por [ADR-0016](0016-vps-agnostica-multi-projeto.md) (2026-05-31: VPS deixa de ser de um único projeto e vira infra agnóstica multi-projeto; nomenclatura `talkingpres-*` → `panini-vps`)
+- **Status:** Accepted
 - **Data:** 2026-05-23
 - **Decisores:** Thiago Panini (solo)
-- **Relacionado:** [ADR-0002](0002-stack-fastapi-nextjs-postgres.md), [ADR-0006](0006-cloudflare-na-frente-da-vps.md), [ADR-0016](0016-vps-agnostica-multi-projeto.md)
+- **Relacionado:** [ADR-0002](0002-stack-fastapi-nextjs-postgres.md), [ADR-0006](0006-cloudflare-na-frente-da-vps.md)
 
 ## Contexto
 
@@ -35,6 +35,16 @@ Precisamos decidir onde e como hospedar `apps/web`, `apps/api`, banco e assets. 
 **Cloudflare R2** para assets de usuário e backups (zero egress fees).
 
 **Deploy:** GitHub Actions builda imagens → push para GHCR → Coolify recebe webhook → puxa imagem e faz rolling restart com health checks.
+
+### Substrato compartilhado: `panlabs.tech` como guarda-chuva multi-projeto
+
+A VPS é **infraestrutura compartilhada, não um projeto**. Três camadas de nomeação convivem:
+
+- **Umbrella público — `panlabs.tech`.** A vitrine pública do portfólio. Cada projeto é um subdomínio próprio; o `ethitorial` é `ethitorial.panlabs.tech`, com zona DNS própria na conta Cloudflare.
+- **Infra do operador.** Painel Coolify em `vps.panlabs.tech`; namespace neutro `panini-vps` (hostname, chave SSH, prefixo de segredos de infra, bucket de backups, tokens de infra); imagens em `ghcr.io/thiagopanini/`. É encanamento — desacoplado de qualquer projeto e fora da marca. O sufixo `-prod` é dispensado: com uma única máquina, ambiente não é eixo de nomeação.
+- **Isolamento por projeto.** Uma única instância de Coolify hospeda **N projetos**, isolados em três eixos: um *Coolify Project* por projeto; uma zona DNS própria por projeto (todas apontando para o IP da VPS, `Full (Strict)`, origem fechada aos ranges Cloudflare); *databases* Postgres separadas no mesmo servidor. Backups num bucket R2 único com prefixo por projeto (`<projeto>/postgres/...`). Segredos de infra moram em `panini-vps/`; segredos de aplicação usam prefixo próprio (`<projeto>/`).
+
+**Blast radius é compartilhado** — um projeto que derrube a VPS derruba os vizinhos (panlabs et al.). Isso é **aceito deliberadamente porque o portfólio é experimental, solo e de baixo risco**: sem usuários ativos relevantes, downtime é quase irrelevante e a autonomia operacional vale mais que o isolamento (ver [ADR-0010](0010-desenvolvimento-autonomo-afk.md)). Isolamento forte — multi-tenant, ou VPS/ambiente dedicado por projeto — é o **gatilho de revisão** para quando um projeto ganhar usuários reais ou SLA.
 
 ## Justificativa
 
@@ -71,14 +81,18 @@ Precisamos decidir onde e como hospedar `apps/web`, `apps/api`, banco e assets. 
 - Coolify é responsabilidade adicional: precisa atualizar, ocasionalmente debugar
 - Backup precisa de teste de restore periódico (regra: backup não testado não é backup)
 - Sem escalabilidade horizontal automática; gargalo de CPU/RAM exige scale-up manual
-- **Coolify usa SSH como `root` para se conectar ao host e executar comandos Docker.** Isso cria um conflito direto com o hardening base (`PermitRootLogin no`, `AllowUsers <user>`): o próprio orquestrador será bloqueado pelo sshd e, em seguida, banido pelo fail2ban. A resolução exige (a) bloco `Match Address 172.16.0.0/12` com `PermitRootLogin prohibit-password` no sshd_config, (b) chave pública do Coolify em `/root/.ssh/authorized_keys`, e (c) `ignoreip = 172.16.0.0/12` no fail2ban. Esses três itens devem ser feitos **durante o hardening**, antes da primeira validação no UI do Coolify — ver [lição 0001 §"Exceção estrutural: orquestradores containerizados"](../lessons/0001-hardening-de-vps-linux.md).
+- **Coolify usa SSH como `root` para se conectar ao host e executar comandos Docker.** Isso cria um conflito direto com o hardening base (`PermitRootLogin no`, `AllowUsers <user>`): o próprio orquestrador será bloqueado pelo sshd e, em seguida, banido pelo fail2ban. A resolução exige (a) bloco `Match Address 172.16.0.0/12` com `PermitRootLogin prohibit-password` no sshd_config, (b) chave pública do Coolify em `/root/.ssh/authorized_keys`, e (c) `ignoreip = 172.16.0.0/12` no fail2ban. Esses três itens devem ser feitos **durante o hardening**, antes da primeira validação no UI do Coolify (o procedimento detalhado de hardening vive no git history).
 
 ## Operação
 
 - **Hardening inicial:** SSH só por chave, root SSH desabilitado, `ufw` permitindo só 22/80/443, `fail2ban`, `unattended-upgrades` configurado.
-- **Backups:** `pg_dump` diário (configurado no Coolify) → R2. Teste de restore mensal documentado em [ARCHITECTURE.md](../ARCHITECTURE.md).
+- **Backups:** `pg_dump` diário (configurado no Coolify) → R2, com teste de restore periódico (regra: backup não testado não é backup).
 - **Monitoramento:** Sentry (errors), Logfire (logs/traces), Uptime Kuma no próprio Coolify (uptime), PostHog (produto).
 - **Snapshots da VPS:** habilitados na Hostinger (custa pouco; é o lifeline para "rm -rf acidental").
+
+## Invariante de deploy — comunicação interna app→app no Coolify
+
+No Coolify, **bancos** recebem `container_name = <uuid>` e são resolvíveis pelo DNS embutido do Docker; **apps do tipo Docker Image não** — o container ganha sufixo aleatório e o UUID só vira host resolvível na rede compartilhada `coolify` quando o campo **Network Aliases** (em *General → Network*) é preenchido com o próprio UUID. Invariante: **ao criar/wire um app interno (sem `fqdn`, chamado por outro app via UUID), setar `Network Aliases = <uuid>` antes do wire-up.** Sem isso o chamador queima ~5s num DNS morto (timeout do resolver musl no Alpine) e o erro fica mascarado por fallbacks silenciosos — um outage que se disfarça de "engajamento real = 0". Aplicado em `ethitorial-api` (`Network Aliases = y1iaroyitv1k9f46t4dssowt`).
 
 ## Comparativo de orquestradores
 
@@ -110,4 +124,4 @@ Se você consumir **mais de 2h/mês mantendo Coolify** (atualizações que quebr
 
 ## Histórico
 
-- **2026-05-24:** corrigido o reverse proxy embutido de Caddy → Traefik. A doc oficial Coolify ([proxy/caddy/overview](https://coolify.io/docs/knowledge-base/proxy/caddy/overview), [server/proxies](https://coolify.io/docs/knowledge-base/server/proxies)) confirma que Traefik é o default e Caddy é experimental, com recomendação explícita de manter Traefik para a maioria dos setups. A decisão original (delegar TLS + roteamento ao Coolify) permanece válida; só o nome do proxy embutido mudou. Divergência originalmente flagrada no registro ai-ops [2026-05-24 — Setup inicial da VPS talkingpres-prod](../ai-ops/0001-setup-inicial-talkingpres-prod.md), seção C.1.
+- **2026-05-24:** corrigido o reverse proxy embutido de Caddy → Traefik. A doc oficial Coolify ([proxy/caddy/overview](https://coolify.io/docs/knowledge-base/proxy/caddy/overview), [server/proxies](https://coolify.io/docs/knowledge-base/server/proxies)) confirma que Traefik é o default e Caddy é experimental, com recomendação explícita de manter Traefik para a maioria dos setups. A decisão original (delegar TLS + roteamento ao Coolify) permanece válida; só o nome do proxy embutido mudou.

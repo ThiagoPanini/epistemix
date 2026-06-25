@@ -18,7 +18,7 @@
         "@masonator/coolify-mcp@2.12.0"
       ],
       "env": {
-        "COOLIFY_BASE_URL": "https://vps.thiagopanini.dev",
+        "COOLIFY_BASE_URL": "https://vps.panlabs.tech",
         "COOLIFY_ACCESS_TOKEN": "<COLE_O_TOKEN_DO_COOLIFY>"
       }
     },

@@ -31,6 +31,8 @@ talkingpres/
 
 **Dentro de `apps/api`, organizar por boundary de domínio** (`catalog`, `identity`, `engagement`, `narration`, `shared`, `platform`), não por camada técnica. Boundaries não importam diretamente uns dos outros — comunicação via interfaces explícitas.
 
+**Catálogo MDX-native (port de leitura).** O boundary `catalog` (Section/Source/Artifact) é servido MDX-native: `apps/web` lê `content/**/*.mdx` em RSC/build-time e materializa o domínio em TypeScript, sem passar pela API — exceção consciente à regra de que `apps/web` consome a API para operações de domínio, que vale só para o que é dinâmico (engagement, auth, upload). Não é dívida: é a primeira implementação de um port de leitura (content source); uma migração CMS futura troca o adapter (MDX → Postgres servido pela API) atrás da mesma fronteira, sem reescrever o domínio. Rejeitadas: seed MDX→Postgres e API-lê-content-em-paralelo (ambas duplo manuseio de dado read-only, sem estado dinâmico que justifique a API).
+
 ## Justificativa
 
 **Monorepo:**

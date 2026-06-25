@@ -22,7 +22,7 @@
 - **Courses** — notas e reflexões sobre cursos específicos, organizadas por curso.
 - **Books** — reviews e anotações sobre livros, organizadas por livro.
 - **Certifications** — material de estudo e reflexões sobre certificações, organizadas por certificação.
-- **Presentations** — apresentações técnicas em slides, renderizadas via slide-kit.
+- **Presentations** — apresentações técnicas em slides.
 
 ## Atributos não-funcionais
 
