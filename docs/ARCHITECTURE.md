@@ -1,6 +1,6 @@
 # Arquitetura — ethitorial
 
-Documento vivo. Reflete a arquitetura **atual e pretendida**. Mudanças significativas devem vir acompanhadas de ADR.
+Documento vivo. O corpo descreve **só o que roda hoje** (as-built); planos genuínos ainda não materializados ficam isolados na seção [Pretendido (não construído)](#pretendido-não-construído). Mudanças significativas vêm acompanhadas de ADR.
 
 ## Visão de topo
 
@@ -12,11 +12,9 @@ Documento vivo. Reflete a arquitetura **atual e pretendida**. Mudanças signific
                                     │
                           ┌─────────▼──────────┐
                           │  VPS Hostinger     │
-                          │  (Ubuntu 24.04)    │
                           │                    │
                           │  ┌──────────────┐  │
                           │  │   Coolify    │  │
-                          │  │ (Caddy + UI) │  │
                           │  └──────┬───────┘  │
                           │         │          │
                           │  ┌──────┴───────┐  │
@@ -33,130 +31,98 @@ Documento vivo. Reflete a arquitetura **atual e pretendida**. Mudanças signific
                           │  │ Postgres 17  │  │
                           │  │   + volume   │  │
                           │  └──────────────┘  │
-                          └─────────┬──────────┘
-                                    │ pg_dump diário
-                          ┌─────────▼──────────┐
-                          │ Cloudflare R2      │
-                          │ assets + backups   │
                           └────────────────────┘
 ```
+
+Cloudflare na frente da VPS — ver [ADR-0006](adr/0006-cloudflare-na-frente-da-vps.md). Infra Hostinger + Coolify — ver [ADR-0003](adr/0003-infra-hostinger-vps-coolify.md).
 
 ## Camadas e responsabilidades
 
 ### `apps/web` (Next.js 15)
 
-- Renderiza catálogo público (RSC + streaming)
-- Renderiza player de slides (MDX → componentes React via `slide-kit`) — ver [ADR-0012](adr/0012-slide-kit-base-plus-extensoes-locais.md)
-- Hospeda `slide-kit/` (catálogo base de primitivas, animações Framer Motion e chrome de player)
-- UI de auth, perfil, votos, comentários
-- Server Actions exclusivas para concerns do Next (revalidar cache, cookies funcionais, redirects) — ver [ADR-0010](adr/0010-server-actions-apenas-para-concerns-do-next.md)
-- Consome `apps/api` via `fetch` para todas as operações **dinâmicas** de domínio (voto, comentário, perfil, upload). Cliente gerado a partir do OpenAPI.
-- **Catálogo MDX-native — ver [ADR-0018](adr/0018-catalogo-mdx-native-na-fase-1.md):** o catálogo (Section/Source/Artifact) é **MDX-native** — lido direto de `content/**/*.mdx` em RSC/build-time, sem passar pela API. "Tudo via fetch da API" vale para as operações **dinâmicas** (engagement, auth, upload), que entram **agora** no push feature-completo ([ADR-0019](adr/0019-redesenho-prototipo-absoluto-push-feature-completo.md)). O `catalog` boundary Python + endpoints REST de catálogo ficam para a futura migração CMS (adapter MDX→Postgres atrás do mesmo port), sem amarração a número de fase.
+App Router em `apps/web/app/` e bibliotecas em `apps/web/lib/` — **não há diretório `src/`**.
+
+- Renderiza o catálogo público (RSC).
+- **Catálogo MDX-native — ver [ADR-0001](adr/0001-monorepo-and-boundaries.md):** o catálogo (Section/Source/Artifact/Tag) é lido direto de `content/**/*.mdx` (+ `sections.yml`/`tags.yml`) em RSC/build-time, **sem passar pela API**. A leitura, o schema e o domínio vivem em `apps/web/lib/catalog/` (`catalog.ts`, `schema.ts`, `domain.ts`, `reserved.ts`); o parse usa `gray-matter` + `js-yaml`, e a renderização MDX usa `next-mdx-remote` com `remark-gfm` e `rehype-pretty-code`/`shiki`.
+- Auth via **better-auth** (`apps/web/lib/auth.ts`, `auth-client.ts`) com Postgres como store — ver [ADR-0011](adr/0011-auth-better-auth.md). UI de auth, perfil, votos e comentários.
+- Operações **dinâmicas** de domínio (voto, comentário, view, sessão de auth) chegam à API por **route handlers de proxy** em `apps/web/app/api/{auth,comments,views,votes}/` — `fetch` manual para `apps/api`, sem cliente gerado.
+- Assets de conteúdo locais são servidos por `apps/web/app/content-assets/`.
 
 ### `apps/api` (FastAPI)
 
-- API REST com OpenAPI gerado automaticamente
-- Tipos TypeScript gerados a partir do OpenAPI (via `openapi-typescript`) e versionados em `packages/types`
-- Estrutura interna em boundaries de domínio:
+API REST com OpenAPI gerado automaticamente pelo FastAPI. Dependências de runtime: `fastapi`, `uvicorn`, `sqlalchemy[asyncio]`, `asyncpg`, `alembic` (ver `apps/api/pyproject.toml`).
+
+Estrutura interna (achatada, **sem** layout hexagonal de 4 pastas):
 
 ```
 apps/api/src/ethitorial/
-├── catalog/         # Section, Source, Artifact (Post, Presentation, Slide), Tag
-├── identity/        # User, Session, Auth
-├── engagement/      # View, Vote, Comment (apontam para Artifact)
-├── narration/       # [V2] voice, RAG, Q&A (restrito a Presentation)
-├── shared/          # value objects, erros base (Slug, UserId, ArtifactId)
-├── platform/        # db, storage, observability adapters
-└── main.py          # composition root: registra adapters via Depends
+├── db.py            # engine + session async (SQLAlchemy 2.0, DeclarativeBase)
+├── main.py          # FastAPI app: todos os endpoints + DI via Depends
+├── identity/        # models.py (AuthUser/AuthSession), dependencies.py (Depends de auth)
+└── engagement/      # models.py, votes.py, views.py, comments.py
 ```
 
-**Layout interno: hexagonal pragmática** (ports & adapters), formalizada em [ADR-0004](adr/0004-hexagonal-pragmatica.md). Layout completo para boundaries ricos (`catalog`, `narration`):
+Só existem dois boundaries: `identity` e `engagement`. Cada um é um punhado de arquivos planos — **não há subpastas `domain/`/`application/`/`infrastructure/`/`presentation/`**. Os endpoints HTTP moram todos em `main.py`; os casos de uso são funções nos módulos do boundary.
 
-```
-catalog/
-├── domain/           # entities, value_objects, events, exceptions — ZERO framework
-├── application/      # ports (typing.Protocol), use_cases, dtos
-├── infrastructure/   # adapters: persistence, storage, clock
-└── presentation/     # api (router, schemas, dependencies), events
-```
+Persistência: **SQLAlchemy 2.0 async puro** (`DeclarativeBase`, `Mapped`/`mapped_column`, `AsyncSession`) — **não há SQLModel**. Pydantic aparece só como `BaseModel` de payload em `main.py` (via FastAPI), não como camada de modelo. `identity` mapeia as tabelas do better-auth (`auth_user`, `auth_session`, …); a app web e a API compartilham o mesmo Postgres.
 
-Granularidade é proporcional à complexidade do boundary — `identity` é mínimo (delega para provedor externo); `engagement` é reduzido (CRUD com regras simples); `catalog` e `narration` usam o layout completo. Boundaries **não importam diretamente uns dos outros** — comunicação via ports.
+Injeção de dependência: **FastAPI `Depends` puro** (`get_current_user`, `require_auth` em `identity/dependencies.py`). A hexagonal pragmática como rumo de evolução está em [ADR-0004](adr/0004-hexagonal-pragmatica.md) (que também absorve o uso restrito de Server Actions para concerns do Next).
 
-Injeção de dependência: **FastAPI `Depends` puro** na composition root. Migrar para container externo só se necessário (ver ADR-0004).
-
-### `packages/`
-
-- **`ui`** — componentes shadcn customizados, reutilizáveis entre páginas
-- **`types`** — tipos TypeScript gerados (build artifact versionado para facilitar code review e PRs)
+> **Dívida conhecida:** `engagement` importa `from ethitorial.identity.models import AuthUser` direto (em `comments.py` e `main.py`) — acoplamento cross-boundary sem port, contra a regra de ouro do AGENTS.md. Aceitável enquanto a API é mínima; revisitar ao crescer.
 
 ### Persistência
 
-- **Postgres 17** em container Coolify-managed
-- Volume persistente local (não em network storage)
-- Backups: `pg_dump` diário → Cloudflare R2 via job no Coolify
-- Migrations: Alembic, sempre reversíveis, sempre revisadas no PR
-
-### Assets de usuário
-
-- **Cloudflare R2** (S3-compatible, zero egress)
-- Estrutura: `r2://ethitorial-assets/{artifact_slug}/{slide_id}/{asset}`
-- Upload assinado direto do cliente (presigned URL emitido pela API)
-
-### Observabilidade
-
-- **Sentry** — errors (free tier)
-- **Logfire** — logs estruturados + traces (free tier, integra com Pydantic/FastAPI)
-- **Uptime Kuma** — uptime self-hosted no Coolify
-- **PostHog cloud** — analytics de produto
+- **Postgres 17** em container (Coolify em produção; `docker-compose.yml` localmente).
+- Volume persistente local (`pgdata`).
+- Migrations: **Alembic** (async), versionadas em `apps/api/alembic/versions/` e revisadas no PR. Hoje há três: schema de engagement, schema de auth (identity) e um fix de tipo de `user_id`.
 
 ## Fluxo de deploy
 
-Três portões em sequência, formalizados em [ADR-0005](adr/0005-deploy-checks-em-tres-portoes.md):
+Três portões em sequência, formalizados em [ADR-0005](adr/0005-deploy-checks-em-tres-portoes.md). Descrição abaixo reflete os arquivos reais (`lefthook.yml`, `.github/workflows/pr-checks.yml`, `.github/workflows/deploy.yml`).
 
 ```
-PORTÃO 1 — Pre-push local (segundos)
-└── Lefthook
-    ├── ruff format --check + ruff check
-    ├── pyright --warnings
-    ├── biome check + tsc --noEmit
-    ├── pytest / vitest dos arquivos afetados
-    ├── gitleaks protect --staged
-    └── commitlint (commit-msg)
+PORTÃO 1 — Pre-push local (Lefthook)
+├── pre-commit:  gitleaks git --staged (segredos)
+├── commit-msg:  commitlint
+└── pre-push (paralelo):
+    ├── api: ruff format --check, ruff check, pyright --warnings, pytest -m "not integration"
+    └── web: biome check apps/web, tsc --noEmit (typecheck)
 
-PORTÃO 2 — On push da branch (minutos) ← GATE REAL
-└── GitHub Actions: pr-checks.yml
-    ├── lint + typecheck (paralelo)
-    ├── test-unit + test-integration + test-e2e
-    ├── security-scan (gitleaks + bandit + npm audit)
-    ├── coverage-check
-    ├── preview-deploy → Coolify
-    │   └── comenta no PR: pr-<n>.preview.ethitorial.panlabs.tech
-    └── open-pr → abre PR para a main quando os checks ficam verdes
-        (se ainda não existir; idempotente. Merge continua humano)
+PORTÃO 2 — Push da branch de trabalho (GATE REAL) → pr-checks.yml
+├── web:      biome check + typecheck (tsc)
+├── api:      ruff format --check + ruff check + pyright --warnings + pytest -m "not integration"
+├── security: gitleaks (apenas)
+└── open-pr:  needs[web,api,security] → abre PR para a main se não existir (idempotente; o agente mergeia no verde)
 
-PORTÃO 3 — On merge to main (deploy)
-└── GitHub Actions: deploy.yml
-    ├── build-images (web + api, paralelo)
-    ├── push-to-ghcr
-    ├── webhook → Coolify (pull + rolling restart + health check)
-    ├── rollback automático se health falha
-    ├── post-deploy-smoke-tests
-    └── notify-sentry (release marker)
+PORTÃO 3 — Push na main → deploy.yml
+├── build-push (matrix web+api): build das imagens → GHCR
+└── deploy (coolify): guardado por COOLIFY_TOKEN → webhook de redeploy + smoke test (curl em ethitorial.panlabs.tech)
 ```
 
-**Branch protection na `main`:** PR obrigatório, `required approvals = 0` (dev solo — a revisão humana é o ato de mergear; ver [emenda do ADR-0005](adr/0005-deploy-checks-em-tres-portoes.md#emenda-2026-06-04--review-na-realidade-solo)), todos os checks verdes, branch atualizada com `main`, história linear, sem `force push`.
+Não há, hoje, jobs de teste de integração/e2e, coverage gate, bandit/npm-audit, preview-deploy por PR, rollback automático nem release marker — o próprio `pr-checks.yml` registra que esses entram "quando houver código que os justifique".
 
-**Convenção de branches:** regex `^(feat|fix|chore|docs|refactor|test)/.+$` enforced via GitHub Ruleset. Scope (`catalog`, `identity`, etc.) recomendado mas não obrigatório no regex inicial. Detalhe completo no ADR-0005.
+**Branch protection na `main`:** PR obrigatório, `required approvals = 0` (dev solo — mergear é a revisão), checks verdes, branch atualizada, história linear, sem force push (ver [ADR-0005](adr/0005-deploy-checks-em-tres-portoes.md) e sua emenda). Abertura automática de PR e merge de PR verde são autônomos ([ADR-0010](adr/0010-desenvolvimento-autonomo-afk.md), [ADR-0005](adr/0005-deploy-checks-em-tres-portoes.md) emenda).
 
-**Sem `develop`/`staging`:** preview por PR cobre o caso; `main` sempre deployável.
+**Sem `develop`/`staging`:** `main` sempre deployável.
 
 ## Princípios
 
-1. **Boundaries explícitos** > pastas técnicas (`models/`, `controllers/`). A organização espelha o domínio.
-2. **Migrations são contratos.** Toda mudança de schema vai junto com a feature que a usa, no mesmo PR.
-3. **OpenAPI é a fronteira** entre web e api. Não invente tipos no front que duplicam o back.
-4. **Custo previsível** > escalabilidade infinita. Otimize para o caso "10k MAU em VPS única". Cross o ponte serverless quando provar gargalo real.
-5. **Open source friendly.** Nada que dependa de SaaS pago para rodar local. Substituível por alternativa FOSS sempre que possível.
+1. **Boundaries explícitos** > pastas técnicas. A organização espelha o domínio (modelo em [ADR-0009](adr/0009-modelo-de-dominio.md)).
+2. **Migrations são contratos.** Mudança de schema vai junto com a feature, no mesmo PR.
+3. **Catálogo é conteúdo, não dado dinâmico.** O catálogo nasce de MDX em build-time; só engagement/auth falam com a API.
+4. **Custo previsível** > escalabilidade infinita. Otimize para "VPS única"; cruze a ponte serverless só ao provar gargalo real.
+5. **Open source friendly.** Nada que dependa de SaaS pago para rodar local.
+
+## Pretendido (não construído)
+
+Itens abaixo são planos genuínos e **não existem no código hoje**. Só viram realidade com ADR/PR próprios.
+
+- **`packages/`** — nenhum workspace de pacotes compartilhados existe. Pretende-se `packages/ui` (componentes shadcn reusáveis) e `packages/types` (tipos TS gerados do OpenAPI via `openapi-typescript`). Hoje o web fala com a API por proxy + `fetch` manual, sem cliente gerado.
+- **Mais boundaries no `apps/api`** — `catalog` (adapter MDX→Postgres atrás de port, para a futura migração CMS), `narration` (voz/TTS + RAG/Q&A, V2 deferida — ver CONTEXT.md), além de `shared` (value objects/erros base) e `platform` (adapters de db/storage/observabilidade). Hoje só `identity` e `engagement`, com `db.py` no topo.
+- **Layout hexagonal de 4 pastas** (`domain`/`application`/`infrastructure`/`presentation`) para boundaries ricos — rumo do [ADR-0004](adr/0004-hexagonal-pragmatica.md), ainda não aplicado a nenhum boundary.
+- **Observabilidade** — Sentry (errors), Logfire (logs/traces), Uptime Kuma (uptime self-hosted), PostHog (analytics). Nenhuma integração no código (sem dependências correspondentes).
+- **Assets de usuário via Cloudflare R2** (S3-compatible) com upload assinado direto do cliente (presigned URL emitido pela API). Não há cliente S3/R2 nem endpoint de presigned; assets de conteúdo são servidos localmente pelo web.
+- **Backups** — `pg_dump` diário para armazenamento externo (ex.: R2) via job no Coolify.
 
 ## Pontos abertos
 
