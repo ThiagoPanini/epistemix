@@ -6,7 +6,7 @@ cover: "_assets/course-aicodingforrealengineers-background.webp"
 author_avatar: "_assets/profile-mattpocock.webp"
 study_status: ongoing
 started_at: "2026-06-01"
-last_activity: "2026-06-12"
+last_activity: "2026-06-26"
 progress: 60
 
 # Ordem de leitura dos Posts, da primeira à última. Desacopla a sequência do
@@ -23,3 +23,8 @@ post_order:
   - progressive-disclosure-o-mapa-nao-o-territorio
   - agent-skills-capacidade-que-o-agente-descobre
   - memoria-do-agente-o-steering-que-ele-escreve-sozinho
+  - resumo-das-aulas-do-dia-02
+  - gerenciando-grandes-implementacoes
+  - tracer-bullets-pilotar-o-agente-fatia-por-fatia
+  - ask-user-question
+  - resumo-das-aulas-do-dia-03

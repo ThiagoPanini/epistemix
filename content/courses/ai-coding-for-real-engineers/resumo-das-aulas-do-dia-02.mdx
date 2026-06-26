@@ -1,0 +1,185 @@
+---
+title: "Resumo das Aulas do Dia 02"
+date: 2026-06-26
+status: published
+tags: [ai, agents]
+summary: "Um resumo do Dia 02 do AI Coding for Real Engineers, o dia de steering: AGENTS.md e CLAUDE.md, progressive disclosure, Agent Skills e a memória que o agente escreve sozinho."
+---
+
+Se o Dia 01 foi sobre a janela de contexto que limita o agente, o Dia 02 é sobre a alavanca que
+fica do outro lado: *steering*. Guiar o agente para os seus padrões sem repetir a mesma instrução
+em toda sessão.
+
+O dia tem um arco que eu só enxerguei no fim, e que vale dizer logo. Ele é sobre autoria. As
+primeiras aulas tratam do *steering* que você escreve e o agente lê: um arquivo de memória, uma
+skill. A última inverte a mão: o *steering* que o agente escreve e relê sozinho. No meio, um
+princípio costura tudo, o *progressive disclosure*, que decide o que entra no contexto e o que
+espera atrás de um ponteiro.
+
+O dia tem seis aulas principais:
+
+| Aula | Tema | Ideia central |
+| --- | --- | --- |
+| 04.01 | O que é um AGENTS.md | Um README para agentes, global e pago em toda request |
+| 04.02 | Steering com o AGENTS.md | A regra é contexto, não lei: notar, escrever, verificar |
+| 04.03 | Progressive disclosure | Dar o mapa, não o território, e revelar sob demanda |
+| 04.04 | O que são Agent Skills | Capacidade que o agente descobre, em três níveis |
+| 04.05 | Skills para steering | Procedimento vira skill, e a descrição é a interface |
+| 04.06 | Memória automática | O steering que o agente escreve sozinho, e o risco de drift |
+
+## 04.01 - O que é um AGENTS.md
+
+A primeira aula apresenta a ferramenta de *steering* mais simples e mais perigosa. É um arquivo
+Markdown versionado no Git que o agente lê antes de qualquer outra coisa. Matt usa a imagem certa:
+é um *README* para agentes, o lugar previsível onde o agente busca o contexto do projeto.
+
+A promessa é ótima: ensine sua preferência uma vez, colha o comportamento para sempre. A conta tem
+letra miúda. O arquivo entra em toda request, custa token em toda request, e o agente pode ignorá-lo
+quando quiser. O `AGENTS.md` virou padrão aberto, hoje sob a Linux Foundation, com mais de 60 mil
+projetos usando o formato. A exceção é justamente o Claude Code, que lê `CLAUDE.md`, então a ponte
+é um *symlink* ou um import.
+
+O detalhe que governa o resto é que o arquivo é global. Matt enche um `CLAUDE.md` com a mesma linha
+duas mil vezes e mostra o resultado: o Claude avisa que o arquivo grande afeta a performance, e a
+janela já aparece com cerca de 10% queimado antes de o trabalho começar. Tudo que mora ali é pago a
+cada chamada.
+
+Daí o número que fecha a aula, vindo de um artigo da Humanlayer. LLMs de fronteira seguem por volta
+de 150 a 200 instruções com consistência, o *system prompt* do Claude Code já gasta cerca de 50, e
+sobra pouco para você. O `AGENTS.md` ideal é o menor possível.
+
+## 04.02 - Steering com o AGENTS.md
+
+A segunda aula tira o conceito do papel com um exercício esperto. O codebase inteiro usa parâmetros
+posicionais, e a memória manda usar objeto. Durante a exploração, o agente vê o padrão ruim
+espalhado por toda parte enquanto o arquivo sussurra o oposto. A pergunta é direta: quem ganha, o
+que o arquivo manda ou o que o código mostra?
+
+A resposta expõe o ponto mais honesto do dia. O `CLAUDE.md` é contexto, não é lei. O Claude injeta o
+arquivo como uma mensagem com um lembrete dizendo que aquilo pode não ser relevante e que o agente
+não deve obedecer cegamente. Para bloquear uma ação aconteça o que acontecer, o caminho é um *hook*,
+não uma frase no arquivo. Você pode escrever a regra certa, no lugar certo, e ainda ver o agente
+ignorá-la.
+
+Isso fecha o *steering* num laço de três passos, e é o que de fato fica:
+
+1. Notar um padrão que o agente usa e que você não quer.
+2. Escrever uma regra no `CLAUDE.md` para empurrá-lo na direção melhor.
+3. Verificar que funcionou, rodando o agente de novo e olhando o código.
+
+O terceiro passo não é opcional. Como a regra é sugestão, "escrevi a regra" e "o agente obedeceu"
+são duas afirmações diferentes. O comando `/memory` ajuda no ciclo, porque injeta a regra recém-escrita
+na sessão ativa sem reiniciar o agente.
+
+## 04.03 - Progressive disclosure
+
+A terceira aula nomeia a cura para o arquivo que incha. O nome é *progressive disclosure*, e ele não
+nasceu para agentes. É um termo de UX, cunhado por Jakob Nielsen em 1995: mostre só as poucas opções
+mais importantes primeiro, e ofereça o resto sob demanda. O exemplo canônico é a caixa de impressão,
+com o básico à vista e o avançado atrás de um botão.
+
+A ideia se transporta direto para o `CLAUDE.md`. Em vez de despejar toda a complexidade no contexto,
+você dá ao agente um mapa e deixa ele navegar até o que precisa. Instruções que andam juntas vão para
+um arquivo separado, e o arquivo raiz guarda só o ponteiro: "para convenções de TypeScript, veja
+`docs/TYPESCRIPT.md`". A regra de TypeScript carrega quando o agente toca TypeScript, não em toda
+conversa.
+
+A Anthropic deu base concreta ao truque, no artigo sobre engenharia de contexto. Contexto é finito
+não por cota de token, mas por atenção. O fenômeno tem nome, *context rot*: conforme a janela cresce,
+a capacidade do modelo de recuperar qualquer informação dali cai.
+
+O princípio que sobra é achar o menor conjunto de tokens de alto sinal que maximiza a chance do
+resultado que você quer. E há um custo que ninguém conta: navegar tem preço, e o próprio Nielsen
+avisa que passar de dois níveis costuma derrubar a usabilidade.
+
+## 04.04 - O que são Agent Skills
+
+A quarta aula entrega a forma madura do *progressive disclosure*: os *Agent Skills*. Uma skill é uma
+pasta com instruções, scripts e recursos que o agente **descobre** sozinho quando precisa. O verbo é
+o ponto inteiro. O `AGENTS.md` empurra tudo para dentro de toda request; a skill senta num lugar
+conhecido e espera o agente puxá-la.
+
+A anatomia é um arquivo `SKILL.md` com *frontmatter* de `name` e `description`, mais o corpo em
+Markdown. Por padrão, o agente só vê o `name` e a `description`: o corpo fica invisível até ele julgar
+a skill relevante. São três níveis de revelação, o metadado no startup, o corpo sob demanda, os
+anexos só se ele navegar até eles. A descrição é a peça mais cara, porque é a única coisa que decide
+se a skill vai ser descoberta. No Claude Code, ela é truncada em 1.536 caracteres na listagem.
+
+| Onde mora | O que pertence | Por quê |
+| --- | --- | --- |
+| `AGENTS.md` raiz | descrição do projeto, build não óbvio | relevante para quase toda tarefa |
+| Skill | o raro de alto valor, a correção que o LLM não sabe | custo zero até o agente descobrir |
+| Anexo da skill | documentação extensa, script, dataset | só carrega se o agente navegar até ele |
+
+## 04.05 - Skills para steering
+
+A quinta aula tira a skill da teoria e dá o critério de quando criar uma. A documentação do Claude
+Code resume bem: fato fica no arquivo, procedimento vira skill. Se você repete a mesma instrução ou
+checklist toda hora, ou se uma seção do `CLAUDE.md` deixou de ser um fato e virou um passo-a-passo,
+extraia para uma skill.
+
+A aula também separa dois eixos de invocação, e isso é mais que controle de acesso. A
+*agent-invoked* é a skill que o LLM dispara sozinho. A *user-invoked*, marcada com
+`disable-model-invocation: true`, é a que só você dispara, para fluxo com efeito colateral como
+`/deploy` ou `/commit`. A flag muda até o contexto: numa skill que só você invoca, a descrição sai do
+contexto, porque o agente não precisa pesá-la se nunca vai disparar a skill.
+
+O exercício é o que prega o resto do dia: usar uma skill para escrever uma skill. O alvo é um
+`CLAUDE.md` com mais de cem linhas de padrões de código. A tarefa é extrair esses padrões para uma
+skill bem organizada e deixar no arquivo só um ponteiro de uma linha. O que importa é que a craft
+está na conversa: a skill não é um depósito de regra, é uma interface que você projeta para o agente.
+
+## 04.06 - Memória automática
+
+A última aula vira a mão. Até aqui, eu escrevo o *steering* e o agente lê. A memória automática deixa
+o agente escrever o próprio *steering*: ele anota o que aprendeu sobre o projeto e relê na sessão
+seguinte, sem você digitar nada. A distinção mais limpa está na documentação: o `CLAUDE.md` é a sua
+instrução para o Claude, e o `MEMORY.md` é o caderno do Claude sobre o seu projeto.
+
+Por baixo, o sistema repete o princípio do dia. Cada repositório ganha um diretório de memória, com
+um `MEMORY.md` que é um índice e arquivos de tópico ao lado. Só as primeiras 200 linhas do índice, ou
+os primeiros 25KB, entram no contexto no startup. O resto espera. É *progressive disclosure* virada
+para dentro: o agente faz com as próprias anotações o que a skill faz com os anexos.
+
+Aqui mora a ansiedade que o Matt admite e que eu compartilho. O pior que acontece com a memória é ela
+ficar desatualizada em relação ao código. O exemplo da aula é uma nota que diz que os testes usam
+`pushSchema`, já depreciado no repo. A nota foi verdadeira no dia em que foi escrita. O código andou,
+a nota ficou, e agora ela mente com confiança.
+
+Esse é o *drift*, e ele é pior que a ausência de memória, porque memória velha tem a mesma cara de
+aprendizado válido. A defesa não é confiar menos, é verificar na hora de ler: a memória registra o
+que era verdade, não o que é verdade.
+
+## A síntese do dia
+
+O Dia 02 forma um arco de autoria sobre uma constante. A constante é o orçamento de atenção, o mesmo
+do Dia 01. Cada peça de *steering* é uma aposta sobre o que vale ocupar esse orçamento:
+
+1. O `AGENTS.md` paga em toda request, então só o frequente e estável pertence a ele.
+2. O *progressive disclosure* tira o resto do caminho, com um ponteiro no lugar do conteúdo.
+3. A skill empacota o raro de alto valor e o procedimento, e o agente a descobre sob demanda.
+4. A memória automática deixa o agente anotar o que aprendeu, e te obriga a ler com suspeita de
+   validade.
+
+O fio que amarra o dia é uma frase que aparece em quase toda aula: nada disso é lei. O arquivo é
+contexto, a skill é contexto, a memória é contexto. Lei mesmo, no Claude Code, é *hook* e permissão.
+O resto é contexto bem-escrito tentando influenciar uma decisão, e por isso o passo de verificação
+não some nunca.
+
+Isso muda meu jeito de trabalhar com agentes. Eu tratava arquivo de instrução como documentação, algo
+que quanto mais completo, melhor. Depois desse dia, passei a tratá-lo como orçamento: um arquivo
+enxuto não é só mais barato, é mais obedecido, porque sinal sobre ruído é o jogo inteiro. A pergunta
+deixou de ser "o agente tem instrução suficiente?" e virou "esta instrução vale o que toda request
+vai pagar por ela?".
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [AGENTS.md, o padrão aberto](https://agents.md/)
+- [Writing a good CLAUDE.md, Humanlayer](https://www.humanlayer.dev/blog/writing-a-good-claude-md)
+- [How Claude remembers your project, documentação do Claude Code](https://code.claude.com/docs/en/memory)
+- [Progressive Disclosure, Jakob Nielsen, Nielsen Norman Group](https://www.nngroup.com/articles/progressive-disclosure/)
+- [Equipping agents for the real world with Agent Skills, Anthropic](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
+- [Effective context engineering for AI agents, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- Aulas `04.01` a `04.06`, do material bruto extraído do cohort
+- Posts do Dia 02: `agents-md-e-claude-md-steering-que-entra-em-toda-request`, `progressive-disclosure-o-mapa-nao-o-territorio`, `agent-skills-capacidade-que-o-agente-descobre`, `memoria-do-agente-o-steering-que-ele-escreve-sozinho`

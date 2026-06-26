@@ -46,6 +46,10 @@ docker compose up -d postgres        # só o banco local
 
 Quando o operador disser "implementa as issues" (ou equivalente), o default — **sem precisar reafirmar autonomia nem ferramenta a cada vez**: pegar issues `agent-ready` sem bloqueio → um **git worktree** por issue → TDD em **modo de economia de token** → autonomia total até o **merge do PR verde** → encadear até as issues acabarem, **parando só se o operador pedir** (ex.: para compactar contexto). Fluxo detalhado em [docs/agents/workflow.md](docs/agents/workflow.md).
 
+## Prompts entregáveis (convenção)
+
+Sempre que o operador pedir "um prompt" (para outra sessão, outro repo ou uma tarefa futura), **salve-o como arquivo em `prompts/`** na convenção `AAAAMMDDHHMMSS_slug-kebab.md` (timestamp via `date +%Y%m%d%H%M%S`; corpo em pt-BR começando por `# Título`, sem frontmatter). Entregar só inline no chat não basta — o arquivo é o entregável.
+
 ## Regras de ouro (não-negociáveis)
 
 - **Autonomia total no escopo do projeto — para só em 4 casos.** Implementar, deploy, redeploy, env, segredo gerável por máquina, migration, criar/dropar recurso próprio no Coolify e **merge de PR verde** são a norma: faça sozinho. Pare e chame o operador apenas se a operação (1) o **trancaria pra fora** (senha root/painel, firewall, token que o MCP usa), (2) **recriaria a VM**, (3) **exige segredo de terceiro** (OAuth/console), ou (4) **tocaria outro projeto** no Coolify compartilhado. Detalhe em [ADR-0010](docs/adr/0010-desenvolvimento-autonomo-afk.md) e [workflow.md](docs/agents/workflow.md).

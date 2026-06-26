@@ -1,0 +1,198 @@
+---
+title: "Gerenciando grandes implementações"
+date: 2026-06-26
+status: published
+tags: [ai, agents, sdd]
+summary: "O Dia 03 começa com o problema das tarefas gigantes: por que uma feature grande não cabe na smart zone, e como dois documentos, um PRD de destino e um plano de jornada, dividem o trabalho entre várias janelas de contexto."
+---
+
+Uma tarefa pequena cabe numa janela de contexto. Um refactor grande não cabe, e fingir que cabe é o
+começo da maioria das sessões que dão errado.
+
+Esse é o ponto de partida do Dia 03 do **AI Coding for Real Engineers**, o dia de planejamento. As
+aulas `05.01` e `05.02` atacam a pergunta mais prática do curso até aqui: o que você faz quando a
+coisa que precisa construir é grande demais para o agente fazer de uma vez? A resposta não é um truque
+novo de IA. É a coisa mais velha da engenharia, agora com um formato.
+
+## Quando a tarefa não cabe na janela
+
+O Dia 01 deixou uma régua: o agente raciocina com nitidez no começo da janela, numa região por volta
+de 80 a 100 mil tokens, e degrada conforme ela enche. Matt chama isso de *smart zone* e *dumb zone*, e
+passou o curso inteiro construindo a paranoia de ficar na parte boa.
+
+Feature pequena e correção de bug cabem confortavelmente ali. O problema aparece quando a tarefa
+estoura a janela inteira, não só a *smart zone*. Um refactor que toca dezenas de arquivos, uma feature
+que atravessa banco, serviço, rota e UI em várias telas. Não há prompt esperto que faça esse trabalho
+caber numa sessão sem cair na *dumb zone* no meio do caminho.
+
+A saída é a que os desenvolvedores usam há décadas. Você pega a tarefa grande e a quebra em tarefas
+pequenas. Cada pedaço acontece dentro da *smart zone*, com contexto fresco, e o todo emerge da soma.
+Matt resume sem cerimônia: "você pega a tarefa grande e a quebra em tarefas pequenas". O que muda com
+o agente é que a disciplina deixa de ser conselho e vira requisito, porque a janela degrada de um jeito
+visível e imediato.
+
+## Dois documentos: o destino e a jornada
+
+Quebrar é fácil de dizer e difícil de fazer bem. A comunidade convergiu para um par de documentos, e a
+distinção entre eles é o coração da aula.
+
+O primeiro é o destino. Algumas pessoas chamam de *spec*, outras de PRD, o *product requirements
+document*. O nome não importa: é a descrição do que você está construindo e de onde quer chegar. Matt é
+direto sobre a função: se você não sabe para onde está indo, não tem como completar a tarefa. O PRD é o
+lugar onde você, humano, impõe seu gosto ao LLM e martela o escopo exato.
+
+O segundo é a jornada, e ele resolve um problema que o destino sozinho não resolve. Se você só
+especifica onde quer chegar, o LLM não sabe como dividir o caminho em pedaços. Sem uma descrição da
+jornada, ele tende a tentar tudo numa janela só. Por isso, ao lado do PRD costuma viver um `PLAN.md`,
+que quebra os requisitos em fases.
+
+| Documento | O que descreve | Pergunta que responde |
+| --- | --- | --- |
+| PRD | o destino, o que será construído | para onde estou indo, e por quê |
+| `PLAN.md` | a jornada, as fases até lá | como divido isso em pedaços que cabem na *smart zone* |
+
+A mecânica de uso é simples. Numa sessão você cria o destino. Na mesma sessão, ou numa nova, você cria
+a jornada, quebrando o PRD numa sequência de fases: fase 1 faz isto, fase 2 faz aquilo, e assim por
+diante. Essas fases viram os ingredientes do *prompt* de execução.
+
+## Por que passar o plano inteiro
+
+Aqui está o detalhe que parece menor e não é. Quando você manda o agente executar uma fase, você passa
+três coisas: qual fase é a da vez, o PRD inteiro, e o plano inteiro. Não só a fase atual. O plano todo.
+
+A razão é coordenação. Com o plano inteiro à vista, o agente enxerga que um certo pedaço pertence à
+fase 3 e decide não fazê-lo na fase 2. As fases param de pisar no pé umas das outras, na imagem que
+Matt usa. Sem isso, você corre dois riscos clássicos de trabalho fatiado: a duplicação, quando duas
+fases constroem a mesma coisa, e o conflito, quando uma fase desfaz o que a outra montou.
+
+Isso ecoa um problema conhecido na pesquisa de decomposição com agentes. Esquemas que fixam as
+subtarefas cedo demais, sem dar a cada uma a visão do todo, propagam erro e divergência de uma etapa
+para a seguinte. O plano completo no contexto de cada fase é o antídoto barato: cada janela é fresca,
+mas nenhuma é cega para o resto da obra.
+
+## O PRD não é invenção de 2025
+
+Vale parar no PRD, porque ele carrega mais história do que a aula deixa ver. O *product requirements
+document* é um artefato clássico de gestão de produto, anterior à IA por décadas. Marty Cagan, numa
+referência que muita gente trata como canônica, descreve um bom PRD em torno de quatro seções:
+propósito, funcionalidades, critérios de release e cronograma aproximado. A frase dele é severa: se o
+PRD não é bem-feito, é quase impossível que um bom produto resulte.
+
+O template que a aula usa é mais enxuto, e mira o que um agente precisa para implementar. São três
+seções, e a perspectiva delas importa.
+
+| Seção | O que captura |
+| --- | --- |
+| *Problem Statement* | o que está quebrado ou faltando, do ponto de vista do usuário |
+| *Solution* | o que precisa acontecer, ainda do ponto de vista do usuário |
+| *User Stories* | uma lista numerada de cenários e resultados esperados |
+
+Essa estrutura dá a quem pega o PRD contexto suficiente para entender não só o que construir, mas por
+quê. É o mesmo benefício do *plan mode* que o Dia 01 elogiou: você entende mais o projeto, o LLM
+entende mais o projeto. A diferença é a escala. O PRD aguenta uma construção muito maior que uma janela
+de contexto.
+
+## A skill que escreve o PRD por você
+
+Você não precisa escrever o PRD na unha. O curso entrega uma skill para isso, a `/to-prd`, e a forma
+como ela se encaixa no fluxo é o que vale aprender. Ela não nasce do nada: ela transforma o que você já
+descobriu numa conversa de exploração num documento estruturado.
+
+O fluxo é uma sequência de duas skills que já apareceram na série. Primeiro, uma sessão de `/grill-me`,
+que força o agente a entrevistar você até o entendimento ficar resolvido. Depois, em vez de partir para
+a implementação, você chama a `/to-prd`, que converte a conversa num PRD gravado no codebase. E aí você
+para. O exercício é explícito nisso: não implemente o PRD ainda, só salve e comite.
+
+A escolha do exemplo ensina o critério de quando esse fluxo vale a pena. A tarefa é um dashboard de
+analytics para instrutores, e Matt o descreve como "enorme e bulboso, capaz de crescer em todo tipo de
+forma". Ele quer ver quantos alunos estão matriculados, quanto se está ganhando, taxas de conclusão,
+distribuição de notas de quiz, e em quais aulas os alunos desistem. Uma feature assim, vaga e
+ramificada, é o caso perfeito para *grill-me* mais PRD: você primeiro descobre o formato, depois o
+congela num documento.
+
+## Spec-driven development: a spec vira a fonte da verdade
+
+O par PRD mais plano tem um nome maior, que vinha fermentando fora deste curso: *spec-driven
+development*. A ideia é que a spec escrita deixa de ser papelada de abertura e vira a fonte durável da
+verdade, o documento que dirige a implementação do agente. Quando algo não fecha, você volta para a
+spec, não para o chat.
+
+Dois projetos recentes dão forma concreta a isso, e ajudam a situar a aula num movimento maior. O *Spec
+Kit*, do GitHub, organiza o trabalho em quatro fases com portões: *specify*, *plan*, *tasks*,
+*implement*, e quebra a obra em unidades pequenas e revisáveis, implementadas e validadas em isolamento.
+O *Kiro*, da Amazon, usa um fluxo de três artefatos parecido: *requirements*, *design*, *tasks*.
+
+| Abordagem | Artefatos | O que valida cada um |
+| --- | --- | --- |
+| Curso (Dia 03) | PRD mais `PLAN.md` | destino claro, jornada em fases |
+| GitHub Spec Kit | specify, plan, tasks, implement | portões entre fases, unidades revisáveis |
+| Amazon Kiro | requirements, design, tasks | spec em três camadas antes do código |
+
+O detalhe que une os três é o mesmo do PRD da aula. A spec é onde o humano impõe gosto e resolve
+ambiguidade antes de o código existir, e é o que sobrevive entre uma sessão e a próxima. O agente é
+*stateless*, mas a spec não é. Ela é a memória do projeto que não apodrece numa janela que fechou.
+
+## Por que a decomposição não é opcional com LLM
+
+Dá para tratar tudo isso como bom senso, e parar aqui. Mas há uma base concreta, e ela explica por que
+a disciplina aperta mais com agente do que com humano. A Anthropic, no artigo sobre engenharia de
+contexto, é direta: contexto é um recurso finito com retornos marginais decrescentes, e o modelo tem um
+orçamento de atenção, não só uma cota de tokens.
+
+O mecanismo é arquitetural. Numa janela de n tokens, há n² relações entre pares para a atenção
+processar, então quanto mais longo o contexto, mais fina ela se estica. Daí o *context rot*: conforme o
+número de tokens cresce, a capacidade de recuperar com precisão qualquer informação dali cai. Quebrar a
+tarefa não é só organização, é a forma de manter cada janela dentro do orçamento onde o modelo ainda
+pensa bem.
+
+A pesquisa recente reforça o tamanho do efeito. Um trabalho sobre resolver tarefas de um milhão de
+passos com zero erro mostra que o desempenho do LLM deteriora, muitas vezes de forma exponencial,
+conforme o horizonte da tarefa cresce. O outro lado é animador: pequenas melhorias no acerto de cada
+subtarefa viram melhorias exponenciais no tamanho de tarefa que você consegue completar. Dividir para
+conquistar não é nostalgia, é alavanca.
+
+## O risco de trocar descoberta por documentação
+
+Aqui entra a auto-auditoria, porque o PRD tem um modo de falhar que ninguém avisa. O próprio Cagan, que
+defende o documento, escreveu depois um aviso: PRD pesado não substitui descoberta. Dá para usar a
+papelada como teatro, produzir um documento bonito e confundir o ato de escrever com o ato de entender.
+
+Por isso a ordem da aula importa tanto. Primeiro o *grill-me*, depois o `/to-prd`. A entrevista é a
+descoberta, o PRD é só o registro dela. Inverter a ordem, gerar o documento antes de resolver as
+decisões, recria exatamente o problema do *plan mode* que o Dia 01 criticou: uma parede de Markdown que
+parece alinhamento e esconde que ninguém alinhou nada. O PRD bom é o que sai de uma conversa difícil,
+não o que a substitui.
+
+## O que fica para o meu fluxo
+
+A grande virada deste começo de dia é de altitude. Eu já quebrava tarefa grande, mas tratava o plano
+como rascunho descartável, algo que vivia no chat e morria com ele. A aula me fez separar duas coisas
+que eu misturava: o destino e a jornada são documentos diferentes, com funções diferentes, e os dois
+sobrevivem à janela.
+
+A disciplina que levo virou uma regra de três:
+
+1. Escrever o destino antes da jornada: um PRD que sai de uma sessão de descoberta, não um documento
+   gerado para fingir entendimento.
+2. Quebrar a jornada em fases que cabem na *smart zone*, e passar o plano inteiro em cada fase, para as
+   fases não pisarem umas nas outras.
+3. Tratar a spec como a fonte da verdade que o agente *stateless* não tem, e voltar a ela quando o
+   código divergir, em vez de improvisar no chat.
+
+No fim, gerenciar uma implementação grande é menos sobre o agente e mais sobre o que você deixa escrito
+antes de soltá-lo. A janela é pequena e esquece. O documento é o que não esquece. A próxima coisa que
+vou afiar é a jornada, porque o destino sem um bom plano de fases ainda deixa o agente tentar engolir o
+mundo de uma vez.
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [How To Write a Good PRD, Marty Cagan, SVPG](https://www.svpg.com/wp-content/uploads/2024/07/How-To-Write-a-Good-PRD.pdf)
+- [What is a Product Requirements Document, Atlassian](https://www.atlassian.com/agile/product-management/requirements)
+- [Discovery vs. Documentation, Marty Cagan, SVPG](https://www.svpg.com/discovery-vs-documentation/)
+- [Spec-driven development with AI, GitHub Blog](https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/)
+- [Spec Kit, repositório do GitHub](https://github.com/github/spec-kit)
+- [Kiro, IDE agêntica da Amazon](https://kiro.dev/)
+- [Effective context engineering for AI agents, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [Solving a Million-Step LLM Task with Zero Errors, arXiv](https://arxiv.org/abs/2511.09030)
+- Aulas `05.01-how-to-tackle-massive-tasks` e `05.02-write-great-prds-with-this-skill`, do material bruto extraído do cohort

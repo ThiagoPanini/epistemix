@@ -1,0 +1,194 @@
+---
+title: "Tracer bullets: pilotar o agente fatia por fatia"
+date: 2026-06-26
+status: published
+tags: [ai, agents, sdd]
+summary: "Por que a IA tende a construir tudo de uma vez e produzir slop, o que são tracer bullets (de O Programador Pragmático), e como uma fatia vertical, um plano multi-fase e o loop plan-execute-clear viram a dinâmica de executar uma feature grande com o agente."
+---
+
+A IA quer te agradar. No código, esse instinto vira a vontade de entregar a solução inteira de uma vez,
+e a solução inteira de uma vez quase sempre vira retrabalho.
+
+Esse é o problema que o meio do Dia 03 do **AI Coding for Real Engineers** ataca. No Post anterior, o
+destino e a jornada ficaram separados: um PRD diz o que construir, um `PLAN.md` quebra o caminho em
+fases. Falta a parte mais prática, a dinâmica de tocar essas fases com o agente sem afogar nem ele nem
+você. As aulas `05.03` a `05.06` são sobre isso, e a peça central tem um nome emprestado de um livro de
+1999: *tracer bullets*.
+
+## A inclinação da IA: construir tudo de uma vez
+
+Matt nomeia o vilão com franqueza. A IA tem uma inclinação natural à bajulação. "Você está
+absolutamente certo", ela diz, e esse impulso de agradar aparece no código como pressa de produzir a
+solução completa num único salto. Ela tem na cabeça a imagem do arquivo pronto, da feature pronta, e
+despeja tudo de uma vez.
+
+O resultado tem nome no curso: *slop*. Blocos enormes de código que precisam de revisão pesada e quase
+sempre de retrabalho. O modo de falhar é sempre o mesmo, e Matt o descreve com um exemplo que dói de tão
+familiar. Você pede uma API que conversa com um banco, e a IA constrói, nesta ordem: todos os
+*endpoints*, os modelos de request e response, o middleware de erro, a autenticação, o *rate limiting*,
+o logging. Só depois de tudo isso ela tenta conectar no banco. E aí a string de conexão está no formato
+errado, ou o tipo da coluna não bate, ou os testes nem tocam o banco de verdade.
+
+A imagem do *Programador Pragmático* para isso é precisa: a IA está correndo na frente dos próprios
+faróis. Ela constrói camada horizontal sobre camada horizontal, no escuro, sem nunca testar se o
+caminho crítico funciona. O LLM tende a codar na horizontal, e a horizontal esconde o erro até a última
+fase, quando ele é mais caro de achar e de desfazer.
+
+## O plano ingênuo
+
+A aula `05.03` mostra esse instinto em estado puro, de propósito. O exercício é o mínimo: abra uma
+sessão nova, referencie o PRD do Post anterior com `@`, e peça o plano sem nenhuma orientação. O prompt
+é uma frase: "transforme isto num plano multi-fase e salve como um arquivo Markdown local".
+
+A intenção é observar, não corrigir. Matt pede para reparar em quantas fases o agente cria, no tamanho
+de cada tarefa, e se cada fase de fato constrói sobre a anterior. O plano que sai costuma quebrar o
+trabalho de forma lógica, e mesmo assim errar no que importa. Ele organiza por camada, não por
+validação. Há uma fase de serviço, uma fase de componentes, uma fase de rotas, e nenhuma delas devolve
+feedback sobre o todo até o fim.
+
+Matt chama isso, com cuidado, de o jeito ingênuo. Não é que o plano esteja quebrado. É que ele
+reproduz, na escala do plano, o mesmo erro horizontal que produz *slop* na escala do código. O destino
+está claro, mas a jornada foi desenhada para te deixar no escuro até a última curva.
+
+## O que é um tracer bullet
+
+A correção vem da aula `05.04`, e ela é de novo um clássico reaproveitado. O conceito de *tracer bullet*
+vem de *O Programador Pragmático*, de Andrew Hunt e David Thomas. A metáfora é munição traçante de
+verdade. Em vez de calcular distância, vento e elevação e torcer pelo acerto, o atirador intercala balas
+fosforescentes que deixam um rastro visível e corrige a mira em tempo real, vendo onde cada tiro bate.
+
+No código, a tradução é uma fatia fina que atravessa o sistema inteiro de ponta a ponta. Andy Hunt fala
+de "uma linha fina de execução que vai de uma ponta à outra", da UI à lógica de negócio ao banco, e que
+depois cresce caso de uso por caso de uso. David Thomas resume a filosofia numa frase: tudo se resume a
+feedback, e quanto mais rápido você o consegue, menos correção precisa para voltar ao alvo.
+
+A diferença com o plano ingênuo fica nítida numa tabela. É a mesma feature, montada em duas direções.
+
+| Direção | Como constrói | Quando você descobre que quebrou |
+| --- | --- | --- |
+| Horizontal (camadas) | uma camada inteira por vez, em isolamento | só na última fase, quando tudo se encontra |
+| Vertical (tracer bullet) | uma fatia fina por todas as camadas | na primeira fatia, antes de investir no resto |
+
+O laço de trabalho que sai disso é curto e repetível:
+
+1. Construir uma fatia pequena, de ponta a ponta.
+2. Testá-la na hora.
+3. Colher o feedback.
+4. Passar para a fatia seguinte, numa janela de contexto nova.
+5. Repetir.
+
+## Tracer code não é protótipo
+
+Aqui mora uma distinção que o livro faz questão de marcar, e que muita gente confunde. Tracer code não é
+protótipo. O protótipo é feito para ser jogado fora: é fachada, não tem nada por trás, serve para
+aprender e depois some. O tracer code fica. Aquela primeira fatia fina é esqueleto de verdade, código
+que carrega peso e sobre o qual o resto será construído.
+
+Essa ideia tem um primo direto, o *walking skeleton* de Alistair Cockburn. A definição dele é quase a
+mesma: uma implementação minúscula do sistema que executa uma função pequena de ponta a ponta, que não
+precisa usar a arquitetura final, mas que liga os componentes arquiteturais principais. A arquitetura e a
+funcionalidade então evoluem juntas. É o tracer bullet aplicado à fundação: você prova que as peças se
+conectam antes de engordar qualquer uma.
+
+A razão de isso importar mais com IA do que com humano é o contexto. Cada fatia validada fecha numa
+janela e libera a próxima para começar fresca. Se você deixa a IA construir na horizontal, ela não só
+arrisca o retrabalho: ela enche a *smart zone* com camadas não testadas, e quando o erro aparece, ele
+aparece numa janela já cansada. A fatia vertical mantém a verificação barata e o contexto enxuto ao
+mesmo tempo.
+
+## O plano refeito com tracer bullets
+
+A aula `05.05` fecha o laço entre o conceito e o plano. O curso entrega uma skill, a `/prd-to-plan`, com
+menções fartas a *tracer bullets* embutidas nas instruções. O experimento é honesto: apague o plano
+ingênuo da aula anterior, abra uma sessão limpa para o LLM não ser contaminado, rode a skill sobre o
+mesmo PRD, e compare os dois planos lado a lado.
+
+A diferença não é sutil. O plano com tracer bullets quebra o trabalho em passos menores e mais
+granulares, e crava pontos de validação e de QA dentro das fases. Ele aponta os lugares de integração
+onde dá para testar a pilha inteira mais cedo, e abre laços de feedback antes, não no fim. O plano
+ingênuo valida no final; o plano com tracer bullets é desenhado para te dar feedback durante a execução.
+
+| Eixo | Plano ingênuo | Plano com tracer bullets |
+| --- | --- | --- |
+| Forma das fases | por camada, em isolamento | por fatia vertical, ponta a ponta |
+| Onde o feedback aparece | só na fase final | já na primeira fatia |
+| Checkpoints de QA | implícitos ou ausentes | explícitos dentro de cada fase |
+| Primeiro ponto de integração | tarde | cedo |
+
+O que me convenceu não foi a teoria, foi a economia da troca. Reescrever o plano custa uma sessão. O
+plano horizontal custa uma pilha de código no escuro que você só descobre que está errado quando já
+investiu nele. A skill é barata; o retrabalho que ela evita, não.
+
+## O loop plan-execute-clear
+
+Com PRD e plano em mãos, a aula `05.06` mostra a execução, e ela tem uma cadência. Cada fase segue o
+mesmo ritmo, e o ritmo é o que impede a degradação de contexto.
+
+| Etapa | O que acontece |
+| --- | --- |
+| *Explore* | o agente lê o codebase e entende os padrões daquela fase |
+| *Implement* | ele constrói o que a fase pede |
+| *Review* | você roda o código e dá feedback na mesma janela |
+| *Iterate* | ele refina até você aprovar |
+| *Clear* | você limpa o contexto de propósito e começa a próxima fase do zero |
+
+A mecânica é direta. Você referencia o PRD e o plano com `@`, e manda "faça a fase 1". Sem *plan mode*:
+você quer o agente trabalhando já, e um `shift+tab` pula o planejamento que aqui seria redundante,
+porque o plano já existe. Ele explora, implementa, e devolve. Você testa de verdade, roda o código,
+olha os arquivos. Se há bug, descreve e pede o conserto na mesma janela.
+
+Dois passos fecham a fase e são fáceis de pular. O primeiro é o commit, que vira um checkpoint seguro
+para voltar se a fase seguinte der errado. O segundo é o `clear`. Você fecha a conversa e abre uma nova
+para a próxima fase, em vez de continuar acumulando contexto. A fase 2 ganha um orçamento fresco,
+reexplora só o que precisa, e executa sem o peso da fase 1 ocupando tokens. Matt descreve a sensação com
+uma imagem boa: depois de fazer a lição de casa no PRD e no plano, você só assiste a coisa rolar ladeira
+abaixo.
+
+## Os clássicos têm a resposta
+
+Tem uma moral que atravessa as quatro aulas, e ela não é sobre IA. Tracer bullets não é novo. TDD não é
+novo. São ideias velhas de livros velhos, princípios que vêm destilando boa prática há décadas. O
+problema é o reflexo de sempre: quando uma tecnologia nova aparece, a gente se empolga e esquece de
+voltar aos clássicos, correndo atrás do que brilha em vez do que já se provou.
+
+A virada do curso é que esses princípios se aplicam com mais força à IA do que jamais se aplicaram a
+humanos. Um dev humano pode ignorar tracer bullets e ainda se virar, porque ele guarda contexto na
+cabeça e desconfia do próprio trabalho. O agente não tem esse luxo. A restrição da janela de contexto
+torna a disciplina inegociável, e a consequência de furá-la é imediata e visível: *slop* na tela, agora.
+
+E há um atalho que Matt faz questão de mostrar. Duas palavras bem escolhidas, "use tracer bullets",
+mudam a forma como a IA prioriza tarefas. O conceito já vive no treino do modelo, então invocá-lo pelo
+nome reordena o plano inteiro. É o tipo de alavanca que o curso vem perseguindo: pouco texto, de alto
+sinal, que muda muito comportamento.
+
+## O que fica para o meu fluxo
+
+A dinâmica que esse trecho do dia me deu é menos sobre planejar e mais sobre pilotar. Eu já quebrava
+features, mas deixava o agente quebrar do jeito dele, e o jeito dele é horizontal. A mudança foi forçar
+a fatia vertical no plano e depois respeitar a cadência na execução.
+
+A prática que levo virou uma regra de três:
+
+1. Exigir tracer bullets no plano: a primeira fase atravessa todas as camadas numa fatia fina e
+   testável, em vez de empilhar uma camada inteira no escuro.
+2. Executar fase a fase com o loop *plan-execute-clear*: explorar, implementar, revisar rodando o código
+   de verdade, comitar como checkpoint, e limpar o contexto antes da fase seguinte.
+3. Voltar aos clássicos antes de inventar moda: tracer bullets, walking skeleton, fatia vertical e TDD
+   resolvem com agente os mesmos problemas que resolviam sem ele, só que a conta agora vence na hora.
+
+No fim, tracer bullet é só um jeito de não deixar o agente correr na frente dos faróis. Você troca um
+salto grande e cego por uma sequência de passos curtos com feedback. A próxima coisa que vou afiar é o
+gatilho do feedback dentro de cada fatia, porque a fatia só vale se eu de fato rodar o código e olhar,
+em vez de confiar que o verde do agente é o verde de verdade.
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [Tracer Bullets: Keeping AI Slop Under Control, Matt Pocock](https://www.aihero.dev/tracer-bullets)
+- [Tracer Bullets and Prototypes, entrevista com David Thomas na Artima](https://www.artima.com/articles/tracer-bullets-and-prototypes)
+- [The Pragmatic Programmer, 20th Anniversary Edition, Hunt e Thomas](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/)
+- [Walking Skeleton, Alistair Cockburn, c2 wiki](https://wiki.c2.com/?WalkingSkeleton)
+- [Vertical Slice Architecture, Jimmy Bogard](https://www.jimmybogard.com/vertical-slice-architecture/)
+- [Elephant Carpaccio, exercício de fatiamento vertical, Alistair Cockburn](https://alistair.cockburn.us/elephant-carpaccio/)
+- Aulas `05.03` a `05.06`, do material bruto extraído do cohort
+- Post anterior, `gerenciando-grandes-implementacoes`, sobre o PRD e o plano multi-fase

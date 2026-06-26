@@ -1,0 +1,148 @@
+---
+title: "Resumo das Aulas do Dia 03"
+date: 2026-06-26
+status: published
+tags: [ai, agents, sdd]
+summary: "Um resumo do Dia 03 do AI Coding for Real Engineers, o dia de planejamento: tarefas gigantes, PRD e plano multi-fase, tracer bullets, o loop plan-execute-clear e a ferramenta AskUserQuestion."
+---
+
+Se o Dia 01 foi sobre a janela de contexto e o Dia 02 sobre *steering*, o Dia 03 do **AI Coding for Real
+Engineers** é sobre a pergunta que os dois deixam pendente: o que você faz quando a tarefa é grande
+demais para caber numa janela só?
+
+A resposta do dia é planejamento, mas planejamento de um tipo específico, que sobrevive entre sessões.
+O dia constrói uma escada. Primeiro separa o destino da jornada em dois documentos. Depois ensina o
+agente a fatiar a jornada de um jeito que dá feedback cedo. Por fim, mostra a cadência de executar fase
+a fase sem deixar o contexto apodrecer. Tudo amarrado por um princípio velho: quebre o grande em
+pequeno, e mantenha cada pedaço dentro da parte boa da janela.
+
+O dia tem sete aulas principais:
+
+| Aula | Tema | Ideia central |
+| --- | --- | --- |
+| 05.01 | Tarefas gigantes | Quebrar o grande em pequeno: PRD de destino, plano de jornada |
+| 05.02 | PRDs com skill | Um grill-me vira PRD com `/to-prd`, e você para antes de implementar |
+| 05.03 | Plano multi-fase ingênuo | Observar como o agente quebra sozinho, por camadas |
+| 05.04 | Tracer bullets | Fatia vertical de ponta a ponta, para não construir no escuro |
+| 05.05 | Tracer bullets no plano | `/prd-to-plan` refaz o plano com feedback cedo |
+| 05.06 | Executar o plano | O loop plan-execute-clear, fase a fase, com contexto fresco |
+| 05.07 | Ask User Question | A pergunta estruturada como decisão opt-in de steering |
+
+## 05.01 - Como atacar tarefas gigantes
+
+A primeira aula parte da paranoia de contexto do Dia 01. O agente pensa bem na *smart zone*, por volta
+de 80 a 100 mil tokens, e degrada conforme a janela enche. Feature pequena cabe ali; um refactor grande
+estoura a janela inteira.
+
+A saída é a de sempre na engenharia: quebrar o grande em pequeno, para cada pedaço caber na parte boa.
+Isso exige dois documentos. O PRD descreve o destino, o que você está construindo. O `PLAN.md` descreve
+a jornada, as fases até lá. E há um detalhe que a aula crava: ao executar uma fase, você passa o plano
+inteiro, não só a fase da vez, para as fases não pisarem umas nas outras.
+
+## 05.02 - Escrever bons PRDs com uma skill
+
+A segunda aula mostra que você não precisa escrever o PRD na unha. O curso entrega a skill `/to-prd`,
+que transforma uma conversa de exploração num documento estruturado. O fluxo é uma dupla: primeiro um
+`/grill-me`, que entrevista você até o entendimento ficar resolvido, depois o `/to-prd`, que registra a
+conversa num PRD.
+
+O template é enxuto, com três seções: *problem statement*, *solution* e *user stories*, todas na
+perspectiva do usuário. O exemplo é um dashboard de analytics para instrutores, que Matt descreve como
+enorme e capaz de crescer em qualquer direção, o caso perfeito para esse fluxo. E a aula é dura num
+ponto: depois de gerar o PRD, você para e comita, sem implementar. A descoberta é o trabalho, o
+documento é só o registro dela.
+
+## 05.03 - O plano multi-fase ingênuo
+
+A terceira aula é de observação pura. Você abre uma sessão nova, referencia o PRD com `@`, e pede um
+plano multi-fase sem nenhuma orientação. A ideia não é acertar, é ver o que o agente faz sozinho.
+
+O que ele faz costuma ser lógico e errado ao mesmo tempo. Ele quebra o trabalho por camada, uma fase de
+serviço, uma de componentes, uma de rotas, e nenhuma delas valida o todo até o fim. Matt chama isso de
+o jeito ingênuo, e guarda a correção para a aula seguinte. O plano reproduz, na escala do plano, o erro
+que produz código ruim na escala do código.
+
+## 05.04 - O que são tracer bullets
+
+A quarta aula traz o conceito central do dia, de novo um clássico. *Tracer bullets* vêm de *O
+Programador Pragmático*, e a metáfora é munição traçante: balas que deixam um rastro visível para o
+atirador corrigir a mira em tempo real, em vez de calcular tudo e torcer. No código, é uma fatia fina
+que atravessa todas as camadas de ponta a ponta.
+
+O alvo é o *slop*, o código que a IA despeja de uma vez por querer agradar. Ela constrói camadas
+horizontais em isolamento e só testa a integração no fim, correndo na frente dos próprios faróis. O
+tracer bullet inverte a direção: você constrói uma fatia vertical, testa na hora, colhe o feedback, e só
+então passa para a próxima, numa janela nova. A disciplina pega mais forte com IA que com humano, porque
+a restrição de contexto torna o erro imediato e visível.
+
+## 05.05 - Tracer bullets no plano multi-fase
+
+A quinta aula liga o conceito ao plano. O curso entrega a skill `/prd-to-plan`, com menções fartas a
+tracer bullets embutidas. O experimento é apagar o plano ingênuo, abrir uma sessão limpa, rodar a skill
+sobre o mesmo PRD, e comparar os dois.
+
+A diferença é clara. O plano com tracer bullets quebra o trabalho em passos mais granulares, crava
+checkpoints de QA dentro das fases, e abre laços de feedback cedo em vez de validar só no fim. Ele aponta
+os pontos de integração onde dá para testar a pilha inteira antes. O plano ingênuo te deixa no escuro até
+a última curva; o plano com tracer bullets te dá luz a cada fatia.
+
+## 05.06 - Executar o plano multi-fase
+
+A sexta aula é a execução, e ela tem ritmo. Cada fase segue o mesmo loop, batizado de *plan-execute-clear*:
+explorar o codebase, implementar a fase, revisar rodando o código de verdade, iterar com feedback na
+mesma janela, e limpar o contexto antes da próxima fase.
+
+A mecânica é simples e fácil de furar nos dois últimos passos. Você manda "faça a fase 1" referenciando
+PRD e plano com `@`, sem *plan mode*, porque o plano já existe. No fim da fase, dois gestos fecham o
+ciclo: o commit, que vira um checkpoint seguro, e o `clear`, que dá à fase seguinte um orçamento de
+contexto fresco. É o que impede a degradação: cada fase reexplora só o que precisa, sem carregar o peso
+da anterior.
+
+## 05.07 - Ask User Question
+
+A última aula fecha o dia com a `AskUserQuestion`, a ferramenta que o Claude usa para perguntar com
+interface, em vez de só escrever a pergunta. Ela é opt-in: você a liga dizendo, numa skill ou prompt,
+para usá-la. A interface oferece opções pré-definidas, um campo de texto livre, e a chance de conversar
+antes de decidir, e se você recusa responder, o agente recebe a recusa e segue.
+
+Matt é honesto que esse é o tema mais de gosto pessoal do dia, e que ele não gosta da UI, achando-a mais
+cansativa que ler texto. A saída para quem concorda é uma linha no `CLAUDE.md` global mandando não usar a
+ferramenta. O padrão por trás dela é maior que o Claude: chama-se *elicitation*, o sistema pedindo input
+estruturado ao usuário, e o *Model Context Protocol* já o especifica para qualquer servidor. A escolha
+certa não é amar nem odiar, é decidir por contexto: pergunta estruturada para decisão fechada, texto
+livre para ambiguidade aberta.
+
+## A síntese do dia
+
+O Dia 03 forma uma escada de planejamento que sobrevive à janela:
+
+1. Separe o destino da jornada: um PRD diz o que construir, um plano diz como chegar lá em fases.
+2. Deixe a descoberta vir antes do documento: o `/grill-me` resolve as decisões, o `/to-prd` só registra.
+3. Force a fatia vertical no plano com tracer bullets, para o feedback aparecer cedo, não no fim.
+4. Execute fase a fase com o loop *plan-execute-clear*, comitando como checkpoint e limpando o contexto
+   entre as fases.
+5. Use a pergunta estruturada com critério, como mais uma alavanca de *steering* que você liga onde ela
+   ajuda.
+
+O padrão que amarra o dia é o mesmo que vem desde o começo do curso: o agente é *stateless* e a janela é
+pequena, então o estado importante precisa morar fora dele, em documentos duráveis. O PRD e o plano são
+esses documentos. Eles são a memória que não apodrece numa conversa que fechou, e a fatia vertical é o
+que garante que cada fase prove a si mesma antes de a próxima começar.
+
+Isso muda meu jeito de tocar tarefas grandes com agente. Eu já quebrava o trabalho, mas deixava o plano
+viver no chat e o agente fatiar do jeito dele, que é horizontal. Depois desse dia, o plano virou
+artefato, a fatia virou vertical por exigência, e a execução ganhou uma cadência com começo e fim
+claros. A pergunta deixou de ser "o agente dá conta dessa feature grande?" e virou "eu quebrei essa
+feature em fatias que cabem na parte boa da janela, e deixei isso escrito antes de soltar o agente?".
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [How To Write a Good PRD, Marty Cagan, SVPG](https://www.svpg.com/wp-content/uploads/2024/07/How-To-Write-a-Good-PRD.pdf)
+- [Spec-driven development with AI, GitHub Blog](https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/)
+- [Tracer Bullets: Keeping AI Slop Under Control, Matt Pocock](https://www.aihero.dev/tracer-bullets)
+- [Tracer Bullets and Prototypes, entrevista com David Thomas na Artima](https://www.artima.com/articles/tracer-bullets-and-prototypes)
+- [Effective context engineering for AI agents, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [Elicitation, especificação do Model Context Protocol](https://modelcontextprotocol.io/docs/learn/client-concepts#elicitation)
+- Aulas `05.01` a `05.07`, do material bruto extraído do cohort
+- Posts do Dia 03: `gerenciando-grandes-implementacoes`, `tracer-bullets-pilotar-o-agente-fatia-por-fatia`, `ask-user-question`

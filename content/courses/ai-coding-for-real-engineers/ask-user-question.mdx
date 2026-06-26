@@ -1,0 +1,140 @@
+---
+title: "Ask User Question"
+date: 2026-06-26
+status: published
+tags: [ai, agents]
+summary: "A ferramenta AskUserQuestion do Claude Code: o que ela faz, como uma pergunta estruturada se monta, por que ela divide opiniões, como ligar e desligar, e onde ela se encaixa no padrão human-in-the-loop de pedir input ao usuário."
+---
+
+Tem uma feature do Claude Code que divide quem usa ao meio. Metade acha a coisa mais legal do mundo na
+primeira vez, metade quer desligar e nunca mais ver. As duas metades estão certas, e é por isso que ela
+vale uma aula.
+
+A aula `05.07` do **AI Coding for Real Engineers** fecha o Dia 03 com a `AskUserQuestion`, a ferramenta
+que o Claude usa para te fazer uma pergunta com interface, em vez de só escrever a pergunta no texto.
+Matt admite que esse é o tema mais de gosto pessoal do dia. Eu vou tratar a mecânica como fato e a
+preferência como o que ela é, opinião, separando as duas com cuidado.
+
+## O que a ferramenta faz
+
+Por padrão, quando o Claude precisa saber algo de você, ele pergunta em texto puro e espera sua resposta
+em texto puro. A `AskUserQuestion` muda o canal. Se a skill ou o prompt pedem explicitamente para usá-la,
+o Claude desenha uma interface mais rica para colher a resposta.
+
+Essa interface oferece três caminhos. Você escolhe entre opções pré-definidas, digita uma resposta
+própria, ou conversa sobre a pergunta antes de decidir. O propósito é o momento de ambiguidade: quando o
+agente precisa de um sinal de intenção que ele não consegue deduzir do contexto, ele para e pergunta em
+vez de chutar. No *plan mode*, por exemplo, é onde ele pode resolver qual padrão você quer manter e qual
+quer trocar antes de propor o plano.
+
+O detalhe que importa para *steering* é que ela é opt-in. A ferramenta não se impõe: você a liga dizendo,
+em qualquer skill ou prompt, para usar a `AskUserQuestion`. Isso a coloca na mesma família das alavancas
+que o dia inteiro discutiu. É mais um comportamento que você escolhe ativar, escrevendo a instrução no
+lugar certo.
+
+## A anatomia de uma pergunta
+
+Por baixo da interface, uma chamada da ferramenta é estruturada, e a estrutura tem limites. Cada chamada
+carrega de uma a quatro perguntas, e cada pergunta tem um rótulo curto, o texto da pergunta e um conjunto
+de duas a quatro opções. Cada opção é um par: um rótulo de poucas palavras e uma descrição que explica o
+que aquela escolha significa.
+
+| Campo | O que é | Limite prático |
+| --- | --- | --- |
+| Pergunta | o texto que o agente quer resolver | de 1 a 4 por chamada |
+| Rótulo da opção | o nome curto da escolha | de 2 a 4 opções por pergunta |
+| Descrição da opção | por que você escolheria aquilo | uma linha, para desempatar |
+| Seleção múltipla | aceitar mais de uma opção | quando as escolhas não se excluem |
+
+Tem duas saídas que a interface sempre garante. Uma é o "Outro", o campo de texto livre para quando
+nenhuma opção serve e você quer responder com suas palavras. A outra é a seleção múltipla, para a
+pergunta cujas respostas não são mutuamente exclusivas. O efeito é que a pergunta estruturada não te
+prende: ela sugere um caminho rápido pelos botões, e deixa a porta do texto aberta.
+
+## Quando o usuário recusa
+
+Há um terceiro caminho, e ele é o mais interessante de desenho. Você pode simplesmente não responder. Se
+você fecha a caixa sem escolher, o Claude recebe de volta a informação de que "o usuário recusou
+responder", e segue a partir daí.
+
+Isso importa porque mantém o controle com você. A ferramenta não trava o fluxo esperando uma resposta
+obrigatória. Recusar é uma resposta válida, e o agente trata a recusa como sinal: ele reformula, assume
+um default conservador, ou continua sem aquela decisão. A pergunta é um convite, não um pedágio.
+
+## A preferência pessoal do Matt, e a minha
+
+Aqui a aula vira opinião, e Matt é honesto sobre isso. A primeira reação dele à ferramenta foi de
+encanto, algo como "isso é a coisa mais legal que já vi". A reação que ficou foi a oposta. Ele diz, em
+letra de forma, que é cem por cento preferência pessoal, mas que não gosta daquela UI.
+
+O argumento dele é de ergonomia. O formato de múltipla escolha parece esperto no começo e fica
+cansativo no uso, mais difícil de navegar do que simplesmente ler o que o agente diz em texto e
+responder. Para quem sente o mesmo, ele dá a saída de uma linha: colar `don't use the AskUserQuestion
+tool` no `CLAUDE.md` global, e nunca mais ver a interface. Para quem gosta, o caminho é o inverso:
+colocar a instrução de usá-la nas skills e nos prompts onde ela ajuda.
+
+A minha posição é morna, e de propósito. A interface brilha numa decisão fechada, com três ou quatro
+caminhos claros, e atrapalha numa conversa que pedia texto corrido. Como ela é opt-in dos dois lados, a
+escolha certa não é amar nem odiar, é decidir por contexto: ligar na skill que faz perguntas de escopo,
+deixar desligada no fluxo de exploração aberta.
+
+## É coisa de Claude?
+
+Pelo que se sabia na gravação, a `AskUserQuestion` é específica do Claude. Matt já ressalva que, quando
+você assistir, outras plataformas provavelmente terão implementado algo parecido, com outro nome. A
+ressalva é boa, porque o padrão por baixo é mais velho que a ferramenta.
+
+O nome desse padrão é *elicitation*, a elicitação: o sistema pedindo input estruturado ao usuário no
+meio da tarefa. O *Model Context Protocol* já tem isso especificado. Um servidor MCP pode emitir uma
+requisição de elicitação e receber a resposta do usuário de volta, exatamente o mesmo gesto
+human-in-the-loop, num formato aberto que qualquer cliente pode implementar. A `AskUserQuestion` é a
+encarnação dessa ideia dentro do Claude Code; a elicitação do MCP é a versão portátil.
+
+| Mecanismo | Onde vive | O que pede |
+| --- | --- | --- |
+| `AskUserQuestion` | nativo do Claude Code | pergunta com opções, na interface do agente |
+| Elicitação MCP | qualquer servidor MCP | input estruturado do usuário, por um protocolo aberto |
+
+## Quando uma pergunta estruturada ganha do texto livre
+
+Vale destilar o critério, porque ele é o que sobra depois que a preferência de UI sai de cena. Uma
+pergunta estruturada ganha quando a decisão é fechada e as opções são finitas e conhecidas: TypeScript
+ou JavaScript, manter ou trocar o padrão, qual das três estratégias seguir. Ali, o botão é mais rápido
+que o agente inferir do contexto e errar.
+
+O texto livre ganha no caso oposto. Exploração aberta, onde você quer a riqueza da resposta. Negociação,
+onde você prefere ver a proposta do agente antes de refinar. Coleta de contexto, onde o agente deveria
+ler e entender primeiro, e só então perguntar. Forçar múltipla escolha num desses casos é estreitar a
+conversa cedo demais, o mesmo erro que o *plan mode* comete ao produzir documento antes de entendimento.
+
+O princípio de fundo é de desenho de human-in-the-loop. A pergunta estruturada funciona melhor quando
+você crava uma fronteira clara de antemão, do tipo "faça duas ou três perguntas de escopo antes de
+propor o plano". O texto livre funciona melhor quando a ambiguidade é parte do trabalho, e você quer
+colaborar para resolvê-la, não despachá-la num clique.
+
+## O que fica para o meu fluxo
+
+A `AskUserQuestion` me ensinou menos sobre uma feature e mais sobre uma escolha. A interface bonita não é
+o ponto: o ponto é que pedir input ao usuário é uma decisão de *steering*, que você liga e desliga onde
+faz sentido.
+
+A prática que levo virou uma regra de três:
+
+1. Tratar a ferramenta como opt-in dos dois lados: ligar nas skills de decisão fechada, e não deixar que
+   ela vire o canal padrão de toda pergunta.
+2. Escolher pergunta estruturada quando as opções são finitas e conhecidas, e texto livre quando a
+   ambiguidade é o próprio trabalho.
+3. Reconhecer o padrão maior por trás dela, a elicitação, para não amarrar o hábito a uma única
+   ferramenta de um único agente.
+
+No fim, gostar ou não da UI é o de menos. O que fica é a pergunta sob a pergunta: este momento pede uma
+escolha entre opções, ou pede uma conversa? Quando eu acerto essa, a ferramenta certa, estruturada ou
+texto, vem junto. A próxima coisa que vou afinar é onde, nas minhas próprias skills, vale cravar a
+pergunta de escopo antes de soltar o agente.
+
+## Referências
+
+- [AI Coding for Real Engineers, página do cohort](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)
+- [Tools reference, documentação do Claude Code](https://code.claude.com/docs/en/tools-reference)
+- [Elicitation, especificação do Model Context Protocol](https://modelcontextprotocol.io/docs/learn/client-concepts#elicitation)
+- Aula `05.07-ask-user-question`, do material bruto extraído do cohort
